@@ -1,0 +1,179 @@
+/* ==========================================================================
+   DESBank Design System
+   Direction: engineering blueprint meets clean modern SaaS.
+   Navy for structure/navigation, amber for action, mono type for
+   codes/IDs/badges (course codes, item numbers, Bloom tags).
+   ========================================================================== */
+
+:root {
+    --navy: #16324F;
+    --navy-light: #1F4468;
+    --navy-dark: #0E2338;
+
+    --amber: #E8A33D;
+    --amber-dark: #C9861F;
+    --amber-tint: #FDF3E3;
+
+    --canvas: #F6F7F9;
+    --surface: #FFFFFF;
+    --border: #DDE3EA;
+
+    --text: #12181F;
+    --text-muted: #5B6B7A;
+
+    --success: #1D9A6C;
+    --success-tint: #E4F5EE;
+    --danger: #D64545;
+    --danger-tint: #FBEAEA;
+    --info: #2F6FED;
+
+    --radius: 8px;
+    --radius-sm: 5px;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--canvas);
+    background-image:
+        linear-gradient(rgba(22, 50, 79, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(22, 50, 79, 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--text);
+    margin: 0;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-display);
+    color: var(--navy);
+}
+
+/* ---- Shell / cards ---- */
+.db-shell { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+
+.db-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+}
+
+.db-card h1 { font-size: 22px; margin: 0 0 4px 0; }
+.db-card .db-subtitle { color: var(--text-muted); font-size: 14px; margin: 0 0 20px 0; }
+
+/* ---- Navbar ---- */
+.db-navbar {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: 0 auto 16px auto;
+}
+.db-navbar a { color: #C9D6E4; text-decoration: none; font-size: 13px; font-family: var(--font-body); font-weight: 500; }
+.db-navbar a.db-nav-primary { color: #fff; font-weight: 700; }
+.db-navbar a:hover { color: var(--amber); }
+.db-navbar .db-nav-divider { color: #3A5674; }
+.db-navbar .db-nav-context { color: #7C93AB; font-size: 12px; }
+
+/* ---- Buttons ---- */
+.db-btn {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1;
+}
+.db-btn-primary { background: var(--amber); color: var(--navy-dark); }
+.db-btn-primary:hover { background: var(--amber-dark); }
+.db-btn-secondary { background: var(--surface); color: var(--navy); border: 1px solid var(--border); }
+.db-btn-secondary:hover { border-color: var(--navy); }
+.db-btn-danger { background: var(--danger-tint); color: var(--danger); }
+.db-btn-danger:hover { background: var(--danger); color: #fff; }
+.db-btn-ghost { background: transparent; color: var(--navy); text-decoration: underline; padding: 9px 4px; }
+
+/* ---- Forms ---- */
+.db-label { display: block; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--navy); }
+.db-input, .db-select, .db-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    margin-top: 5px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--text);
+}
+.db-input:focus, .db-select:focus, .db-textarea:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: var(--amber); }
+
+/* ---- Tables ---- */
+.db-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.db-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    padding: 8px;
+    border-bottom: 2px solid var(--navy);
+}
+.db-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
+
+/* ---- Badges / spec chips ---- */
+.db-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px 3px 8px;
+    border-left: 3px solid var(--navy);
+    background: #EEF2F6;
+    color: var(--navy);
+    border-radius: 3px;
+    margin-right: 4px;
+}
+.db-chip-amber { border-left-color: var(--amber-dark); background: var(--amber-tint); color: #8A5A15; }
+.db-chip-success { border-left-color: var(--success); background: var(--success-tint); color: #146B4C; }
+.db-chip-danger { border-left-color: var(--danger); background: var(--danger-tint); color: #A13333; }
+
+/* ---- Alerts ---- */
+.db-alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; }
+.db-alert-success { background: var(--success-tint); color: #146B4C; }
+.db-alert-error { background: var(--danger-tint); color: #A13333; }
+
+/* ---- Course/type tile grid (question bank blocks) ---- */
+.db-tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-top: 20px; }
+.db-tile {
+    display: block;
+    background: var(--navy);
+    background-image: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    text-decoration: none;
+    border-top: 3px solid var(--amber);
+    transition: transform 0.1s ease;
+}
+.db-tile:hover { transform: translateY(-2px); }
+.db-tile .db-tile-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+.db-tile .db-tile-count { font-family: var(--font-mono); font-size: 26px; font-weight: 600; margin-top: 8px; }
+.db-tile .db-tile-label { font-size: 11px; opacity: 0.75; }
+
+.db-link { color: var(--navy); text-decoration: none; font-size: 13px; }
+.db-link:hover { color: var(--amber-dark); }
+.db-back-link { display: block; margin-top: 20px; }
