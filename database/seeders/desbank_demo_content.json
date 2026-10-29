@@ -1,0 +1,692 @@
+[
+  {
+    "courseCode": "DEMO-CS101",
+    "courseName": "[DEMO] Introduction to Computing",
+    "topics": [
+      {
+        "topicName": "Algorithms and Flowcharts",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which shape typically represents a decision in a flowchart?",
+            "correctAnswer": "Diamond",
+            "choices": [
+              "Oval",
+              "Diamond",
+              "Rectangle",
+              "Arrow"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "What do we call a finite sequence of steps for solving a problem?",
+            "correctAnswer": "Algorithm",
+            "choices": [
+              "Variable",
+              "Algorithm",
+              "Compiler",
+              "Database"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Arrows in a flowchart indicate the direction of the process flow.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Every algorithm must contain a loop to be valid.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A structure that repeats a set of instructions is called a ____.",
+            "correctAnswer": "loop"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The branch taken by an if statement depends on a Boolean ____.",
+            "correctAnswer": "condition"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Identify two criteria for evaluating whether an algorithm is useful.",
+            "correctAnswer": "Correctness,Efficiency"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Name two control structures other than a simple sequence.",
+            "correctAnswer": "Selection,Repetition"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Select the best term for repeating instructions while a condition is true.",
+            "correctAnswer": "Loop"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Select the best term for choosing one of two paths after a test.",
+            "correctAnswer": "Decision"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design an algorithm that finds the largest of three numbers.",
+            "correctAnswer": "Compare the three values, track the largest, and output it."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Create a flowchart outline for a login process with up to three attempts.",
+            "correctAnswer": "Start, read credentials, validate, retry up to three times, then grant or deny access."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which flowchart symbol represents the beginning or end of a process?",
+            "correctAnswer": "Oval",
+            "choices": [
+              "Oval",
+              "Diamond",
+              "Rectangle",
+              "Parallelogram"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Pseudocode can describe an algorithm without following a specific programming language syntax.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A diagram that uses standard symbols to represent steps in an algorithm is a ____.",
+            "correctAnswer": "flowchart"
+          }
+        ]
+      },
+      {
+        "topicName": "Computer Systems and Data",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which computer component performs most arithmetic and logical operations?",
+            "correctAnswer": "CPU",
+            "choices": [
+              "RAM",
+              "CPU",
+              "Monitor",
+              "SSD"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which type of memory typically loses stored data when power is removed?",
+            "correctAnswer": "RAM",
+            "choices": [
+              "SSD",
+              "ROM",
+              "RAM",
+              "Flash drive"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Operating systems help coordinate a computer's hardware and software resources.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "One byte is always equal to one bit.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A binary number system uses only the digits 0 and ____.",
+            "correctAnswer": "1"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A storage device that typically has no moving mechanical parts is an ____.",
+            "correctAnswer": "SSD"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "List two differences between RAM and permanent storage.",
+            "correctAnswer": "Volatility,Typical access role"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Name two input devices and explain their function briefly.",
+            "correctAnswer": "Keyboard,Mouse"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the most appropriate component for temporary working memory.",
+            "correctAnswer": "RAM"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the most appropriate component for long-term file storage.",
+            "correctAnswer": "SSD"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design a simple plan to back up a student project against device failure.",
+            "correctAnswer": "Use multiple copies in separate locations and test recovery regularly."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Propose a computer setup for a small school lab and justify your choices.",
+            "correctAnswer": "Prioritize RAM, adequate storage, reliable network, and maintainability."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which component stores instructions and data that the CPU needs immediately while running programs?",
+            "correctAnswer": "RAM",
+            "choices": [
+              "Printer",
+              "RAM",
+              "Monitor",
+              "Keyboard"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Solid-state drives normally retain stored files after the computer is switched off.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The smallest unit of binary information is a ____.",
+            "correctAnswer": "bit"
+          }
+        ]
+      },
+      {
+        "topicName": "Online Safety and Digital Citizenship",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "What is the name for fraudulent messages that attempt to steal passwords?",
+            "correctAnswer": "Phishing",
+            "choices": [
+              "Caching",
+              "Phishing",
+              "Compiling",
+              "Indexing"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which practice adds a second proof of identity when signing in?",
+            "correctAnswer": "Multi-factor authentication",
+            "choices": [
+              "File compression",
+              "Multi-factor authentication",
+              "Disk formatting",
+              "Screen sharing"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Reusing the same password across accounts increases security risk.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "A website using HTTPS guarantees its owner cannot be dishonest.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A login code sent to a phone can provide a second authentication ____.",
+            "correctAnswer": "factor"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "Regularly updating software helps address known security ____.",
+            "correctAnswer": "vulnerabilities"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Identify two warning signs that an email might be phishing.",
+            "correctAnswer": "Suspicious links,Urgent requests"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "List two steps to protect your personal data online.",
+            "correctAnswer": "Use unique passwords,Enable MFA"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best control for limiting access based on a user's job role.",
+            "correctAnswer": "Access control"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best process for verifying a sender before sharing sensitive data.",
+            "correctAnswer": "Identity verification"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Create a short cyber-safety guide for first-year students.",
+            "correctAnswer": "Cover passwords, MFA, phishing detection, software updates, and reporting."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design a response plan after a student clicks a suspicious link.",
+            "correctAnswer": "Disconnect if needed, report it, change credentials, scan, and monitor accounts."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which security principle means giving users only the permissions needed for their tasks?",
+            "correctAnswer": "Least privilege",
+            "choices": [
+              "Least privilege",
+              "Public sharing",
+              "Password reuse",
+              "Open access"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "A password manager can help create and store unique passwords for different accounts.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "A separate copy of important files that can be restored after data loss is called a ____.",
+            "correctAnswer": "backup"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "courseCode": "DEMO-MATH101",
+    "courseName": "[DEMO] Mathematics in the Modern World",
+    "topics": [
+      {
+        "topicName": "Numbers and Operations",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "What is the value of 7 multiplied by 8?",
+            "correctAnswer": "56",
+            "choices": [
+              "54",
+              "56",
+              "63",
+              "64"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which number is prime?",
+            "correctAnswer": "17",
+            "choices": [
+              "15",
+              "17",
+              "21",
+              "27"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "The sum of two even integers is always even.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Dividing a nonzero number by zero produces zero.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "Using order of operations, 3 + 4 × 2 = ____.",
+            "correctAnswer": "11"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The greatest common divisor of 18 and 24 is ____.",
+            "correctAnswer": "6"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "List two properties of addition that help simplify calculations.",
+            "correctAnswer": "Commutative,Associative"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Name two ways of expressing one half as another form.",
+            "correctAnswer": "0.5,50 percent"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best term for the answer to a multiplication problem.",
+            "correctAnswer": "Product"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best term for the answer to a division problem.",
+            "correctAnswer": "Quotient"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Create a realistic shopping problem that requires percentages and solve it.",
+            "correctAnswer": "A 20% discount on 500 gives a discount of 100 and a final price of 400."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design a short method for checking an arithmetic answer without a calculator.",
+            "correctAnswer": "Estimate the magnitude and verify using inverse operations."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "What is 12 multiplied by 12?",
+            "correctAnswer": "144",
+            "choices": [
+              "124",
+              "132",
+              "144",
+              "156"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "For any integers a and b, a × b equals b × a.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The result of 5! (five factorial) is ____.",
+            "correctAnswer": "120"
+          }
+        ]
+      },
+      {
+        "topicName": "Algebra and Functions",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Solve x + 5 = 12.",
+            "correctAnswer": "7",
+            "choices": [
+              "5",
+              "6",
+              "7",
+              "8"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "What is the slope of y = 3x + 2?",
+            "correctAnswer": "3",
+            "choices": [
+              "2",
+              "3",
+              "5",
+              "-3"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "A linear function has a constant rate of change.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "The equation x = 4 has infinitely many real solutions for x.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "If 2x = 18, then x = ____.",
+            "correctAnswer": "9"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "Evaluate f(x) = x² + 1 at x = 3: ____.",
+            "correctAnswer": "10"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "List two common representations of a mathematical function.",
+            "correctAnswer": "Equation,Graph"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Identify two pieces of information needed to graph a straight line.",
+            "correctAnswer": "Slope,Y-intercept"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the term for the input values accepted by a function.",
+            "correctAnswer": "Domain"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the term for the output values produced by a function.",
+            "correctAnswer": "Range"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design a linear model for a taxi fare with a fixed fee and per-kilometer charge.",
+            "correctAnswer": "For example C(d)=40+12d; explain the intercept and slope."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Create and solve a word problem that uses two-step algebra.",
+            "correctAnswer": "Example: Twice a number plus 3 is 15; the number is 6."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "If f(x) = 2x - 3, what is f(4)?",
+            "correctAnswer": "5",
+            "choices": [
+              "3",
+              "5",
+              "8",
+              "11"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "The graph of y = x² is a straight line.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "If x / 3 = 4, then x = ____.",
+            "correctAnswer": "12"
+          }
+        ]
+      },
+      {
+        "topicName": "Statistics and Data Literacy",
+        "questions": [
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which measure is the middle value of sorted observations?",
+            "correctAnswer": "Median",
+            "choices": [
+              "Mode",
+              "Median",
+              "Range",
+              "Variance"
+            ]
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which chart is typically used to compare counts across categories?",
+            "correctAnswer": "Bar chart",
+            "choices": [
+              "Scatter plot",
+              "Bar chart",
+              "Line graph",
+              "Box plot"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "A sample is a subset of a population.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "Correlation always proves that one variable caused another.",
+            "correctAnswer": "False"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The mean of 2, 4, and 6 is ____.",
+            "correctAnswer": "4"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "The range of 5, 9, 12, and 20 is ____.",
+            "correctAnswer": "15"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "List two measures of central tendency.",
+            "correctAnswer": "Mean,Median"
+          },
+          {
+            "questionType": "Enumeration",
+            "bloomLevel": "Analyzing",
+            "content": "Identify two ways a graph can mislead readers.",
+            "correctAnswer": "Truncated axis,Unequal intervals"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best summary for the most frequently occurring value.",
+            "correctAnswer": "Mode"
+          },
+          {
+            "questionType": "Matching Type",
+            "bloomLevel": "Evaluating",
+            "content": "Choose the best summary for the arithmetic average of all values.",
+            "correctAnswer": "Mean"
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Design a five-question survey about students' study habits.",
+            "correctAnswer": "Include clear unbiased questions and appropriate answer categories."
+          },
+          {
+            "questionType": "Essay",
+            "bloomLevel": "Creating",
+            "content": "Create a plan to compare two classes' quiz results fairly.",
+            "correctAnswer": "Use the same assessment and compare distributions, centers, and spread."
+          },
+          {
+            "questionType": "Multiple Choice",
+            "bloomLevel": "Remembering",
+            "content": "Which value represents the middle 50 percent of a sorted data set?",
+            "correctAnswer": "Interquartile range",
+            "choices": [
+              "Arithmetic mean",
+              "Interquartile range",
+              "Sample size",
+              "Frequency"
+            ]
+          },
+          {
+            "questionType": "True/False",
+            "bloomLevel": "Understanding",
+            "content": "An outlier can influence the mean more strongly than the median.",
+            "correctAnswer": "True"
+          },
+          {
+            "questionType": "Fill in the Blanks",
+            "bloomLevel": "Applying",
+            "content": "In the sorted data set 1, 4, 9, the median is ____.",
+            "correctAnswer": "4"
+          }
+        ]
+      }
+    ]
+  }
+]
