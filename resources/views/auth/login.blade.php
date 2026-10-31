@@ -1,29 +1,40 @@
 @extends('layouts.auth')
 
+@section('title', 'Log in · DESBank')
+
 @section('content')
-    <h1>DESBank Login</h1>
+    <h1>Log in</h1>
+    <p class="auth-lede">Use your DESBank email and password.</p>
 
     @if (session('status'))
-        <div class="status">{{ session('status') }}</div>
+        <div class="auth-alert auth-alert-status" role="status">{{ session('status') }}</div>
     @endif
 
     @if ($errors->any())
-        <div class="error">{{ $errors->first() }}</div>
+        <div class="auth-alert auth-alert-error" role="alert">{{ $errors->first() }}</div>
     @endif
 
     <form method="POST" action="{{ route('login.attempt') }}">
         @csrf
 
-        <label>Email</label>
-        <input type="email" name="email" value="{{ old('email') }}" required autofocus>
+        <div class="auth-field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                   autocomplete="username" required autofocus
+                   @if ($errors->has('email')) aria-invalid="true" @endif>
+        </div>
 
-        <label>Password</label>
-        <input type="password" name="password" required>
+        <div class="auth-field">
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password"
+                   autocomplete="current-password" required
+                   @if ($errors->has('password')) aria-invalid="true" @endif>
+        </div>
 
-        <button type="submit">Log In</button>
+        <button type="submit" class="auth-submit" data-loading="Logging in…">Log in</button>
     </form>
 
-    <div class="link">
-        Instructor? <a href="{{ route('register') }}">Create an account</a>
-    </div>
+    <p class="auth-switch">
+        New instructor? <a href="{{ route('register') }}">Create an account</a>
+    </p>
 @endsection

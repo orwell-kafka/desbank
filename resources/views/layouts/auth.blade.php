@@ -2,38 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DESBank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'DESBank')</title>
     @include('partials.head-assets')
-    <style>
-        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .auth-wrap { width: 100%; max-width: 380px; padding: 20px; }
-        .auth-brand { text-align: center; margin-bottom: 20px; }
-        .auth-brand .mark { display: inline-block; width: 40px; height: 40px; background: var(--navy); border-radius: 8px; border-top: 3px solid var(--amber); margin-bottom: 10px; }
-        .auth-brand .name { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--navy); }
-        .auth-brand .tagline { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; margin-top: 2px; }
-        .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
-        .auth-card h1 { font-size: 19px; margin: 0 0 18px 0; }
-        button[type=submit] { margin-top: 20px; width: 100%; padding: 11px; background: var(--amber); color: var(--navy-dark); border: none; border-radius: 5px; cursor: pointer; font-family: var(--font-body); font-weight: 700; font-size: 14px; }
-        button[type=submit]:hover { background: var(--amber-dark); }
-        .error { color: #A13333; background: var(--danger-tint); font-size: 13px; margin-top: 12px; padding: 10px; border-radius: 5px; }
-        .status { color: #146B4C; background: var(--success-tint); font-size: 13px; margin-top: 12px; padding: 10px; border-radius: 5px; }
-        .link { margin-top: 18px; font-size: 13px; text-align: center; color: var(--text-muted); }
-        .link a { color: var(--navy); font-weight: 600; text-decoration: none; }
-        label { display: block; margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--navy); }
-        input { width: 100%; padding: 9px 12px; margin-top: 5px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-family: var(--font-body); font-size: 14px; }
-        input:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: var(--amber); }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
-<body>
-    <div class="auth-wrap">
-        <div class="auth-brand">
-            <div class="mark"></div>
-            <div class="name">DESBank</div>
-            <div class="tagline">TEST BANK &amp; EXAM GENERATION</div>
-        </div>
-        <div class="auth-card">
-            @yield('content')
-        </div>
+<body class="auth-page">
+    <div class="auth-layout">
+        <header class="auth-brand">
+            <div class="auth-brand-head">
+                <div class="auth-mark" aria-hidden="true"></div>
+                <div>
+                    <div class="auth-name">DESBank</div>
+                    <p class="auth-sub">Question bank and exam builder</p>
+                </div>
+            </div>
+
+            <ol class="auth-flow" aria-label="How DESBank works">
+                <li><strong>Course</strong>Set up the subject you teach.</li>
+                <li><strong>Topic</strong>Group your questions by topic.</li>
+                <li><strong>Question bank</strong>Add questions by type and Bloom level.</li>
+                <li><strong>Table of Specifications</strong>Plan how many items each topic and level gets.</li>
+                <li><strong>Exam</strong>Generate, format and print it, with an answer key.</li>
+            </ol>
+        </header>
+
+        <main class="auth-main">
+            <div class="auth-panel">
+                @yield('content')
+            </div>
+        </main>
     </div>
+    <script>
+        // Show progress after submit and block double submits. Server behavior is unchanged.
+        document.querySelectorAll('.auth-panel form').forEach(function (form) {
+            var btn = form.querySelector('.auth-submit');
+            if (!btn) return;
+            var label = btn.textContent;
+            form.addEventListener('submit', function (e) {
+                if (form.dataset.busy) { e.preventDefault(); return; }
+                form.dataset.busy = '1';
+                btn.classList.add('is-loading');
+                btn.textContent = btn.dataset.loading || 'Working…';
+                btn.setAttribute('aria-busy', 'true');
+                setTimeout(function () { btn.disabled = true; }, 0);
+            });
+            // Back button restores the page from cache: reset the button.
+            window.addEventListener('pageshow', function (e) {
+                if (!e.persisted) return;
+                delete form.dataset.busy;
+                btn.disabled = false;
+                btn.classList.remove('is-loading');
+                btn.removeAttribute('aria-busy');
+                btn.textContent = label;
+            });
+        });
+    </script>
 </body>
 </html>
