@@ -2,180 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit ToS - {{ $course->courseName }} - DESBank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit ToS - {{ $course->courseName }} · DESBank</title>
     @include('partials.head-assets')
-    <style>
-        h3 { font-family: var(--font-display); font-size: 15px; color: var(--navy); margin-top: 28px; border-bottom: 2px solid var(--border); padding-bottom: 6px; }
-        .hint { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
-        .hours-input, .count-input { width: 80px; padding: 5px; border: 1px solid var(--border); border-radius: 4px; font-family: var(--font-body); }
-    </style>
+    @include('partials.workspace-assets')
 </head>
-<body>
-    <div class="db-shell" style="max-width:900px;">
+<body class="workspace">
+    <div class="db-shell">
         @include('partials.navbar')
-        <div class="db-card">
-            <h1>Edit ToS</h1>
-            <p class="db-subtitle">{{ $course->courseName }} ({{ $course->courseCode }})</p>
 
-            @if ($errors->any())
-                <div class="db-alert db-alert-error">{{ $errors->first() }}</div>
-            @endif
-
-            <form method="POST" action="{{ route('courses.tos.update', [$course, $tos]) }}">
-                @csrf
-                @method('PUT')
-
-                <label class="db-label">ToS Title</label>
-                <input type="text" name="title" class="db-input" value="{{ old('title', $tos->title) }}" required>
-
-                <label class="db-label">Exam Type</label>
-                <select name="examType" class="db-select" required>
-                    @foreach ($examTypes as $type)
-                        <option value="{{ $type }}" {{ old('examType', $tos->examType) == $type ? 'selected' : '' }}>{{ $type }}</option>
-                    @endforeach
-                </select>
-
-                <label class="db-label">Total Score</label>
-                <input type="number" step="0.01" name="totalScore" class="db-input" value="{{ old('totalScore', $tos->totalScore) }}" required>
-
-                <h3>Table 1 — Topics &amp; Contact Hours</h3>
-                <p class="hint">Check each topic covered by this exam and enter its contact hours.</p>
-                <table class="db-table">
-                    <tr><th>Include</th><th>Topic</th><th>Contact Hours</th></tr>
-                    @foreach ($topics as $topic)
-                        @php $existing = $existingTopics[$topic->topicId] ?? null; @endphp
-                        <tr>
-                            <td><input type="checkbox" name="topicId[]" value="{{ $topic->topicId }}" {{ $existing ? 'checked' : '' }}></td>
-                            <td>{{ $topic->topicName }}</td>
-                            <td><input type="number" step="0.5" min="0" class="hours-input" name="contactHours[{{ $topic->topicId }}]" value="{{ $existing->contactHours ?? 0 }}"></td>
-                        </tr>
-                    @endforeach
-                </table>
-
-                <h3>Table 2 — Bloom's Taxonomy Distribution</h3>
-                <p class="hint">Pick a Bloom level, question type, points per item, and item count, then click Add. The total score across all added rows must equal the Total Score above.</p>
-
-                <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; background:var(--canvas); border:1px solid var(--border); padding:12px; border-radius:6px;">
-                    <div>
-                        <label class="db-label" style="margin-top:0;">Bloom Level</label>
-                        <select id="newBloomLevel" class="db-select">
-                            @foreach ($bloomLevels as $level)
-                                <option value="{{ $level }}">{{ $level }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="db-label" style="margin-top:0;">Question Type</label>
-                        <select id="newQuestionType" class="db-select">
-                            @foreach ($questionTypes as $type)
-                                <option value="{{ $type }}">{{ $type }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="db-label" style="margin-top:0;">Points/Item</label>
-                        <input type="number" step="0.5" min="0" id="newPoints" value="1" class="db-input" style="width:90px;">
-                    </div>
-                    <div>
-                        <label class="db-label" style="margin-top:0;">Item Count</label>
-                        <input type="number" min="0" id="newCount" value="1" class="db-input" style="width:90px;">
-                    </div>
-                    <div>
-                        <button type="button" id="addBloomRowBtn" class="db-btn db-btn-primary" style="margin-top:0;">+ Add</button>
-                    </div>
+        <main id="main-content" class="work-main">
+            <nav class="work-crumb" aria-label="Breadcrumb">
+                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.tos.index', $course) }}">{{ $course->courseName }} ToS</a><span aria-hidden="true">/</span><span aria-current="page">Edit ToS</span>
+            </nav>
+            <header class="work-heading work-heading-compact">
+                <div>
+                    <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Table of Specifications</p>
+                    <h1>Edit ToS<span class="work-title-period">.</span></h1>
+                    <p class="work-intro">Adjust the plan for <strong>{{ $tos->title }}</strong>. Existing generated exams are not changed.</p>
                 </div>
+            </header>
 
-                <table class="db-table" id="bloomRowsTable">
-                    <tr><th>Bloom Level</th><th>Question Type</th><th>Points/Item</th><th>Item Count</th><th>Score</th><th></th></tr>
-                </table>
-                <div id="bloomRunningTotal" style="margin-top:8px; font-size:13px; color:var(--text-muted); font-family:var(--font-mono);"></div>
-                <div id="bloomHiddenInputs"></div>
 
-                <button type="submit" class="db-btn db-btn-primary" style="margin-top:25px;">Update ToS</button>
+            @php
+                // After a failed validation the submitted values come back; show those, not the saved ones.
+                $hasOld = session()->hasOldInput();
+                $oldTopicIds = array_map('strval', (array) old('topicId', []));
+                $oldHours = (array) old('contactHours', []);
+                $initialRows = [];
+                if ($hasOld) {
+                    $oldPoints = (array) old('pointsPerItem', []);
+                    $oldCounts = (array) old('itemCount', []);
+                    foreach ((array) old('bloomKey', []) as $key) {
+                        [$rowLevel, $rowType] = array_pad(explode('|', (string) $key, 2), 2, '');
+                        $initialRows[] = ['level' => $rowLevel, 'type' => $rowType, 'points' => (float) ($oldPoints[$key] ?? 0), 'count' => (int) ($oldCounts[$key] ?? 0)];
+                    }
+                }
+                if (! $hasOld) {
+                    foreach ($existingBloom as $key => $row) {
+                        $initialRows[] = ['level' => $row->bloomLevel, 'type' => $row->questionType, 'points' => (float) $row->pointsPerItem, 'count' => (int) $row->generatedItemCount];
+                    }
+                }
+            @endphp
+            <div class="work-form-layout work-form-layout-wide">
+                <form method="POST" action="{{ route('courses.tos.update', [$course, $tos]) }}" class="work-form" data-pending>
+                    @csrf
+                    @method('PUT')
+                    @include('partials.work-errors')
 
-                <script>
-                    (function () {
-                        const rows = [
-                            @foreach ($existingBloom as $key => $row)
-                                { level: @json($row->bloomLevel), type: @json($row->questionType), points: {{ $row->pointsPerItem }}, count: {{ $row->generatedItemCount }} },
-                            @endforeach
-                        ];
-                        const tableEl = document.getElementById('bloomRowsTable');
-                        const totalEl = document.getElementById('bloomRunningTotal');
-                        const form = tableEl.closest('form');
+                    <section class="work-section" aria-labelledby="tf-details">
+                        <div class="work-section-head">
+                            <span class="work-section-num" aria-hidden="true">01</span>
+                            <div><h2 id="tf-details">Details</h2><p>Name the plan and set the exam type and total score.</p></div>
+                        </div>
+                        <div class="work-section-body">
+                            <div class="work-field">
+                                <label class="work-label" for="tosTitle">ToS title</label>
+                                <input type="text" id="tosTitle" name="title" class="work-input {{ $errors->has('title') ? 'is-invalid' : '' }}" value="{{ old('title', $tos->title) }}" required @if ($errors->has('title')) aria-invalid="true" @endif>
+                            </div>
+                            <div class="work-field-row">
+                                <div class="work-field">
+                                    <label class="work-label" for="examType">Exam type</label>
+                                    <select name="examType" id="examType" class="work-select {{ $errors->has('examType') ? 'is-invalid' : '' }}" required>
+                                        @foreach ($examTypes as $type)
+                                            <option value="{{ $type }}" {{ old('examType', $tos->examType) == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="work-field">
+                                    <label class="work-label" for="totalScore">Total score</label>
+                                    <input type="number" step="0.01" id="totalScore" name="totalScore" class="work-input {{ $errors->has('totalScore') ? 'is-invalid' : '' }}" value="{{ old('totalScore', $tos->totalScore) }}" required @if ($errors->has('totalScore')) aria-invalid="true" @endif>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-                        function render() {
-                            tableEl.innerHTML = '<tr><th>Bloom Level</th><th>Question Type</th><th>Points/Item</th><th>Item Count</th><th>Score</th><th></th></tr>';
-                            let total = 0;
-                            rows.forEach(function (row, i) {
-                                const score = row.points * row.count;
-                                total += score;
-                                const tr = document.createElement('tr');
-                                tr.innerHTML = '<td>' + row.level + '</td><td>' + row.type + '</td><td>' + row.points + '</td><td>' + row.count + '</td><td>' + score.toFixed(2) + '</td><td><button type="button" data-i="' + i + '" class="removeBloomRow db-btn db-btn-danger" style="padding:3px 8px;">Remove</button></td>';
-                                tableEl.appendChild(tr);
-                            });
-                            totalEl.textContent = 'Running total from Table 2: ' + total.toFixed(2);
+                    <section class="work-section" aria-labelledby="tf-topics">
+                        <div class="work-section-head">
+                            <span class="work-section-num" aria-hidden="true">02</span>
+                            <div><h2 id="tf-topics">Table 1 — Topics &amp; contact hours</h2><p>Check each topic covered by this exam and enter its contact hours.</p></div>
+                        </div>
+                        <div class="work-section-body">
+                            <div class="work-table-scroll work-table-framed" style="margin-top:0;" role="region" aria-label="Topics and contact hours" tabindex="0">
+                                <table class="work-table work-table-inset">
+                                    <thead><tr>
+                                        <th scope="col" class="work-check-col">Include</th>
+                                        <th scope="col">Topic</th>
+                                        <th scope="col" class="work-num">Contact hours</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        @foreach ($topics as $topic)
+                                            @php
+                                                $existing = $existingTopics[$topic->topicId] ?? null;
+                                                $isChecked = $hasOld ? in_array((string) $topic->topicId, $oldTopicIds, true) : (bool) $existing;
+                                                $hours = $oldHours[$topic->topicId] ?? ($existing->contactHours ?? 0);
+                                            @endphp
+                                            <tr>
+                                                <td><input type="checkbox" class="work-check" id="topic-{{ $topic->topicId }}" name="topicId[]" value="{{ $topic->topicId }}" {{ $isChecked ? 'checked' : '' }}></td>
+                                                <td class="work-course-name"><label for="topic-{{ $topic->topicId }}" style="cursor:pointer;">{{ $topic->topicName }}</label></td>
+                                                <td class="work-num"><input type="number" step="0.5" min="0" class="work-input work-hours hours-input" name="contactHours[{{ $topic->topicId }}]" value="{{ $hours }}" aria-label="Contact hours for {{ $topic->topicName }}"></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
 
-                            tableEl.querySelectorAll('.removeBloomRow').forEach(function (btn) {
-                                btn.addEventListener('click', function () {
-                                    rows.splice(parseInt(this.dataset.i), 1);
-                                    render();
-                                });
-                            });
-                        }
+                    <section class="work-section" aria-labelledby="tf-bloom">
+                        <div class="work-section-head">
+                            <span class="work-section-num" aria-hidden="true">03</span>
+                            <div><h2 id="tf-bloom">Table 2 — Bloom's taxonomy distribution</h2><p>Pick a Bloom level, question type, points per item, and item count, then add the row. The total score across all rows must equal the Total Score above.</p></div>
+                        </div>
+                        <div class="work-section-body">
+                            <div class="work-builder" role="group" aria-label="Add a distribution row">
+                                <div class="work-field">
+                                    <label class="work-label" for="newBloomLevel">Bloom level</label>
+                                    <select id="newBloomLevel" class="work-select">
+                                        @foreach ($bloomLevels as $level)
+                                            <option value="{{ $level }}">{{ $level }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="work-field">
+                                    <label class="work-label" for="newQuestionType">Question type</label>
+                                    <select id="newQuestionType" class="work-select">
+                                        @foreach ($questionTypes as $type)
+                                            <option value="{{ $type }}">{{ $type }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="work-field">
+                                    <label class="work-label" for="newPoints">Points/item</label>
+                                    <input type="number" step="0.5" min="0" id="newPoints" value="1" class="work-input">
+                                </div>
+                                <div class="work-field">
+                                    <label class="work-label" for="newCount">Item count</label>
+                                    <input type="number" min="0" id="newCount" value="1" class="work-input">
+                                </div>
+                                <div class="work-builder-add">
+                                    <button type="button" id="addBloomRowBtn" class="work-action-primary">Add row <span aria-hidden="true">+</span></button>
+                                </div>
+                            </div>
+                            <p id="bloomRowError" class="work-builder-error" role="alert" hidden></p>
 
-                        document.getElementById('addBloomRowBtn').addEventListener('click', function () {
-                            const level = document.getElementById('newBloomLevel').value;
-                            const type = document.getElementById('newQuestionType').value;
-                            const points = parseFloat(document.getElementById('newPoints').value) || 0;
-                            const count = parseInt(document.getElementById('newCount').value) || 0;
+                            <div class="work-table-scroll work-table-framed" role="region" aria-label="Bloom distribution rows" tabindex="0">
+                                <table class="work-table work-table-inset work-table-bloom" id="bloomRowsTable" data-initial="{{ json_encode($initialRows) }}">
+                                    <thead><tr>
+                                        <th scope="col">Bloom level</th>
+                                        <th scope="col">Question type</th>
+                                        <th scope="col" class="work-num">Points/item</th>
+                                        <th scope="col" class="work-num">Item count</th>
+                                        <th scope="col" class="work-num">Score</th>
+                                        <th scope="col"><span class="sr-only" style="position:absolute;left:-9999px;">Remove</span></th>
+                                    </tr></thead>
+                                    <tbody id="bloomRowsBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="work-total">
+                                <span>Table 2 total <strong id="bloomRunningTotal">0.00</strong></span>
+                                <span id="bloomTotalStatus" class="work-status" role="status" aria-live="polite"></span>
+                            </div>
+                            <div id="bloomHiddenInputs"></div>
+                        </div>
+                    </section>
 
-                            if (points <= 0 || count <= 0) {
-                                alert('Points per item and item count must both be greater than zero.');
-                                return;
-                            }
+                    <div class="work-form-actions">
+                        <button type="submit" class="work-action-primary" data-pending-label="Updating…">Update ToS <span aria-hidden="true">→</span></button>
+                        <a href="{{ route('courses.tos.index', $course) }}" class="work-form-cancel">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            <script src="{{ asset('js/tos-form.js') }}?v={{ @filemtime(public_path('js/tos-form.js')) }}"></script>
 
-                            const existingIndex = rows.findIndex(r => r.level === level && r.type === type);
-                            if (existingIndex >= 0) {
-                                rows[existingIndex] = { level, type, points, count };
-                            } else {
-                                rows.push({ level, type, points, count });
-                            }
-                            render();
-                        });
-
-                        form.addEventListener('submit', function () {
-                            const container = document.getElementById('bloomHiddenInputs');
-                            container.innerHTML = '';
-                            rows.forEach(function (row) {
-                                const key = row.level + '|' + row.type;
-                                const keyInput = document.createElement('input');
-                                keyInput.type = 'hidden';
-                                keyInput.name = 'bloomKey[]';
-                                keyInput.value = key;
-                                container.appendChild(keyInput);
-
-                                const pointsInput = document.createElement('input');
-                                pointsInput.type = 'hidden';
-                                pointsInput.name = 'pointsPerItem[' + key + ']';
-                                pointsInput.value = row.points;
-                                container.appendChild(pointsInput);
-
-                                const countInput = document.createElement('input');
-                                countInput.type = 'hidden';
-                                countInput.name = 'itemCount[' + key + ']';
-                                countInput.value = row.count;
-                                container.appendChild(countInput);
-                            });
-                        });
-
-                        render();
-                    })();
-                </script>
-            </form>
-
-            <a href="{{ route('courses.tos.index', $course) }}" class="db-link db-back-link">&larr; Back to ToS List</a>
-        </div>
+        </main>
+        <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>
 </body>
 </html>

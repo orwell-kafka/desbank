@@ -2,78 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - DESBank</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f5f7; margin: 0; padding: 40px; }
-        .card { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        h1 { color: #1f2937; }
-        h2 { color: #374151; font-size: 18px; margin-top: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-        .status { color: #15803d; font-size: 13px; margin-bottom: 10px; }
-        .badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .badge-approved { background: #dcfce7; color: #166534; }
-        .badge-rejected { background: #fee2e2; color: #991b1b; }
-        button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-right: 5px; }
-        .approve-btn { background: #16a34a; color: #fff; }
-        .reject-btn { background: #dc2626; color: #fff; }
-        .logout-btn { margin-top: 20px; background: #374151; color: #fff; padding: 8px 14px; }
-        .empty { color: #6b7280; font-size: 14px; font-style: italic; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard · DESBank</title>
+    @include('partials.head-assets')
+    @include('partials.workspace-assets')
 </head>
-<body>
-    <div class="card">
-        <h1>Welcome, {{ auth()->user()->name }} (Admin)</h1>
+<body class="workspace">
+    <div class="db-shell">
+        <div class="work-adminbar"><span class="work-adminbar-brand">DESBank</span><span class="work-adminbar-role">Administration</span></div>
 
-        @if (session('status'))
-            <div class="status">{{ session('status') }}</div>
-        @endif
+        <main id="main-content" class="work-main">
+            <header class="work-heading work-heading-compact">
+                <div>
+                    <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Admin / Accounts</p>
+                    <h1>Account approvals<span class="work-title-period">.</span></h1>
+                    <p class="work-intro">Welcome, <strong>{{ auth()->user()->name }}</strong>. Review instructor sign-ups and see the status of every instructor account.</p>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="work-signout">
+                    @csrf
+                    <button type="submit" class="work-text-button">Log out <span aria-hidden="true">↗</span></button>
+                </form>
+            </header>
 
-        <h2>Pending Instructor Approvals</h2>
-        @if ($pending->isEmpty())
-            <p class="empty">No pending accounts right now.</p>
-        @else
-            <table>
-                <tr><th>Name</th><th>Email</th><th>Action</th></tr>
-                @foreach ($pending as $account)
-                    <tr>
-                        <td>{{ $account->name }}</td>
-                        <td>{{ $account->email }}</td>
-                        <td>
-                            <form method="POST" action="{{ route('admin.accounts.approve', $account) }}" style="display:inline">
-                                @csrf
-                                <button type="submit" class="approve-btn">Approve</button>
-                            </form>
-                            <form method="POST" action="{{ route('admin.accounts.reject', $account) }}" style="display:inline">
-                                @csrf
-                                <button type="submit" class="reject-btn">Reject</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </table>
-        @endif
+            @if (session('status'))
+                <div class="work-notice" role="status">{{ session('status') }}</div>
+            @endif
 
-        <h2>All Instructor Accounts</h2>
-        @if ($accounts->isEmpty())
-            <p class="empty">No approved or rejected accounts yet.</p>
-        @else
-            <table>
-                <tr><th>Name</th><th>Email</th><th>Status</th></tr>
-                @foreach ($accounts as $account)
-                    <tr>
-                        <td>{{ $account->name }}</td>
-                        <td>{{ $account->email }}</td>
-                        <td><span class="badge badge-{{ $account->status }}">{{ ucfirst($account->status) }}</span></td>
-                    </tr>
-                @endforeach
-            </table>
-        @endif
+            <section class="work-directory" aria-labelledby="work-pending">
+                <div class="work-directory-heading">
+                    <div><p class="work-eyebrow">AWAITING DECISION</p><h2 id="work-pending">Pending instructor approvals</h2></div>
+                    <span class="work-count">{{ $pending->count() }} pending</span>
+                </div>
+                @if ($pending->isEmpty())
+                    <div class="work-empty-inline">No pending accounts right now.</div>
+                @else
+                    <div class="work-table-scroll" role="region" aria-label="Pending accounts" tabindex="0">
+                        <table class="work-table work-table-narrow">
+                            <thead><tr>
+                                <th scope="col">No.</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Action</th>
+                            </tr></thead>
+                            <tbody>
+                                @foreach ($pending as $account)
+                                    <tr>
+                                        <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                        <td class="work-person">{{ $account->name }}</td>
+                                        <td class="work-email">{{ $account->email }}</td>
+                                        <td>
+                                            <div class="work-row-actions">
+                                                <form method="POST" action="{{ route('admin.accounts.approve', $account) }}" data-pending>
+                                                    @csrf
+                                                    <button type="submit" class="work-row-btn work-row-btn-ok" data-pending-label="Approving…">Approve</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.accounts.reject', $account) }}" onsubmit="return confirm('Reject this account?');" data-pending>
+                                                    @csrf
+                                                    <button type="submit" class="work-row-btn work-row-btn-bad" data-pending-label="Rejecting…">Reject</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn">Log Out</button>
-        </form>
+            <section class="work-directory" style="margin-top:0;" aria-labelledby="work-accounts">
+                <div class="work-directory-heading">
+                    <div><p class="work-eyebrow">DECIDED</p><h2 id="work-accounts">All instructor accounts</h2></div>
+                    <span class="work-count">{{ $accounts->count() }} {{ $accounts->count() === 1 ? 'account' : 'accounts' }}</span>
+                </div>
+                @if ($accounts->isEmpty())
+                    <div class="work-empty-inline">No approved or rejected accounts yet.</div>
+                @else
+                    <div class="work-table-scroll" role="region" aria-label="Instructor accounts" tabindex="0">
+                        <table class="work-table work-table-narrow">
+                            <thead><tr>
+                                <th scope="col">No.</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Status</th>
+                            </tr></thead>
+                            <tbody>
+                                @foreach ($accounts as $account)
+                                    @php $statusChip = ['approved' => 'work-chip-ok', 'rejected' => 'work-chip-bad'][$account->status] ?? 'work-chip-gold'; @endphp
+                                    <tr>
+                                        <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                        <td class="work-person">{{ $account->name }}</td>
+                                        <td class="work-email">{{ $account->email }}</td>
+                                        <td><span class="work-chip {{ $statusChip }}">{{ ucfirst($account->status) }}</span></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </section>
+        </main>
+        <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>
 </body>
 </html>
