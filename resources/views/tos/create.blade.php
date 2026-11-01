@@ -87,7 +87,7 @@
                             <div><h2 id="tf-topics">Table 1 — Topics &amp; contact hours</h2><p>Check each topic covered by this exam and enter its contact hours.</p></div>
                         </div>
                         <div class="work-section-body">
-                            <div class="work-table-scroll work-table-framed" style="margin-top:0;" role="region" aria-label="Topics and contact hours" tabindex="0">
+                            <div class="work-table-scroll work-table-framed {{ $errors->hasAny(['topicId', 'contactHours']) ? 'is-invalid' : '' }}" style="margin-top:0;" role="region" aria-label="Topics and contact hours" tabindex="0" data-error-key="topicId contactHours">
                                 <table class="work-table work-table-inset">
                                     <thead><tr>
                                         <th scope="col" class="work-check-col">Include</th>
@@ -118,7 +118,14 @@
                             <div><h2 id="tf-bloom">Table 2 — Bloom's taxonomy distribution</h2><p>Pick a Bloom level, question type, points per item, and item count, then add the row. The total score across all rows must equal the Total Score above.</p></div>
                         </div>
                         <div class="work-section-body">
-                            <div class="work-builder" role="group" aria-label="Add a distribution row">
+                            <div class="work-score-summary" id="scoreSummary" aria-label="Score summary">
+                                <div class="work-score-stat"><span class="work-score-label">Total score</span><strong id="scoreAccumulated">0.00</strong><small>added so far</small></div>
+                                <div class="work-score-stat"><span class="work-score-label">Target score</span><strong id="scoreTarget">&mdash;</strong><small>from Details</small></div>
+                                <div class="work-score-stat"><span class="work-score-label">Remaining</span><strong id="scoreRemaining">&mdash;</strong><small id="scoreRemainingNote">enter a target</small></div>
+                                <div class="work-score-stat"><span class="work-score-label">Items</span><strong id="scoreItems">0</strong><small>questions planned</small></div>
+                                <div class="work-score-bar" id="scoreBar" role="progressbar" aria-label="Progress toward target score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scoreBarFill"></span></div>
+                            </div>
+                            <div class="work-builder {{ $errors->has('bloomKey') ? 'is-invalid' : '' }}" data-error-key="bloomKey itemCount pointsPerItem" role="group" aria-label="Add a distribution row">
                                 <div class="work-field">
                                     <label class="work-label" for="newBloomLevel">Bloom level</label>
                                     <select id="newBloomLevel" class="work-select">

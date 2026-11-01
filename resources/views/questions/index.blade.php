@@ -137,6 +137,9 @@
                                                         <form method="POST" action="{{ route('courses.topics.questions.destroy', [$course, $topic, $question]) }}" onsubmit="return confirm('Delete this question?');">
                                                             @csrf
                                                             @method('DELETE')
+                                                            <input type="hidden" name="type" value="{{ $selectedType }}">
+                                                            <input type="hidden" name="bloom" value="{{ $bloomFilter }}">
+                                                            <input type="hidden" name="sort" value="{{ $sort }}">
                                                             <button type="submit" class="work-row-link work-row-delete">Delete</button>
                                                         </form>
                                                     </div>

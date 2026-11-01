@@ -16,6 +16,15 @@
     var targetInput = form.querySelector('input[name="totalScore"]');
     var COLS = 6;
 
+    var accEl = document.getElementById('scoreAccumulated');
+    var tgtEl = document.getElementById('scoreTarget');
+    var remEl = document.getElementById('scoreRemaining');
+    var remNoteEl = document.getElementById('scoreRemainingNote');
+    var itemsEl = document.getElementById('scoreItems');
+    var barEl = document.getElementById('scoreBar');
+    var barFillEl = document.getElementById('scoreBarFill');
+    var summaryEl = document.getElementById('scoreSummary');
+
     var rows = [];
     try { rows = JSON.parse(table.getAttribute('data-initial') || '[]'); } catch (e) { rows = []; }
     rows = rows.map(function (r) {
@@ -38,8 +47,39 @@
         return s;
     }
 
+    // Accumulated total, target, remaining and item count, kept in sync on every change.
+    function updateSummary(total, target) {
+        if (!summaryEl) return;
+        var items = rows.reduce(function (n, r) { return n + r.count; }, 0);
+        var hasTarget = !isNaN(target) && target > 0;
+        var diff = hasTarget ? target - total : NaN;
+        var state = !hasTarget ? '' : (Math.abs(diff) < 0.005 ? 'is-ok' : (diff < 0 ? 'is-over' : 'is-short'));
+
+        accEl.textContent = total.toFixed(2);
+        itemsEl.textContent = String(items);
+        tgtEl.textContent = hasTarget ? target.toFixed(2) : '\u2014';
+        if (!hasTarget) {
+            remEl.textContent = '\u2014';
+            remNoteEl.textContent = 'enter a target';
+        } else if (state === 'is-ok') {
+            remEl.textContent = '0.00';
+            remNoteEl.textContent = 'target reached';
+        } else if (diff > 0) {
+            remEl.textContent = diff.toFixed(2);
+            remNoteEl.textContent = 'still to add';
+        } else {
+            remEl.textContent = Math.abs(diff).toFixed(2);
+            remNoteEl.textContent = 'over target';
+        }
+        var pct = hasTarget ? Math.max(0, Math.min(100, (total / target) * 100)) : 0;
+        barFillEl.style.width = pct.toFixed(1) + '%';
+        barEl.setAttribute('aria-valuenow', String(Math.round(pct)));
+        summaryEl.className = 'work-score-summary' + (state ? ' ' + state : '');
+    }
+
     function updateStatus(total) {
         var target = targetInput ? parseFloat(targetInput.value) : NaN;
+        updateSummary(total, target);
         var cls = 'work-status', msg;
         if (!rows.length) {
             msg = 'Add at least one row';

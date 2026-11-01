@@ -110,24 +110,24 @@
 
                 <label>Paper Size</label>
                 <select name="paperSize">
-                    <option value="Letter" {{ $exam->paperSize == 'Letter' ? 'selected' : '' }}>Letter (Short)</option>
-                    <option value="Legal" {{ $exam->paperSize == 'Legal' ? 'selected' : '' }}>Legal (Long)</option>
+                    <option value="Letter" {{ old('paperSize', $exam->paperSize) == 'Letter' ? 'selected' : '' }}>Letter (Short)</option>
+                    <option value="Legal" {{ old('paperSize', $exam->paperSize) == 'Legal' ? 'selected' : '' }}>Legal (Long)</option>
                 </select>
 
                 <label>School Name</label>
-                <input type="text" name="schoolName" value="{{ $exam->schoolName }}">
+                <input type="text" name="schoolName" value="{{ old('schoolName', $exam->schoolName) }}">
 
                 <label>Department</label>
-                <input type="text" name="department" value="{{ $exam->department }}">
+                <input type="text" name="department" value="{{ old('department', $exam->department) }}">
 
                 <label>Columns per Section</label>
                 @foreach ($presentTypes as $type)
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
                         <span style="font-size:12px; color:#4b5563;">{{ $type }}</span>
                         <select name="columns[{{ $type }}]" style="width:70px;">
-                            <option value="1" {{ ($columnsPerPart[$type] ?? 1) == 1 ? 'selected' : '' }}>1</option>
-                            <option value="2" {{ ($columnsPerPart[$type] ?? 1) == 2 ? 'selected' : '' }}>2</option>
-                            <option value="3" {{ ($columnsPerPart[$type] ?? 1) == 3 ? 'selected' : '' }}>3</option>
+                            <option value="1" {{ (old('columns.' . $type, $columnsPerPart[$type] ?? 1)) == 1 ? 'selected' : '' }}>1</option>
+                            <option value="2" {{ (old('columns.' . $type, $columnsPerPart[$type] ?? 1)) == 2 ? 'selected' : '' }}>2</option>
+                            <option value="3" {{ (old('columns.' . $type, $columnsPerPart[$type] ?? 1)) == 3 ? 'selected' : '' }}>3</option>
                         </select>
                     </div>
                 @endforeach
@@ -146,24 +146,24 @@
 
                 <h3>Header Template</h3>
                 <select name="headerTemplate">
-                    <option value="classic" {{ $exam->headerTemplate == 'classic' ? 'selected' : '' }}>Classic (double border, centered)</option>
-                    <option value="formal" {{ $exam->headerTemplate == 'formal' ? 'selected' : '' }}>Formal (boxed border)</option>
-                    <option value="minimal" {{ $exam->headerTemplate == 'minimal' ? 'selected' : '' }}>Minimal (left-aligned)</option>
+                    <option value="classic" {{ old('headerTemplate', $exam->headerTemplate) == 'classic' ? 'selected' : '' }}>Classic (double border, centered)</option>
+                    <option value="formal" {{ old('headerTemplate', $exam->headerTemplate) == 'formal' ? 'selected' : '' }}>Formal (boxed border)</option>
+                    <option value="minimal" {{ old('headerTemplate', $exam->headerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (left-aligned)</option>
                 </select>
                 <div class="hint">Pre-designed layout — school name/department text only, no custom logo.</div>
 
                 <h3>Footer Text</h3>
-                <input type="text" name="footerText" value="{{ $exam->footerText }}">
+                <input type="text" name="footerText" value="{{ old('footerText', $exam->footerText) }}">
 
                 <h3>Footer Template</h3>
                 <select name="footerTemplate">
-                    <option value="simple" {{ $exam->footerTemplate == 'simple' ? 'selected' : '' }}>Simple (centered, thin line)</option>
-                    <option value="paged" {{ $exam->footerTemplate == 'paged' ? 'selected' : '' }}>Paged (left/right split, bold line)</option>
-                    <option value="minimal" {{ $exam->footerTemplate == 'minimal' ? 'selected' : '' }}>Minimal (small, no line)</option>
+                    <option value="simple" {{ old('footerTemplate', $exam->footerTemplate) == 'simple' ? 'selected' : '' }}>Simple (centered, thin line)</option>
+                    <option value="paged" {{ old('footerTemplate', $exam->footerTemplate) == 'paged' ? 'selected' : '' }}>Paged (left/right split, bold line)</option>
+                    <option value="minimal" {{ old('footerTemplate', $exam->footerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (small, no line)</option>
                 </select>
 
                 <h3>Watermark Text</h3>
-                <input type="text" name="watermarkText" value="{{ $exam->watermarkText }}">
+                <input type="text" name="watermarkText" value="{{ old('watermarkText', $exam->watermarkText) }}">
 
                 <h3>Watermark Image (overrides text if set)</h3>
                 @if ($exam->watermarkImagePath)

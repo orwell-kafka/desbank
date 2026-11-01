@@ -38,4 +38,49 @@
             if (e.persisted && region) region.removeAttribute('aria-busy');
         });
     });
+
+    // 3. Clickable validation messages: jump to (and focus) the field or section that needs fixing.
+    function esc(v) { return window.CSS && CSS.escape ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&'); }
+    function isVisible(el) { return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length); }
+
+    function findErrorTarget(key) {
+        var base = String(key).split('.')[0];
+        var selectors = [
+            '[data-error-key~="' + esc(key) + '"]',
+            '[data-error-key~="' + esc(base) + '"]',
+            '[name="' + esc(base) + '"]',
+            '[name="' + esc(base) + '[]"]',
+            '[id="' + esc(base) + '"]'
+        ];
+        for (var i = 0; i < selectors.length; i++) {
+            var found = document.querySelectorAll(selectors[i]);
+            for (var j = 0; j < found.length; j++) {
+                if (found[j].type !== 'hidden' && isVisible(found[j])) return found[j];
+            }
+        }
+        return null;
+    }
+
+    function focusable(el) {
+        if (/^(INPUT|SELECT|TEXTAREA|BUTTON|A)$/.test(el.tagName) || el.hasAttribute('tabindex')) return el;
+        return el.querySelector('input:not([type="hidden"]), select, textarea, button') || el;
+    }
+
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('[data-error-target]');
+        if (!link) return;
+        e.preventDefault();
+        var target = findErrorTarget(link.getAttribute('data-error-target'));
+        if (!target) return;
+        var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+        var toFocus = focusable(target);
+        if (!toFocus.hasAttribute('tabindex') && !/^(INPUT|SELECT|TEXTAREA|BUTTON|A)$/.test(toFocus.tagName)) toFocus.setAttribute('tabindex', '-1');
+        toFocus.focus({ preventScroll: true });
+        var flash = target.closest('.work-field, .work-section') || target;
+        flash.classList.remove('is-flash');
+        void flash.offsetWidth;
+        flash.classList.add('is-flash');
+        setTimeout(function () { flash.classList.remove('is-flash'); }, 2200);
+    });
 })();

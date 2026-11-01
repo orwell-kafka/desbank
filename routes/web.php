@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/courses/{course}/exams/{exam}/format', [ExamController::class, 'editFormat'])->name('courses.exams.format');
     Route::get('/courses/{course}/exams/{exam}/answer-key', [ExamController::class, 'answerKey'])->name('courses.exams.answerkey');
     Route::post('/courses/{course}/exams/{exam}/format', [ExamController::class, 'updateFormat'])->name('courses.exams.format.update');
+    Route::get('/courses/{course}/exams/{exam}/questions/{question}/replace', [ExamController::class, 'replaceOptions'])->name('courses.exams.replace.options');
     Route::post('/courses/{course}/exams/{exam}/questions/{question}/replace', [ExamController::class, 'replace'])->name('courses.exams.replace');
     Route::delete('/courses/{course}/exams/{exam}', [ExamController::class, 'destroy'])->name('courses.exams.destroy');
 });

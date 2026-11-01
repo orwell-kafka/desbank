@@ -66,6 +66,24 @@
                                 <label class="work-label" for="content">Question text</label>
                                 <textarea name="content" id="content" rows="4" required class="work-textarea {{ $errors->has('content') ? 'is-invalid' : '' }}">{{ old('content', $question->content) }}</textarea>
                             </div>
+                            <div id="blankTools" class="work-blank-tools" role="group" aria-label="Blanks and answer lines">
+                                <span class="work-blank-tools-label">Blanks &amp; answer lines</span>
+                                <div class="work-blank-tools-row">
+                                    <button type="button" class="work-row-btn work-row-btn-primary" data-blank="cursor">Insert blank at cursor</button>
+                                    <button type="button" class="work-row-btn" data-blank="start">Answer line at start</button>
+                                    <button type="button" class="work-row-btn" data-blank="end">Answer line at end</button>
+                                    <button type="button" class="work-row-btn" data-blank="clear">Remove blanks</button>
+                                    <label class="work-blank-len">Length
+                                        <select id="blankLength" class="work-select" aria-label="Blank length">
+                                            <option value="6">Short</option>
+                                            <option value="10" selected>Medium</option>
+                                            <option value="16">Long</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <p id="blankSummary" class="work-hint" role="status" aria-live="polite"></p>
+                                <p class="work-hint">Tip: select the answer word first, then press &ldquo;Insert blank at cursor&rdquo; to replace it with a blank.</p>
+                            </div>
                         </div>
                     </section>
 
@@ -75,10 +93,13 @@
                             <div><h2 id="qf-answer">Answer</h2><p>The fields below change with the question type.</p></div>
                         </div>
                         <div class="work-section-body">
-                            <div id="choicesField" class="work-dyn">
+                            <div id="choicesField" class="work-dyn" data-error-key="choices">
                                 <div class="work-field">
-                                    <label class="work-label" for="choicesInput">Choices <span class="work-label-opt">(separate with commas)</span></label>
-                                    <input type="text" name="choices" id="choicesInput" class="work-input" value="{{ old('choices', $question->choices) }}">
+                                    <span class="work-label" id="choicesLabel">Answer choices</span>
+                                    <ol id="choiceList" class="work-choice-list" aria-labelledby="choicesLabel" data-initial="{{ json_encode(array_values((array) old('choices', $question->choices ? array_map('trim', explode(',', $question->choices)) : []))) }}"></ol>
+                                    <p id="choiceError" class="work-builder-error" role="alert" hidden></p>
+                                    <button type="button" id="addChoiceBtn" class="work-row-btn work-row-btn-primary">+ Add answer</button>
+                                    <p class="work-hint">One box per choice. Edit any box, or use Remove to delete it. No commas needed.</p>
                                 </div>
                             </div>
 
@@ -92,10 +113,10 @@
                             <div id="answerTrueFalseField" class="work-dyn" style="display:none;">
                                 <div class="work-field">
                                     <label class="work-label" for="answerTrueFalseSelect">Correct Answer</label>
-                                    <select id="answerTrueFalseSelect" class="work-select">
+                                    <select id="answerTrueFalseSelect" class="work-select {{ $errors->has('correctAnswer') ? 'is-invalid' : '' }}" data-error-key="correctAnswer">
                                         <option value="">-- Select --</option>
-                                        <option value="True" {{ $question->correctAnswer == 'True' ? 'selected' : '' }}>True</option>
-                                        <option value="False" {{ $question->correctAnswer == 'False' ? 'selected' : '' }}>False</option>
+                                        <option value="True" {{ old('correctAnswer', $question->correctAnswer) == 'True' ? 'selected' : '' }}>True</option>
+                                        <option value="False" {{ old('correctAnswer', $question->correctAnswer) == 'False' ? 'selected' : '' }}>False</option>
                                     </select>
                                 </div>
                             </div>
@@ -118,7 +139,7 @@
                 <aside class="work-aside" aria-label="Question types">
                     <h2>Answer format by type</h2>
                     <ol>
-                        <li><span class="work-step-num">MC</span><div><strong>Multiple Choice</strong><p>List the choices separated by commas, then enter the correct answer.</p></div></li>
+                        <li><span class="work-step-num">MC</span><div><strong>Multiple Choice</strong><p>Add each choice with the Add answer button, then enter the correct answer.</p></div></li>
                         <li><span class="work-step-num">T/F</span><div><strong>True/False</strong><p>Pick True or False as the answer.</p></div></li>
                         <li><span class="work-step-num">Enum</span><div><strong>Enumeration</strong><p>Separate the correct answers with commas.</p></div></li>
                         <li><span class="work-step-num">Match</span><div><strong>Matching Type</strong><p>Enter the answer for this item. The answer pool is built at print time.</p></div></li>
@@ -130,6 +151,8 @@
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>
 
+    <script src="{{ asset('js/question-choices.js') }}?v={{ @filemtime(public_path('js/question-choices.js')) }}"></script>
+    <script src="{{ asset('js/question-blanks.js') }}?v={{ @filemtime(public_path('js/question-blanks.js')) }}"></script>
     <script>
         const form = document.getElementById('questionForm');
         const typeSelect = document.getElementById('questionType');
@@ -152,11 +175,9 @@
             essayHint.style.display = 'none';
             answerLabel.textContent = 'Correct Answer';
             answerInput.required = true;
-            document.getElementById('choicesInput').required = false;
 
             if (type === 'Multiple Choice') {
                 choicesField.style.display = 'block';
-                document.getElementById('choicesInput').required = true;
             } else if (type === 'True/False') {
                 answerTextField.style.display = 'none';
                 answerTrueFalseField.style.display = 'block';

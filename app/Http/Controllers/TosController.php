@@ -13,6 +13,17 @@ class TosController extends Controller
     private const BLOOM_LEVELS = ['Remembering', 'Understanding', 'Applying', 'Analyzing', 'Evaluating', 'Creating'];
     private const QUESTION_TYPES = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
 
+    private const VALIDATION_MESSAGES = [
+        'title.required' => 'Required: enter a ToS title.',
+        'examType.required' => 'Required: choose an exam type.',
+        'totalScore.required' => 'Required: enter the total score.',
+        'topicId.required' => 'Required: check at least one topic in Table 1.',
+        'topicId.min' => 'Required: check at least one topic in Table 1.',
+        'contactHours.required' => 'Required: enter contact hours for the checked topics.',
+        'bloomKey.required' => 'Required: add at least one row to Table 2.',
+        'bloomKey.min' => 'Required: add at least one row to Table 2.',
+    ];
+
     public function index(Course $course)
     {
         $this->authorizeOwner($course);
@@ -75,12 +86,12 @@ class TosController extends Controller
             'bloomKey' => ['required', 'array', 'min:1'],
             'itemCount' => ['required', 'array'],
             'pointsPerItem' => ['required', 'array'],
-        ]);
+        ], self::VALIDATION_MESSAGES);
 
         $result = $this->computeAndValidate($request, $data);
 
         if (isset($result['error'])) {
-            return back()->withErrors(['totalScore' => $result['error']])->withInput();
+            return back()->withErrors([($result['field'] ?? 'totalScore') => $result['error']])->withInput();
         }
 
         DB::transaction(function () use ($tos, $data, $result) {
@@ -132,12 +143,12 @@ class TosController extends Controller
             'bloomKey' => ['required', 'array', 'min:1'],
             'itemCount' => ['required', 'array'],
             'pointsPerItem' => ['required', 'array'],
-        ]);
+        ], self::VALIDATION_MESSAGES);
 
         $result = $this->computeAndValidate($request, $data);
 
         if (isset($result['error'])) {
-            return back()->withErrors(['totalScore' => $result['error']])->withInput();
+            return back()->withErrors([($result['field'] ?? 'totalScore') => $result['error']])->withInput();
         }
 
         DB::transaction(function () use ($course, $data, $result) {
@@ -223,7 +234,7 @@ class TosController extends Controller
         }
 
         if ($totalContactHours <= 0) {
-            return ['error' => 'Total contact hours must be greater than zero.'];
+            return ['error' => 'Total contact hours must be greater than zero.', 'field' => 'contactHours'];
         }
 
         $topics = [];
@@ -279,13 +290,13 @@ class TosController extends Controller
         }
 
         if (empty($bloom)) {
-            return ['error' => 'Select at least one Bloom level/question type with an item count and points per item greater than zero.'];
+            return ['error' => 'Select at least one Bloom level/question type with an item count and points per item greater than zero.', 'field' => 'bloomKey'];
         }
 
         $bloomScoreTotal = round($bloomScoreTotal, 2);
 
         if (abs($bloomScoreTotal - $totalScore) > 0.01) {
-            return ['error' => "Bloom's Taxonomy total score ({$bloomScoreTotal}) does not match the ToS total score ({$totalScore}). Adjust item counts or points per item and try again."];
+            return ['error' => "Bloom's Taxonomy total score ({$bloomScoreTotal}) does not match the ToS total score ({$totalScore}). Adjust item counts or points per item and try again.", 'field' => 'bloomKey'];
         }
 
         return ['topics' => $topics, 'bloom' => $bloom];

@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Tos;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
@@ -296,25 +297,69 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig'));
     }
 
-    public function replace(Course $course, Exam $exam, Question $question)
+    /**
+     * Questions that may replace $question in this exam: same ToS topics, same Bloom level and
+     * question type (so the ToS distribution still holds), and not already used in the exam.
+     */
+    private function replacementPool(Exam $exam, Question $question)
+    {
+        $tos = Tos::findOrFail($exam->tosId);
+        $topicIds = DB::table('tostopic')->where('tosId', $tos->tosId)->pluck('topicId');
+        $currentQuestionIds = DB::table('examquestion')->where('examId', $exam->examId)->pluck('questionId');
+
+        return Question::whereIn('topicId', $topicIds)
+            ->where('bloomLevel', $question->bloomLevel)
+            ->where('questionType', $question->questionType)
+            ->whereNotIn('questionId', $currentQuestionIds);
+    }
+
+    private function authorizeQuestionInExam(Exam $exam, Question $question): void
+    {
+        $inExam = DB::table('examquestion')
+            ->where('examId', $exam->examId)
+            ->where('questionId', $question->questionId)
+            ->exists();
+
+        if (! $inExam) {
+            abort(404);
+        }
+    }
+
+    public function replaceOptions(Course $course, Exam $exam, Question $question)
     {
         $this->authorizeOwner($course);
         $this->authorizeExamBelongsToCourse($course, $exam);
+        $this->authorizeQuestionInExam($exam, $question);
 
-        $tos = Tos::findOrFail($exam->tosId);
-        $topicIds = DB::table('tostopic')->where('tosId', $tos->tosId)->pluck('topicId');
+        $candidates = $this->replacementPool($exam, $question)->orderBy('topicId')->orderBy('questionId')->get();
+        $topicNames = DB::table('topic')->whereIn('topicId', $candidates->pluck('topicId')->unique())->pluck('topicName', 'topicId');
 
-        $currentQuestionIds = DB::table('examquestion')->where('examId', $exam->examId)->pluck('questionId');
+        return view('exams.replace', compact('course', 'exam', 'question', 'candidates', 'topicNames'));
+    }
 
-        $replacement = Question::whereIn('topicId', $topicIds)
-            ->where('bloomLevel', $question->bloomLevel)
-            ->where('questionType', $question->questionType)
-            ->whereNotIn('questionId', $currentQuestionIds)
-            ->inRandomOrder()
-            ->first();
+    public function replace(Request $request, Course $course, Exam $exam, Question $question)
+    {
+        $this->authorizeOwner($course);
+        $this->authorizeExamBelongsToCourse($course, $exam);
+        $this->authorizeQuestionInExam($exam, $question);
 
-        if (! $replacement) {
-            return back()->withErrors(['exam' => 'No other question available in the Question Bank for that same Bloom level/question type slot.']);
+        $pool = $this->replacementPool($exam, $question);
+
+        if ($request->filled('replacementId')) {
+            // The user picked a specific question: it must be one of the allowed candidates.
+            $replacement = $pool->where('questionId', (int) $request->input('replacementId'))->first();
+
+            if (! $replacement) {
+                return redirect()
+                    ->route('courses.exams.replace.options', [$course, $exam, $question])
+                    ->withErrors(['exam' => 'That question is no longer available as a replacement. Please choose another.']);
+            }
+        } else {
+            $replacement = $pool->inRandomOrder()->first();
+
+            if (! $replacement) {
+                return back()->withErrors(['exam' => 'No other question available in the Question Bank for that same Bloom level/question type slot.']);
+            }
         }
 
         DB::table('examquestion')

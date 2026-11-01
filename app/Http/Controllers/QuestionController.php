@@ -76,9 +76,15 @@ class QuestionController extends Controller
             'bloomLevel' => ['required', 'in:' . implode(',', self::BLOOM_LEVELS)],
             'questionType' => ['required', 'in:' . implode(',', self::QUESTION_TYPES)],
             'content' => ['required', 'string'],
-            'choices' => ['nullable', 'string'],
+            'choices' => ['nullable', 'array', 'max:12'],
+            'choices.*' => ['nullable', 'string', 'max:255'],
             'correctAnswer' => ['nullable', 'string'],
         ]);
+
+        $choices = $this->cleanChoices($data);
+        if ($data['questionType'] === 'Multiple Choice' && count($choices) < 2) {
+            return back()->withErrors(['choices' => 'Add at least two answer choices for a Multiple Choice question.'])->withInput();
+        }
 
         // Simple duplicate check: same content already exists under this topic
         $duplicate = Question::where('topicId', $topic->topicId)
@@ -94,7 +100,7 @@ class QuestionController extends Controller
             'bloomLevel' => $data['bloomLevel'],
             'questionType' => $data['questionType'],
             'content' => $data['content'],
-            'choices' => $data['choices'] ?? null,
+            'choices' => $data['questionType'] === 'Multiple Choice' ? implode(',', $choices) : null,
             'correctAnswer' => $data['correctAnswer'] ?? null,
         ]);
 
@@ -122,21 +128,47 @@ class QuestionController extends Controller
             'bloomLevel' => ['required', 'in:' . implode(',', self::BLOOM_LEVELS)],
             'questionType' => ['required', 'in:' . implode(',', self::QUESTION_TYPES)],
             'content' => ['required', 'string'],
-            'choices' => ['nullable', 'string'],
+            'choices' => ['nullable', 'array', 'max:12'],
+            'choices.*' => ['nullable', 'string', 'max:255'],
             'correctAnswer' => ['nullable', 'string'],
         ]);
+
+        $choices = $this->cleanChoices($data);
+        if ($data['questionType'] === 'Multiple Choice' && count($choices) < 2) {
+            return back()->withErrors(['choices' => 'Add at least two answer choices for a Multiple Choice question.'])->withInput();
+        }
+        $data['choices'] = $data['questionType'] === 'Multiple Choice' ? implode(',', $choices) : null;
 
         $question->update($data);
 
         return redirect()->route('courses.topics.questions.index', [$course, $topic])->with('status', 'Question updated.');
     }
 
-    public function destroy(Course $course, Topic $topic, Question $question)
+    public function destroy(Request $request, Course $course, Topic $topic, Question $question)
     {
         $this->authorize($course, $topic, $question);
         $question->delete();
 
-        return redirect()->route('courses.topics.questions.index', [$course, $topic])->with('status', 'Question deleted.');
+        // Return to the same Questions list the user was on (type, Bloom filter and sort
+        // are carried by the delete form), so the updated list stays visible.
+        $view = array_filter($request->only(['type', 'bloom', 'sort']), fn ($v) => is_string($v) && $v !== '');
+
+        return redirect()
+            ->to(route('courses.topics.questions.index', array_merge([$course, $topic], $view)) . '#work-results')
+            ->with('status', 'Question deleted.');
+    }
+
+    /**
+     * Trim the submitted choices, drop empty ones and neutralise commas
+     * (choices are stored comma-joined, so a comma inside one would split it).
+     */
+    private function cleanChoices(array $data): array
+    {
+        return collect($data['choices'] ?? [])
+            ->map(fn ($choice) => trim(preg_replace('/\s*,\s*/', ' ', (string) $choice)))
+            ->filter(fn ($choice) => $choice !== '')
+            ->values()
+            ->all();
     }
 
     private function authorize(Course $course, Topic $topic, ?Question $question = null): void

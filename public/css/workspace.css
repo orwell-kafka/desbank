@@ -457,3 +457,53 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
     .work-empty-inline { padding: 24px 20px 28px; }
     .work-adminbar { padding: 13px 15px; margin-bottom: 23px; gap: 12px; }
 }
+
+/* ---- Clickable validation messages ---- */
+.work-alert-list { list-style: none; margin: 0; padding: 0; }
+.work-alert-list li + li { margin-top: 4px; }
+.work-alert-link { appearance: none; background: none; border: 0; padding: 2px 0; font: inherit; color: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.work-alert-link:hover { text-decoration-thickness: 2px; }
+.work-alert-link:focus-visible { outline: 3px solid var(--work-gold); outline-offset: 2px; }
+.work-alert-tip { margin: 8px 0 0; font-size: 12px; opacity: .8; }
+.work-table-framed.is-invalid, .work-builder.is-invalid { border-color: #c24848; }
+@keyframes work-flash { 0%, 60% { box-shadow: 0 0 0 3px rgba(232, 163, 61, .55); } 100% { box-shadow: 0 0 0 3px rgba(232, 163, 61, 0); } }
+.is-flash { animation: work-flash 2.2s ease-out; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { .is-flash { animation: none; outline: 3px solid var(--work-gold); } }
+
+/* ---- ToS score summary ---- */
+.work-score-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0 0 14px; border: 1px solid var(--work-line); border-radius: 4px; background: #fff; overflow: hidden; }
+.work-score-stat { padding: 12px 16px; border-left: 1px solid var(--work-line); }
+.work-score-stat:first-child { border-left: 0; }
+.work-score-label { display: block; font: 500 11px var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; color: #607181; }
+.work-score-stat strong { display: block; margin: 3px 0 1px; font: 700 22px/1.2 var(--font-display, sans-serif); letter-spacing: -.02em; color: var(--work-dark); font-variant-numeric: tabular-nums; }
+.work-score-stat small { font-size: 11.5px; color: #758492; }
+.work-score-bar { grid-column: 1 / -1; height: 5px; background: #e4e9ed; }
+.work-score-bar span { display: block; height: 100%; width: 0; background: #d49a45; transition: width .25s ease; }
+.work-score-summary.is-ok .work-score-bar span { background: #23825d; }
+.work-score-summary.is-over .work-score-bar span { background: #c24848; }
+.work-score-summary.is-ok #scoreRemaining { color: var(--work-ok); }
+.work-score-summary.is-over #scoreRemaining { color: var(--work-bad); }
+@media (max-width: 700px) { .work-score-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .work-score-stat:nth-child(3) { border-left: 0; } }
+@media (prefers-reduced-motion: reduce) { .work-score-bar span { transition: none; } }
+
+/* ---- Blank / answer-line tools ---- */
+.work-blank-tools { margin: 14px 0 20px; padding: 12px 14px; border: 1px solid var(--work-line); border-left: 3px solid #d49a45; border-radius: 4px; background: #f5f7f8; }
+.work-blank-tools-label { display: block; margin: 0 0 9px; font: 500 11px var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; color: #607181; }
+.work-blank-tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.work-blank-len { display: inline-flex; align-items: center; gap: 7px; font: 600 12px var(--font-body, sans-serif); color: #16324f; }
+.work-blank-len .work-select { min-height: 34px; padding: 5px 30px 5px 10px; font-size: 12px; width: auto; }
+.work-blank-tools .work-hint { margin-top: 9px; }
+
+/* ---- Multiple Choice answer choices ---- */
+.work-choice-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; max-width: 640px; }
+.work-choice-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.work-choice-letter { font: 500 13px var(--font-mono, monospace); color: #b07c2c; text-align: right; }
+.work-choice-remove:disabled, #addChoiceBtn:disabled { opacity: .45; cursor: not-allowed; }
+#addChoiceBtn { min-height: 38px; }
+@media (max-width: 480px) { .work-choice-row { grid-template-columns: 22px minmax(0, 1fr); } .work-choice-remove { grid-column: 2; justify-self: start; } }
+
+/* ---- Exam page: question type filter (buttons share the .work-tab look) ---- */
+button.work-tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; }
+button.work-tab[aria-pressed="true"] { color: var(--work-dark); border-bottom-color: #c3892c; }
+button.work-tab:focus-visible { outline: 3px solid var(--work-gold); outline-offset: -3px; }
+tr[hidden] { display: none; }
