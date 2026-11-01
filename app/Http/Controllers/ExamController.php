@@ -114,14 +114,8 @@ class ExamController extends Controller
 
         $defaultOrder = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
 
-        $directions = [
-            'Multiple Choice' => 'Read each question carefully. Encircle the letter of the best answer.',
-            'True/False' => 'Write TRUE if the statement is correct and FALSE if the statement is incorrect. Write your answer on the space provided before each number.',
-            'Fill in the Blanks' => 'Complete each statement by writing the correct word or phrase in the blank provided.',
-            'Enumeration' => 'Enumerate the required terms, concepts, or items for each question. Write your answers in the spaces provided.',
-            'Matching Type' => 'Match the items in Column A with their corresponding answers in Column B. Write the letter of the correct answer on the space provided before each number.',
-            'Essay' => 'Answer the following question(s) clearly and concisely. Support your answer with appropriate explanations and examples when necessary. Write your response in the space provided.',
-        ];
+        $defaultDirections = self::defaultDirections();
+        $directions = $this->resolveDirections($exam, $defaultDirections);
 
         $questionsRaw = DB::table('examquestion')
             ->join('question', 'question.questionId', '=', 'examquestion.questionId')
@@ -146,7 +140,7 @@ class ExamController extends Controller
         $questions = $finalOrder->mapWithKeys(fn ($type) => [$type => $questionsRaw[$type]]);
 
         $columnsPerPart = $exam->columnsPerPart ? json_decode($exam->columnsPerPart, true) : [];
-        return view('exams.format', compact('course', 'exam', 'tos', 'questions', 'directions', 'presentTypes', 'columnsPerPart'));
+        return view('exams.format', compact('course', 'exam', 'tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart'));
     }
 
 public function answerKey(Course $course, Exam $exam)
@@ -251,7 +245,24 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             'watermarkImage' => ['nullable', 'image', 'max:2048'],
             'removeWatermarkImage' => ['nullable'],
             'partOrder' => ['nullable', 'array'],
-        ]);
+            'directions' => ['nullable', 'array'],
+            'directions.*' => ['nullable', 'string', 'max:600'],
+        ], [], ['directions.*' => 'direction text']);
+
+        // Directions: keep only known parts, and store only text that differs from the default.
+        // An empty box (or text equal to the default) resets that part to the default wording.
+        $defaults = self::defaultDirections();
+        $overrides = [];
+        foreach ((array) ($data['directions'] ?? []) as $type => $text) {
+            if (! array_key_exists($type, $defaults)) {
+                continue;
+            }
+            $text = trim(str_replace(["\r\n", "\r"], "\n", (string) $text));
+            if ($text !== '' && $text !== $defaults[$type]) {
+                $overrides[$type] = $text;
+            }
+        }
+        $data['directions'] = $overrides ? json_encode($overrides) : null;
 
         if (! empty($data['partOrder'])) {
             $data['partOrder'] = implode(',', array_unique($data['partOrder']));
@@ -278,6 +289,34 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
     }
 
     
+
+    /** Default printed direction for each question type. */
+    public static function defaultDirections(): array
+    {
+        return [
+            'Multiple Choice' => 'Read each question carefully. Encircle the letter of the best answer.',
+            'True/False' => 'Write TRUE if the statement is correct and FALSE if the statement is incorrect. Write your answer on the space provided before each number.',
+            'Fill in the Blanks' => 'Complete each statement by writing the correct word or phrase in the blank provided.',
+            'Enumeration' => 'Enumerate the required terms, concepts, or items for each question. Write your answers in the spaces provided.',
+            'Matching Type' => 'Match the items in Column A with their corresponding answers in Column B. Write the letter of the correct answer on the space provided before each number.',
+            'Essay' => 'Answer the following question(s) clearly and concisely. Support your answer with appropriate explanations and examples when necessary. Write your response in the space provided.',
+        ];
+    }
+
+    /** Defaults with this exam's saved edits applied. Tolerates a missing column or bad JSON. */
+    private function resolveDirections(Exam $exam, array $defaults): array
+    {
+        $saved = $exam->directions ? json_decode($exam->directions, true) : [];
+        if (! is_array($saved)) {
+            return $defaults;
+        }
+        foreach ($saved as $type => $text) {
+            if (array_key_exists($type, $defaults) && is_string($text) && trim($text) !== '') {
+                $defaults[$type] = $text;
+            }
+        }
+        return $defaults;
+    }
 
     public function show(Course $course, Exam $exam)
     {

@@ -16,6 +16,12 @@
         .settings .checkbox-line input { width: auto; margin: 0; }
         .settings button { margin-top: 16px; width: 100%; padding: 8px; background: #2563eb; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         .settings .print-btn { background: #16a34a; margin-top: 8px; }
+        .settings textarea { width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 12px; font-family: inherit; line-height: 1.45; resize: vertical; }
+        .settings .direction-block { margin-top: 10px; }
+        .settings .direction-block .direction-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #4b5563; }
+        .settings .direction-reset { width: auto; margin: 0; padding: 2px 8px; background: #fff; color: #2563eb; border: 1px solid #d1d5db; font-size: 11px; }
+        .settings .direction-reset:hover { background: #eff6ff; }
+        .settings .direction-edited { font-size: 11px; color: #b45309; }
         .status { color: #15803d; font-size: 12px; margin-bottom: 8px; }
         .error { color: #b91c1c; font-size: 12px; margin-bottom: 8px; }
         .back-link { display: block; margin-top: 14px; color: #2563eb; text-decoration: none; font-size: 13px; }
@@ -54,6 +60,7 @@
 
         .part-header { font-weight: bold; font-size: 13px; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; }
         .part-direction { font-size: 12px; font-style: italic; margin-bottom: 10px; }
+        .part-direction .direction-text { white-space: pre-line; }
         .question-list { columns: var(--cols, 1); column-gap: 30px; }
         .question-item { font-size: 13px; margin-bottom: 10px; break-inside: avoid; }
         .choices { margin-top: 4px; margin-left: 15px; }
@@ -144,6 +151,19 @@
                 </ul>
                 <div id="partOrderInputs"></div>
 
+                <h3>Section Directions</h3>
+                <div class="hint" style="margin-bottom:6px;">Edit the instruction printed under each part. Leave a box empty, or press Reset, to use the default wording.</div>
+                @foreach ($presentTypes as $type)
+                    @php $directionValue = old('directions.' . $type, $directions[$type] ?? ''); @endphp
+                    <div class="direction-block">
+                        <div class="direction-head">
+                            <label for="direction-{{ $loop->index }}" style="margin:0; font-size:12px;">{{ $type }}</label>
+                            <button type="button" class="direction-reset" data-target="direction-{{ $loop->index }}">Reset</button>
+                        </div>
+                        <textarea id="direction-{{ $loop->index }}" name="directions[{{ $type }}]" rows="3" maxlength="600" data-type="{{ $type }}" data-default="{{ $defaultDirections[$type] ?? '' }}">{{ $directionValue }}</textarea>
+                    </div>
+                @endforeach
+
                 <h3>Header Template</h3>
                 <select name="headerTemplate">
                     <option value="classic" {{ old('headerTemplate', $exam->headerTemplate) == 'classic' ? 'selected' : '' }}>Classic (double border, centered)</option>
@@ -230,6 +250,32 @@
                 </script>
             </form>
 
+            <script>
+                (function () {
+                    // Live preview: typing in a direction box updates that part on the paper right away.
+                    // Nothing is saved until "Update preview" is pressed.
+                    const boxes = document.querySelectorAll('textarea[data-type]');
+                    function paperText(type) {
+                        return Array.from(document.querySelectorAll('.part-direction[data-type]'))
+                            .find(function (el) { return el.dataset.type === type; });
+                    }
+                    function sync(box) {
+                        const target = paperText(box.dataset.type);
+                        if (!target) return;
+                        const text = box.value.trim() === '' ? box.dataset.default : box.value.trim();
+                        target.querySelector('.direction-text').textContent = text;
+                    }
+                    boxes.forEach(function (box) { box.addEventListener('input', function () { sync(box); }); });
+                    document.querySelectorAll('.direction-reset').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            const box = document.getElementById(btn.dataset.target);
+                            box.value = box.dataset.default;
+                            sync(box);
+                        });
+                    });
+                })();
+            </script>
+
             <button type="button" class="print-btn" onclick="window.print()">Print / Save as PDF</button>
 
             <a href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
@@ -265,7 +311,7 @@
                         PART {{ $romanParts[$partNum - 1] ?? $partNum }} — {{ strtoupper($type) }}
                         (ITEMS 1–{{ $group->count() }})
                     </div>
-                    <div class="part-direction">Direction: {{ $directions[$type] ?? '' }}</div>
+                    <div class="part-direction" data-type="{{ $type }}">Direction: <span class="direction-text">{{ $directions[$type] ?? '' }}</span></div>
 
                    @if ($type === 'Matching Type')
                         @php
