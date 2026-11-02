@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Courses · DESBank</title>
     @include('partials.head-assets')
-    <link rel="stylesheet" href="{{ asset('css/workspace.css') }}">
+    @include('partials.workspace-assets')
 </head>
 <body class="workspace">
     <div class="db-shell">
@@ -65,7 +65,7 @@
                                                 <a href="{{ route('courses.tos.index', $course) }}" class="work-row-link">ToS</a>
                                                 <a href="{{ route('courses.exams.index', $course) }}" class="work-row-link">Exams</a>
                                                 <a href="{{ route('courses.edit', $course) }}" class="work-row-link">Edit</a>
-                                                <form method="POST" action="{{ route('courses.destroy', $course) }}" onsubmit="return confirm('Delete this course?');">
+                                                <form method="POST" action="{{ route('courses.destroy', $course) }}" data-confirm="Delete this course?" data-confirm-item="{{ $course->courseName }}" data-confirm-label="Delete course">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="work-row-link work-row-delete">Delete</button>

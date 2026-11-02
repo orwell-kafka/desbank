@@ -134,7 +134,7 @@
                                                 <td>
                                                     <div class="work-row-actions">
                                                         <a href="{{ route('courses.topics.questions.edit', [$course, $topic, $question]) }}" class="work-row-link work-row-link-main">Edit</a>
-                                                        <form method="POST" action="{{ route('courses.topics.questions.destroy', [$course, $topic, $question]) }}" onsubmit="return confirm('Delete this question?');">
+                                                        <form method="POST" action="{{ route('courses.topics.questions.destroy', [$course, $topic, $question]) }}" data-confirm="Delete this question?" data-confirm-item="{{ \Illuminate\Support\Str::limit($question->content, 90) }}" data-confirm-label="Delete question">
                                                             @csrf
                                                             @method('DELETE')
                                                             <input type="hidden" name="type" value="{{ $selectedType }}">

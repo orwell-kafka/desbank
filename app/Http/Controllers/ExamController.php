@@ -240,8 +240,11 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             'footerText' => ['nullable', 'string', 'max:255'],
             'watermarkText' => ['nullable', 'string', 'max:100'],
             'columns' => ['nullable', 'array'],
-            'headerTemplate' => ['required', 'in:classic,formal,minimal'],
-            'footerTemplate' => ['required', 'in:simple,paged,minimal'],
+            'headerTemplate' => ['required', 'in:classic,formal,minimal,marsu'],
+            'footerTemplate' => ['required', 'in:simple,paged,minimal,marsu'],
+            'headerTop' => ['nullable', 'integer', 'between:0,200'],
+            'headerLines' => ['nullable', 'string', 'max:600'],
+            'footerLines' => ['nullable', 'string', 'max:900'],
             'watermarkImage' => ['nullable', 'image', 'max:2048'],
             'removeWatermarkImage' => ['nullable'],
             'partOrder' => ['nullable', 'array'],
@@ -263,6 +266,17 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             }
         }
         $data['directions'] = $overrides ? json_encode($overrides) : null;
+
+        // Blank "distance from top" keeps the stored value (the column is NOT NULL).
+        if (! isset($data['headerTop'])) {
+            unset($data['headerTop']);
+        }
+
+        // Letterhead / footer wording: one line per row; blank falls back to the built-in text.
+        foreach (['headerLines', 'footerLines'] as $key) {
+            $text = trim(preg_replace("/\r\n|\r/", "\n", (string) ($data[$key] ?? '')));
+            $data[$key] = $text !== '' ? $text : null;
+        }
 
         if (! empty($data['partOrder'])) {
             $data['partOrder'] = implode(',', array_unique($data['partOrder']));

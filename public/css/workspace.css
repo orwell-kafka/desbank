@@ -74,6 +74,7 @@
 .work-text-button span { margin-left: 12px; }
 .work-text-button:hover { background: #edf2f6; border-color: #8298a9; }
 .work-overview-grid { display: grid; grid-template-columns: minmax(0, 1.44fr) minmax(280px, 1fr); gap: 28px; margin-top: 28px; align-items: stretch; }
+.work-overview-grid { margin-bottom: 44px; }
 .work-feature {
     display: flex;
     flex-direction: column;
@@ -507,3 +508,29 @@ button.work-tab { appearance: none; background: none; border: 0; border-bottom: 
 button.work-tab[aria-pressed="true"] { color: var(--work-dark); border-bottom-color: #c3892c; }
 button.work-tab:focus-visible { outline: 3px solid var(--work-gold); outline-offset: -3px; }
 tr[hidden] { display: none; }
+
+
+/* ---- In-page confirmation dialog (public/js/workspace.js) ---- */
+.work-action-danger, .work-confirm-ok.is-danger { background: #a32d2d; border-color: #a32d2d; color: #fff; }
+.work-action-danger:hover, .work-confirm-ok.is-danger:hover { background: #8a2424; border-color: #8a2424; color: #fff; }
+.work-confirm { border: 0; padding: 0; border-radius: 5px; width: min(440px, calc(100vw - 32px)); max-width: none; color: var(--work-dark); background: #fff; box-shadow: 0 24px 60px rgba(14, 35, 56, .35); }
+.work-confirm::backdrop { background: rgba(14, 35, 56, .55); }
+.work-confirm-panel { padding: 26px 28px 22px; border-top: 3px solid #d49a45; border-radius: 5px; }
+.work-confirm h2 { margin: 0 0 10px; font: 700 21px/1.3 var(--font-display, sans-serif); letter-spacing: -.02em; }
+.work-confirm p { margin: 0; font-size: 14px; line-height: 1.65; color: #4d6173; overflow-wrap: anywhere; }
+.work-confirm-item { display: block; margin-bottom: 4px; color: var(--work-dark); font-weight: 600; }
+.work-confirm-item[hidden] { display: none; }
+.work-confirm-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.work-confirm-actions button { min-height: 44px; justify-content: center; }
+.work-confirm-ok { min-width: 110px; }
+@media (max-width: 480px) {
+    .work-confirm-panel { padding: 22px 20px 18px; }
+    .work-confirm-actions { flex-direction: column-reverse; }
+    .work-confirm-actions button { width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .work-confirm[open] { animation: work-confirm-in var(--motion-panel) var(--ease-out); }
+    .work-confirm[open]::backdrop { animation: work-confirm-fade var(--motion-ui) ease-out; }
+    @keyframes work-confirm-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    @keyframes work-confirm-fade { from { opacity: 0; } to { opacity: 1; } }
+}

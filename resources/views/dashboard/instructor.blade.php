@@ -28,7 +28,6 @@
                 <section class="work-feature" aria-labelledby="work-start-title">
                     <div class="work-feature-top">
                         <span class="work-feature-label">YOUR WORKSPACE</span>
-                        <span class="work-feature-index">01 / 02</span>
                     </div>
                     <div class="work-feature-body">
                         <p class="work-feature-category">Course management</p>
@@ -55,17 +54,6 @@
                     </ol>
                 </aside>
             </div>
-
-            <section class="work-next" aria-labelledby="work-next-title">
-                <div>
-                    <p class="work-eyebrow">SHORTCUTS</p>
-                    <h2 id="work-next-title">Continue your work</h2>
-                </div>
-                <div class="work-next-links">
-                    <a href="{{ route('courses.index') }}"><span>Browse courses and their resources</span><span aria-hidden="true">↗</span></a>
-                    <a href="{{ route('courses.create') }}"><span>Create a new course</span><span aria-hidden="true">↗</span></a>
-                </div>
-            </section>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

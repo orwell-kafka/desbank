@@ -61,7 +61,7 @@
                                             <div class="work-row-actions">
                                                 <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="work-row-link work-row-link-main">Questions <span aria-hidden="true">↗</span></a>
                                                 <a href="{{ route('courses.topics.edit', [$course, $topic]) }}" class="work-row-link">Edit</a>
-                                                <form method="POST" action="{{ route('courses.topics.destroy', [$course, $topic]) }}" onsubmit="return confirm('Delete this topic?');">
+                                                <form method="POST" action="{{ route('courses.topics.destroy', [$course, $topic]) }}" data-confirm="Delete this topic?" data-confirm-item="{{ $topic->topicName }}" data-confirm-label="Delete topic">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="work-row-link work-row-delete">Delete</button>

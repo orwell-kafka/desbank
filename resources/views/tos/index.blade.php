@@ -72,7 +72,7 @@
                                                 </form>
                                                 <a href="{{ route('courses.tos.show', [$course, $tos]) }}" class="work-row-link work-row-link-main">View <span aria-hidden="true">↗</span></a>
                                                 <a href="{{ route('courses.tos.edit', [$course, $tos]) }}" class="work-row-link">Edit</a>
-                                                <form method="POST" action="{{ route('courses.tos.destroy', [$course, $tos]) }}" onsubmit="return confirm('Delete this ToS?');">
+                                                <form method="POST" action="{{ route('courses.tos.destroy', [$course, $tos]) }}" data-confirm="Delete this ToS?" data-confirm-item="{{ $tos->title }}" data-confirm-label="Delete ToS">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="work-row-link work-row-delete">Delete</button>

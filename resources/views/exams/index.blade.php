@@ -66,7 +66,7 @@
                                             <div class="work-row-actions">
                                                 <a href="{{ route('courses.exams.show', [$course, $exam]) }}" class="work-row-link work-row-link-main">View <span aria-hidden="true">↗</span></a>
                                                 <a href="{{ route('courses.exams.answerkey', [$course, $exam]) }}" class="work-row-link">Answer key</a>
-                                                <form method="POST" action="{{ route('courses.exams.destroy', [$course, $exam]) }}" onsubmit="return confirm('Delete this exam?');">
+                                                <form method="POST" action="{{ route('courses.exams.destroy', [$course, $exam]) }}" data-confirm="Delete this exam?" data-confirm-item="{{ $exam->tosTitle }} · {{ $exam->created }}" data-confirm-label="Delete exam">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="work-row-link work-row-delete">Delete</button>

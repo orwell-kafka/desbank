@@ -56,7 +56,7 @@
                                                     @csrf
                                                     <button type="submit" class="work-row-btn work-row-btn-ok" data-pending-label="Approving…">Approve</button>
                                                 </form>
-                                                <form method="POST" action="{{ route('admin.accounts.reject', $account) }}" onsubmit="return confirm('Reject this account?');" data-pending>
+                                                <form method="POST" action="{{ route('admin.accounts.reject', $account) }}" data-confirm="Reject this account?" data-confirm-item="{{ $account->name }}" data-confirm-note="They will not be able to sign in." data-confirm-label="Reject account" data-pending>
                                                     @csrf
                                                     <button type="submit" class="work-row-btn work-row-btn-bad" data-pending-label="Rejecting…">Reject</button>
                                                 </form>

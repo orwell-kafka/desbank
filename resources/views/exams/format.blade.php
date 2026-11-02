@@ -29,7 +29,7 @@
         .hint { font-size: 11px; color: #9ca3af; margin-top: 2px; }
 
         .preview-wrapper { flex: 1; display: flex; justify-content: center; background: #d1d5db; padding: 20px; border-radius: 8px; }
-        .paper { background: #fff; padding: 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; width: 8.5in; min-height: 11in; overflow: hidden; }
+        .paper { background: #fff; padding: var(--header-top, 50px) 50px 50px; box-sizing: border-box; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; width: 8.5in; min-height: 11in; overflow: hidden; }
         .paper.legal { width: 8.5in; min-height: 14in; }
 
         .watermark-text { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 60px; color: rgba(0,0,0,0.06); font-weight: bold; white-space: nowrap; pointer-events: none; z-index: 0; }
@@ -78,14 +78,52 @@
 
         .footer-minimal { text-align: center; font-size: 10px; color: #9ca3af; margin-top: 25px; }
 
+        /* ---- MarSU letterhead: replicates the Word header/footer. All measurements are in inches
+           taken from the .docx (header group 7.829in x 1.0355in; footer group 7.84in x 0.7826in). ---- */
+        .paper.has-marsu-header { padding-top: calc(var(--header-top, 30px) + 1.0355in + 0.25in); }
+        .paper.has-marsu-footer { padding-bottom: 1.45in; }
+
+        .paper > .marsu-header { position: absolute; left: 0.3355in; top: var(--header-top, 30px); width: 7.829in; height: 1.0355in; z-index: 1; }
+        .marsu-header > * { position: absolute; display: block; margin: 0; }
+        .marsu-header .mh-logo-l { left: 0.734in; top: 0.011in; width: 0.831in; height: 0.909in; }
+        .marsu-header .mh-logo-r { left: 6.340in; top: 0.053in; width: 0.838in; height: 0.835in; }
+        .marsu-header .mh-rule { left: 0; top: 0.902in; width: 7.829in; height: 0.133in; }
+        .marsu-header .mh-text { left: 1.085in; top: 0; width: 5.217in; height: 0.988in; padding: 0.05in 0.1in; box-sizing: border-box; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; color: #000; }
+        .marsu-header .mh-text p { margin: 0 -0.474in 0 0; text-align: center; line-height: normal; }
+        .marsu-title { text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0 0 14px; }
+
+        .paper > .marsu-footer { position: absolute; left: 0.339in; bottom: 0.317in; width: 7.84in; height: 0.7826in; z-index: 1; }
+        .marsu-footer > * { position: absolute; display: block; margin: 0; }
+        .marsu-footer .mf-rule { left: 0; top: -0.0347in; width: 7.84in; height: 0.0694in; }
+        .marsu-footer .mf-iso { left: 1.0315in; top: 0.224in; width: 1.021in; height: 0.373in; }
+        .marsu-footer .mf-seal { left: 0.1915in; top: 0.043in; width: 0.676in; height: 0.74in; }
+        .marsu-footer .mf-text { left: 2.1485in; top: 0.16in; width: 5.364in; padding: 0.05in 0.1in; box-sizing: border-box; font-family: 'Calibri Light', 'Calibri', 'Carlito', 'Segoe UI', Arial, sans-serif; font-size: 7pt; color: #000; }
+        .marsu-footer .mf-text p { margin: 0; line-height: normal; }
+
+        /* ---- Print layout ----
+           @page margin 0 stops the browser printing its own date/title/URL/page-number text.
+           The page margins are rebuilt with a table: the empty <thead>/<tfoot> rows repeat on every
+           printed page, so every page keeps a top and bottom margin. The MarSU header and footer are
+           positioned on the first page only. ---- */
+        .sheet { width: 100%; border-collapse: collapse; border-spacing: 0; }
+        .sheet > thead > tr > td, .sheet > tbody > tr > td, .sheet > tfoot > tr > td { padding: 0; vertical-align: top; }
+        .sheet-top, .sheet-bottom, .first-page-gap { height: 0; }
+
         @media print {
             body { background: #fff; padding: 0; }
+            .paper, .paper.has-marsu-header, .paper.has-marsu-footer { padding: 0 50px; overflow: visible; }   /* overflow:hidden would clip the last page's footer */
+            .sheet-top, .sheet-bottom { height: 0.5in; }
+            .paper.has-marsu-footer .sheet-bottom { height: 1.3in; }
+            .first-page-gap { height: max(0px, calc(var(--header-top, 50px) - 0.5in)); }
+            .paper.has-marsu-header .first-page-gap { height: max(0px, calc(var(--header-top, 30px) + 1.0355in + 0.25in - 0.5in)); }
+            .paper > .marsu-footer { top: calc(var(--page-h, 11in) - 1.0996in); bottom: auto; }
             .settings, .back-link { display: none; }
             .layout { display: block; }
             .preview-wrapper { background: none; padding: 0; }
             .paper { box-shadow: none; margin: 0; }
         }
     </style>
+    <style>@page { size: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '8.5in 14in' : '8.5in 11in' }}; margin: 0; }</style>
 </head>
 <body>
     @php
@@ -99,6 +137,16 @@
         'paged' => 'images/exam-templates/footer-paged.svg',
         'minimal' => 'images/exam-templates/footer-minimal.svg',
     ];
+
+    // MarSU letterhead: built-in wording copied from the Word template; editable per exam.
+    $marsuHeaderDefault = "Marinduque State University\nCollege of Engineering\nBachelor of Science in Computer Engineering\nPanfilo M. Manguera Sr. Rd., Tanza, Boac, Marinduque";
+    $marsuFooterDefault = "Vision: By 2030, MarSU is a globally recognized university, fostering academic excellence through research and innovation.\nMission: MarSU provides excellence in instruction, research, extension and production, responsive to the needs of the 21st century education in pursuit of global transformation.";
+    $splitLines = fn ($text) => array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text)), fn ($l) => $l !== ''));
+    $headerLines = $splitLines(old('headerLines', $exam->headerLines) ?: $marsuHeaderDefault);
+    $footerLines = $splitLines(old('footerLines', $exam->footerLines) ?: $marsuFooterDefault);
+    $headerTpl = $exam->headerTemplate ?? 'classic';
+    $footerTpl = $exam->footerTemplate ?? 'simple';
+    $headerTop = (int) ($exam->headerTop ?? 50);
 @endphp
 
     <div class="layout">
@@ -169,8 +217,17 @@
                     <option value="classic" {{ old('headerTemplate', $exam->headerTemplate) == 'classic' ? 'selected' : '' }}>Classic (double border, centered)</option>
                     <option value="formal" {{ old('headerTemplate', $exam->headerTemplate) == 'formal' ? 'selected' : '' }}>Formal (boxed border)</option>
                     <option value="minimal" {{ old('headerTemplate', $exam->headerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (left-aligned)</option>
+                    <option value="marsu" {{ old('headerTemplate', $exam->headerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU letterhead (logos, 4 lines, orange rule)</option>
                 </select>
                 <div class="hint">Pre-designed layout — school name/department text only, no custom logo.</div>
+
+                <label for="headerTop">Header distance from top (px)</label>
+                <input type="number" id="headerTop" name="headerTop" min="0" max="200" value="{{ old('headerTop', $headerTop) }}">
+                <div class="hint">Moves the whole header down from the top edge of the paper. The MarSU letterhead matches the Word file at 30.</div>
+
+                <label for="headerLines">Letterhead lines (MarSU)</label>
+                <textarea id="headerLines" name="headerLines" rows="5" maxlength="600" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('headerLines', $exam->headerLines ?: $marsuHeaderDefault) }}</textarea>
+                <div class="hint">One line per row, centered between the two logos.</div>
 
                 <h3>Footer Text</h3>
                 <input type="text" name="footerText" value="{{ old('footerText', $exam->footerText) }}">
@@ -180,7 +237,12 @@
                     <option value="simple" {{ old('footerTemplate', $exam->footerTemplate) == 'simple' ? 'selected' : '' }}>Simple (centered, thin line)</option>
                     <option value="paged" {{ old('footerTemplate', $exam->footerTemplate) == 'paged' ? 'selected' : '' }}>Paged (left/right split, bold line)</option>
                     <option value="minimal" {{ old('footerTemplate', $exam->footerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (small, no line)</option>
+                    <option value="marsu" {{ old('footerTemplate', $exam->footerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU footer (orange rule, logos, vision/mission)</option>
                 </select>
+
+                <label for="footerLines">Footer lines (MarSU)</label>
+                <textarea id="footerLines" name="footerLines" rows="6" maxlength="900" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('footerLines', $exam->footerLines ?: $marsuFooterDefault) }}</textarea>
+                <div class="hint">One paragraph per row. A leading label such as &ldquo;Vision:&rdquo; is printed in bold.</div>
 
                 <h3>Watermark Text</h3>
                 <input type="text" name="watermarkText" value="{{ old('watermarkText', $exam->watermarkText) }}">
@@ -282,20 +344,42 @@
         </div>
 
         <div class="preview-wrapper">
-            <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }}">
+            <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }} {{ $headerTpl === 'marsu' ? 'has-marsu-header' : '' }} {{ $footerTpl === 'marsu' ? 'has-marsu-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --page-h: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '14in' : '11in' }};">
                 @if ($exam->watermarkImagePath)
                     <img src="{{ asset('storage/' . $exam->watermarkImagePath) }}" class="watermark-img">
                 @elseif ($exam->watermarkText)
                     <div class="watermark-text">{{ $exam->watermarkText }}</div>
                 @endif
 
-                @php $headerClass = 'header-' . ($exam->headerTemplate ?? 'classic'); @endphp
-                <div class="{{ $headerClass }}">
-                    <img src="{{ asset($headerImageMap[$exam->headerTemplate ?? 'classic']) }}">
-                    <div class="school">{{ $exam->schoolName ?? 'School Name' }}</div>
-                    <div class="dept">{{ $exam->department ?? 'Department' }}</div>
-                    <div class="title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
-                </div>
+                @if ($headerTpl === 'marsu')
+                    <div class="marsu-header">
+                        <img class="mh-logo-r" src="{{ asset('images/exam-templates/marsu/college-logo.png') }}" alt="">
+                        <div class="mh-text">
+                            @foreach ($headerLines as $line)
+                                <p>{{ $line }}</p>
+                            @endforeach
+                        </div>
+                        <img class="mh-rule" src="{{ asset('images/exam-templates/marsu/rule.png') }}" alt="">
+                        <img class="mh-logo-l" src="{{ asset('images/exam-templates/marsu/seal.jpg') }}" alt="">
+                    </div>
+                @endif
+
+                <table class="sheet" role="presentation">
+                    <thead><tr><td><div class="sheet-top"></div></td></tr></thead>
+                    <tfoot><tr><td><div class="sheet-bottom"></div></td></tr></tfoot>
+                    <tbody><tr><td>
+                <div class="first-page-gap"></div>
+                @if ($headerTpl === 'marsu')
+                    <div class="marsu-title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
+                @else
+                    @php $headerClass = 'header-' . ($exam->headerTemplate ?? 'classic'); @endphp
+                    <div class="{{ $headerClass }}">
+                        <img src="{{ asset($headerImageMap[$exam->headerTemplate ?? 'classic']) }}">
+                        <div class="school">{{ $exam->schoolName ?? 'School Name' }}</div>
+                        <div class="dept">{{ $exam->department ?? 'Department' }}</div>
+                        <div class="title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
+                    </div>
+                @endif
 
                 <div class="info-row">
                     <span>Name:</span>
@@ -359,7 +443,7 @@
                     @php $partNum++; @endphp
                 @endforeach
 
-                @if ($exam->footerText)
+                @if ($footerTpl !== 'marsu' && $exam->footerText)
                     @php $footerClass = 'footer-' . ($exam->footerTemplate ?? 'simple'); @endphp
                     <img src="{{ asset($footerImageMap[$exam->footerTemplate ?? 'simple']) }}" style="width:100%; display:block; margin-top:30px;">
                     @if ($exam->footerTemplate == 'paged')
@@ -371,8 +455,37 @@
                         <div class="{{ $footerClass }}" style="margin-top:4px; border-top:none;">{{ $exam->footerText }}</div>
                     @endif
                 @endif
+                    </td></tr></tbody>
+                </table>
+
+                @if ($footerTpl === 'marsu')
+                    <div class="marsu-footer">
+                        <svg class="mf-rule" viewBox="0 0 752.64 6.667" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="752.64" height="4" fill="#F79646"/><rect x="0" y="5.333" width="752.64" height="1.334" fill="#F79646"/></svg>
+                        <img class="mf-iso" src="{{ asset('images/exam-templates/marsu/iso-badge.jpg') }}" alt="">
+                        <img class="mf-seal" src="{{ asset('images/exam-templates/marsu/seal.jpg') }}" alt="">
+                        <div class="mf-text">
+                            @foreach ($footerLines as $line)
+                                @php $hasLabel = preg_match('/^([^:]{1,24}:)\s*(.*)$/u', $line, $m); @endphp
+                                <p>@if ($hasLabel)<strong>{{ $m[1] }}</strong> {{ $m[2] }}@else{{ $line }}@endif</p>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
+
+    <script>
+        // Choosing the MarSU header moves it to the exact distance used in the Word file (30 px),
+        // unless the distance was already changed from the default.
+        (function () {
+            var tpl = document.querySelector('select[name="headerTemplate"]');
+            var top = document.getElementById('headerTop');
+            if (!tpl || !top) return;
+            tpl.addEventListener('change', function () {
+                if (tpl.value === 'marsu' && top.value === '50') top.value = '30';
+            });
+        })();
+    </script>
 </body>
 </html>
