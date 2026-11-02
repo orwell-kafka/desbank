@@ -92,8 +92,8 @@
 
         /* ---- MarSU letterhead: replicates the Word header/footer. All measurements are in inches
            taken from the .docx (header group 7.829in x 1.0355in; footer group 7.84in x 0.7826in). ---- */
-        .paper.has-marsu-header { padding-top: calc(var(--header-top, 30px) + 1.0355in + 0.25in); }
-        .paper.has-marsu-footer { padding-bottom: 1.45in; }
+        .paper.has-marsu-header { padding-top: calc(var(--header-top, 30px) + var(--hdr-h, 1.0355in) + 0.25in); }
+        .paper.has-marsu-footer { padding-bottom: var(--ftr-pad, 1.45in); }
 
         .paper > .marsu-header { position: absolute; left: 0.3355in; top: var(--header-top, 30px); width: 7.829in; height: 1.0355in; z-index: 1; }
         .marsu-header > * { position: absolute; display: block; margin: 0; }
@@ -102,6 +102,28 @@
         .marsu-header .mh-rule { left: 0; top: 0.902in; width: 7.829in; height: 0.133in; }
         .marsu-header .mh-text { left: 1.085in; top: 0; width: 5.217in; height: 0.988in; padding: 0.05in 0.1in; box-sizing: border-box; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; color: #000; }
         .marsu-header .mh-text p { margin: 0 -0.474in 0 0; text-align: center; line-height: normal; }
+        /* ---- College of Engineering letterhead (from TOS_Management_Finals.docx). Coordinates are inches
+           measured from the left edge of the page and from the top of the header group / footer group. ---- */
+        .paper > .coe-header { position: absolute; left: 0; top: var(--header-top, 12px); width: 8.5in; height: 1.15in; z-index: 1; font-family: Cambria, Caladea, 'Cambria Math', 'Times New Roman', serif; color: #000; }
+        .coe-header > * { position: absolute; display: block; margin: 0; }
+        .coe-header .ch-logo { left: 0.729in; top: 0.1028in; width: 0.885in; height: 0.885in; }
+        .coe-header .ch-vline { left: 1.6458in; top: 0.03125in; width: 0; height: 1.0938in; border-left: 1pt solid #F79646; }
+        .coe-header .ch-top { left: 1.6458in; top: 0; width: 5.552in; padding: 0.05in 0.1in 0; box-sizing: border-box; font-size: 10pt; line-height: 1.15; }
+        .coe-header .ch-text { left: 1.6458in; top: 0.198in; width: 6.222in; padding: 0.05in 0.1in 0; box-sizing: border-box; font-size: 7pt; line-height: 1.15; }
+        .coe-header .ch-text p, .coe-header .ch-top p { margin: 0; }
+        .coe-header .ch-text p:first-child { font-size: 18pt; font-weight: bold; line-height: 1.15; }
+        .coe-header .ch-text p:nth-child(2) { font-weight: bold; }
+        .coe-header .ch-link { color: #0000FF; text-decoration: underline; }
+        .coe-header .ch-bar { left: 0.75in; top: 1.0625in; width: 7.198in; height: 0.083in; background: #F79646; }
+        .paper > .coe-footer { position: absolute; left: 0; bottom: 0; width: 8.5in; height: 0.95in; z-index: 1; font-family: 'Cambria Math', Cambria, Caladea, 'Times New Roman', serif; color: #000; }
+        .coe-footer > * { position: absolute; display: block; margin: 0; }
+        .coe-footer .cf-rule { left: 0.646in; top: 0.0757in; width: 7.24in; height: 0.0694in; border-top: 3pt solid #F79646; border-bottom: 1pt solid #F79646; box-sizing: border-box; }
+        .coe-footer .cf-seal { left: 0.611in; top: 0.185in; width: 0.559in; height: 0.548in; }
+        .coe-footer .cf-iso { left: 1.143in; top: 0.262in; width: 1.021in; height: 0.373in; }
+        .coe-footer .cf-text { left: 2.26in; top: 0.107in; width: 5.708in; padding: 0.05in 0.1in 0; box-sizing: border-box; font-size: 8pt; line-height: 1.15; }
+        .coe-footer .cf-text p { margin: 0; text-align: justify; }
+        .coe-footer .cf-text p.cf-tagline { text-align: center; font-weight: bold; font-size: 9pt; }
+        .paper.has-coe-footer { --ftr-pad: 1.2in; }
         .marsu-title { text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0 0 14px; }
 
         .paper > .marsu-footer { position: absolute; left: 0.339in; bottom: 0.317in; width: 7.84in; height: 0.7826in; z-index: 1; }
@@ -131,9 +153,11 @@
             .paper > .watermark-text, .paper > .watermark-img { position: fixed; }
             .sheet-top, .sheet-bottom { height: 0.5in; }
             .paper.has-marsu-footer .sheet-bottom { height: 1.3in; }
+            .paper.has-coe-footer .sheet-bottom { height: 1.05in; }
             .first-page-gap { height: max(0px, calc(var(--header-top, 50px) - 0.5in)); }
-            .paper.has-marsu-header .first-page-gap { height: max(0px, calc(var(--header-top, 30px) + 1.0355in + 0.25in - 0.5in)); }
+            .paper.has-marsu-header .first-page-gap { height: max(0px, calc(var(--header-top, 30px) + var(--hdr-h, 1.0355in) + 0.25in - 0.5in)); }
             .paper > .marsu-footer { top: calc(var(--page-h, 11in) - 1.0996in); bottom: auto; }
+            .paper > .coe-footer { top: calc(var(--page-h, 11in) - 0.95in); bottom: auto; }
             .settings, .back-link { display: none; }
             .layout { display: block; }
             .preview-wrapper { background: none; padding: 0; }
@@ -159,10 +183,24 @@
     $marsuHeaderDefault = "Marinduque State University\nCollege of Engineering\nBachelor of Science in Computer Engineering\nPanfilo M. Manguera Sr. Rd., Tanza, Boac, Marinduque";
     $marsuFooterDefault = "Vision: By 2030, MarSU is a globally recognized university, fostering academic excellence through research and innovation.\nMission: MarSU provides excellence in instruction, research, extension and production, responsive to the needs of the 21st century education in pursuit of global transformation.";
     $splitLines = fn ($text) => array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text)), fn ($l) => $l !== ''));
-    $headerLines = $splitLines(old('headerLines', $exam->headerLines) ?: $marsuHeaderDefault);
-    $footerLines = $splitLines(old('footerLines', $exam->footerLines) ?: $marsuFooterDefault);
+    // College of Engineering letterhead: wording copied from the Word file (TOS_Management_Finals.docx).
+    // Line 1 sits above the college name; line 2 is the big bold college name; line 3 is bold; the rest are regular.
+    $coeHeaderDefault = "Marinduque State University\nCollege of Engineering\nMain Campus Boac/Branches: Sta. Cruz· Torrijos· Gasan\nPanfilo M. Manguera Sr. Rd., Tanza, Boac, Marinduque 4900\nTel.No. (042) 754-0178 Email Address: ceng@marsu.edu.ph\nWebsite: www.mscmarinduque.edu.ph";
+    $coeFooterDefault = $marsuFooterDefault . "\nEmpowering minds, transforming lives, and advancing opportunities with a HEART!";
     $headerTpl = $exam->headerTemplate ?? 'classic';
     $footerTpl = $exam->footerTemplate ?? 'simple';
+    $headerDefault = $headerTpl === 'coe' ? $coeHeaderDefault : $marsuHeaderDefault;
+    $footerDefault = $footerTpl === 'coe' ? $coeFooterDefault : $marsuFooterDefault;
+    $headerLines = $splitLines(old('headerLines', $exam->headerLines) ?: $headerDefault);
+    $footerLines = $splitLines(old('footerLines', $exam->footerLines) ?: $footerDefault);
+    $letterheadDefaults = [
+        'header' => ['marsu' => $marsuHeaderDefault, 'coe' => $coeHeaderDefault],
+        'footer' => ['marsu' => $marsuFooterDefault, 'coe' => $coeFooterDefault],
+    ];
+    $isLetterheadHdr = in_array($headerTpl, ['marsu', 'coe'], true);
+    $isLetterheadFtr = in_array($footerTpl, ['marsu', 'coe'], true);
+    // Turns e-mail addresses and www. addresses in a header line into blue underlined text, like the Word file.
+    $coeLink = fn ($line) => preg_replace('/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|www\.[A-Za-z0-9.-]+\.[A-Za-z]{2,})/', '<span class="ch-link">$1</span>', e($line));
     $headerTop = (int) ($exam->headerTop ?? 50);
 
     // printMode = the page Chrome turns into the PDF (no settings panel, images embedded).
@@ -241,16 +279,17 @@
                     <option value="formal" {{ old('headerTemplate', $exam->headerTemplate) == 'formal' ? 'selected' : '' }}>Formal (boxed border)</option>
                     <option value="minimal" {{ old('headerTemplate', $exam->headerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (left-aligned)</option>
                     <option value="marsu" {{ old('headerTemplate', $exam->headerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU letterhead (logos, 4 lines, orange rule)</option>
+                    <option value="coe" {{ old('headerTemplate', $exam->headerTemplate) == 'coe' ? 'selected' : '' }}>College of Engineering letterhead (logo, 6 lines, orange bar)</option>
                 </select>
                 <div class="hint">Pre-designed layout — school name/department text only, no custom logo.</div>
 
                 <label for="headerTop">Header distance from top (px)</label>
                 <input type="number" id="headerTop" name="headerTop" min="0" max="200" value="{{ old('headerTop', $headerTop) }}">
-                <div class="hint">Moves the whole header down from the top edge of the paper. The MarSU letterhead matches the Word file at 30.</div>
+                <div class="hint">Moves the whole header down from the top edge of the paper. The MarSU letterhead matches the Word file at 30; the College of Engineering letterhead at 12.</div>
 
-                <label for="headerLines">Letterhead lines (MarSU)</label>
-                <textarea id="headerLines" name="headerLines" rows="5" maxlength="600" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('headerLines', $exam->headerLines ?: $marsuHeaderDefault) }}</textarea>
-                <div class="hint">One line per row, centered between the two logos.</div>
+                <label for="headerLines">Letterhead lines (MarSU / College of Engineering)</label>
+                <textarea id="headerLines" name="headerLines" rows="6" maxlength="600" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('headerLines', $exam->headerLines ?: $headerDefault) }}</textarea>
+                <div class="hint">One line per row. MarSU: centered between the two logos. College of Engineering: line 2 is the big college name, line 3 is bold.</div>
 
                 <h3>Footer Text</h3>
                 <input type="text" name="footerText" value="{{ old('footerText', $exam->footerText) }}">
@@ -261,11 +300,12 @@
                     <option value="paged" {{ old('footerTemplate', $exam->footerTemplate) == 'paged' ? 'selected' : '' }}>Paged (left/right split, bold line)</option>
                     <option value="minimal" {{ old('footerTemplate', $exam->footerTemplate) == 'minimal' ? 'selected' : '' }}>Minimal (small, no line)</option>
                     <option value="marsu" {{ old('footerTemplate', $exam->footerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU footer (orange rule, logos, vision/mission)</option>
+                    <option value="coe" {{ old('footerTemplate', $exam->footerTemplate) == 'coe' ? 'selected' : '' }}>College of Engineering footer (quality award, ISO badge, vision/mission, tagline)</option>
                 </select>
 
-                <label for="footerLines">Footer lines (MarSU)</label>
-                <textarea id="footerLines" name="footerLines" rows="6" maxlength="900" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('footerLines', $exam->footerLines ?: $marsuFooterDefault) }}</textarea>
-                <div class="hint">One paragraph per row. A leading label such as &ldquo;Vision:&rdquo; is printed in bold.</div>
+                <label for="footerLines">Footer lines (MarSU / College of Engineering)</label>
+                <textarea id="footerLines" name="footerLines" rows="7" maxlength="900" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('footerLines', $exam->footerLines ?: $footerDefault) }}</textarea>
+                <div class="hint">One paragraph per row. A leading label such as &ldquo;Vision:&rdquo; is printed in bold. On the College of Engineering footer, a row without a label is printed as the centered bold tagline.</div>
 
                 <h3>Watermark Text</h3>
                 <input type="text" name="watermarkText" value="{{ old('watermarkText', $exam->watermarkText) }}">
@@ -385,13 +425,30 @@
                     });
                 </script>
             @else
-            <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }} {{ $headerTpl === 'marsu' ? 'has-marsu-header' : '' }} {{ $footerTpl === 'marsu' ? 'has-marsu-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --page-h: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '14in' : '11in' }};">
+            <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }} {{ $isLetterheadHdr ? 'has-marsu-header' : '' }} {{ $isLetterheadFtr ? 'has-marsu-footer' : '' }} {{ $footerTpl === 'coe' ? 'has-coe-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --hdr-h: {{ $headerTpl === 'coe' ? '1.15in' : '1.0355in' }}; --page-h: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '14in' : '11in' }};">
                 @if ($exam->watermarkImagePath)
                     <img src="{{ $src('storage/' . $exam->watermarkImagePath) }}" class="watermark-img">
                 @elseif ($exam->watermarkText)
                     <div class="watermark-text">{{ $exam->watermarkText }}</div>
                 @endif
 
+                @if ($headerTpl === 'coe')
+                    <div class="coe-header">
+                        <img class="ch-logo" src="{{ $src('images/exam-templates/marsu/coe-logo.png') }}" alt="">
+                        <div class="ch-vline"></div>
+                        <div class="ch-top">
+                            @foreach (array_slice($headerLines, 0, 1) as $line)
+                                <p>{!! $coeLink($line) !!}</p>
+                            @endforeach
+                        </div>
+                        <div class="ch-text">
+                            @foreach (array_slice($headerLines, 1) as $line)
+                                <p>{!! $coeLink($line) !!}</p>
+                            @endforeach
+                        </div>
+                        <div class="ch-bar"></div>
+                    </div>
+                @endif
                 @if ($headerTpl === 'marsu')
                     <div class="marsu-header">
                         <img class="mh-logo-r" src="{{ $src('images/exam-templates/marsu/college-logo.png') }}" alt="">
@@ -410,7 +467,7 @@
                     <tfoot><tr><td><div class="sheet-bottom"></div></td></tr></tfoot>
                     <tbody><tr><td>
                 <div class="first-page-gap"></div>
-                @if ($headerTpl === 'marsu')
+                @if ($isLetterheadHdr)
                     <div class="marsu-title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
                 @else
                     @php $headerClass = 'header-' . ($exam->headerTemplate ?? 'classic'); @endphp
@@ -484,7 +541,7 @@
                     @php $partNum++; @endphp
                 @endforeach
 
-                @if ($footerTpl !== 'marsu' && $exam->footerText)
+                @if (! $isLetterheadFtr && $exam->footerText)
                     @php $footerClass = 'footer-' . ($exam->footerTemplate ?? 'simple'); @endphp
                     <img src="{{ $src($footerImageMap[$exam->footerTemplate ?? 'simple']) }}" style="width:100%; display:block; margin-top:30px;">
                     @if ($exam->footerTemplate == 'paged')
@@ -499,6 +556,23 @@
                     </td></tr></tbody>
                 </table>
 
+                @if ($footerTpl === 'coe')
+                    <div class="coe-footer">
+                        <div class="cf-rule"></div>
+                        <img class="cf-seal" src="{{ $src('images/exam-templates/marsu/coe-pqa.jpg') }}" alt="">
+                        <img class="cf-iso" src="{{ $src('images/exam-templates/marsu/coe-iso.jpg') }}" alt="">
+                        <div class="cf-text">
+                            @foreach ($footerLines as $line)
+                                @php $hasLabel = preg_match('/^([^:]{1,24}:)\s*(.*)$/u', $line, $m); @endphp
+                                @if ($hasLabel)
+                                    <p><strong>{{ $m[1] }}</strong> {{ $m[2] }}</p>
+                                @else
+                                    <p class="cf-tagline">{{ $line }}</p>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 @if ($footerTpl === 'marsu')
                     <div class="marsu-footer">
                         <svg class="mf-rule" viewBox="0 0 752.64 6.667" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="752.64" height="4" fill="#F79646"/><rect x="0" y="5.333" width="752.64" height="1.334" fill="#F79646"/></svg>
@@ -519,15 +593,30 @@
 
     @unless ($printMode)
     <script>
-        // Choosing the MarSU header moves it to the exact distance used in the Word file (30 px),
-        // unless the distance was already changed from the default.
+        // Choosing a letterhead moves it to the distance used in its Word file (MarSU 30 px, College of
+        // Engineering 12 px) unless the distance was already changed by hand, and swaps the built-in wording
+        // in the line boxes (only when they still hold built-in wording, never when they were edited).
         (function () {
-            var tpl = document.querySelector('select[name="headerTemplate"]');
+            var hdr = document.querySelector('select[name="headerTemplate"]');
+            var ftr = document.querySelector('select[name="footerTemplate"]');
             var top = document.getElementById('headerTop');
-            if (!tpl || !top) return;
-            tpl.addEventListener('change', function () {
-                if (tpl.value === 'marsu' && top.value === '50') top.value = '30';
+            var hLines = document.getElementById('headerLines');
+            var fLines = document.getElementById('footerLines');
+            var defaults = @json($letterheadDefaults);
+            var norm = function (t) { return (t || '').replace(/\r/g, '').trim(); };
+            var swap = function (box, set, key) {
+                if (!box || !set[key]) return;
+                var cur = norm(box.value);
+                if (cur === '' || cur === norm(set.marsu) || cur === norm(set.coe)) box.value = set[key];
+            };
+            if (hdr) hdr.addEventListener('change', function () {
+                if (top && (top.value === '50' || top.value === '30' || top.value === '12')) {
+                    if (hdr.value === 'marsu') top.value = '30';
+                    if (hdr.value === 'coe') top.value = '12';
+                }
+                swap(hLines, defaults.header, hdr.value);
             });
+            if (ftr) ftr.addEventListener('change', function () { swap(fLines, defaults.footer, ftr.value); });
         })();
     </script>
     @endunless
