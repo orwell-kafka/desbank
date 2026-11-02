@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/courses/{course}/tos/{tos}/generate', [ExamController::class, 'generate'])->name('courses.tos.generate');
     Route::get('/courses/{course}/exams/{exam}', [ExamController::class, 'show'])->name('courses.exams.show');
     Route::get('/courses/{course}/exams/{exam}/format', [ExamController::class, 'editFormat'])->name('courses.exams.format');
+    Route::get('/courses/{course}/exams/{exam}/format/pdf', [ExamController::class, 'formatPdf'])->name('courses.exams.format.pdf');
     Route::get('/courses/{course}/exams/{exam}/answer-key', [ExamController::class, 'answerKey'])->name('courses.exams.answerkey');
     Route::post('/courses/{course}/exams/{exam}/format', [ExamController::class, 'updateFormat'])->name('courses.exams.format.update');
     Route::get('/courses/{course}/exams/{exam}/questions/{question}/replace', [ExamController::class, 'replaceOptions'])->name('courses.exams.replace.options');

@@ -6,8 +6,10 @@ use App\Models\Course;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Tos;
+use App\Services\ExamPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ExamController extends Controller
 {
@@ -110,6 +112,47 @@ class ExamController extends Controller
         $this->authorizeOwner($course);
         $this->authorizeExamBelongsToCourse($course, $exam);
 
+        $printMode = false;
+        $pdfAvailable = ExamPdf::available();
+
+        return view('exams.format', $this->formatViewData($exam) + compact('course', 'exam', 'printMode', 'pdfAvailable'));
+    }
+
+    /** The exam exactly as it prints, as a PDF (shown in the preview; ?download=1 saves it). */
+    public function formatPdf(Request $request, Course $course, Exam $exam)
+    {
+        $this->authorizeOwner($course);
+        $this->authorizeExamBelongsToCourse($course, $exam);
+
+        if (! ExamPdf::available()) {
+            return response('PDF engine not available. Install Google Chrome or Microsoft Edge, or set CHROME_PATH in .env.', 503);
+        }
+
+        $printMode = true;
+        $pdfAvailable = false;
+        $data = $this->formatViewData($exam);
+        $html = view('exams.format', $data + compact('course', 'exam', 'printMode', 'pdfAvailable'))->render();
+
+        try {
+            $pdf = ExamPdf::fromHtml($html);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response('Could not build the PDF preview: '.$e->getMessage(), 500);
+        }
+
+        $name = Str::slug(($data['tos']->title ?? 'exam').'-exam-'.$exam->examId).'.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => ($request->boolean('download') ? 'attachment' : 'inline').'; filename="'.$name.'"',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    /** Data the exam paper needs, shared by the on-screen page and the PDF. */
+    private function formatViewData(Exam $exam): array
+    {
         $tos = Tos::find($exam->tosId);
 
         $defaultOrder = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
@@ -140,7 +183,8 @@ class ExamController extends Controller
         $questions = $finalOrder->mapWithKeys(fn ($type) => [$type => $questionsRaw[$type]]);
 
         $columnsPerPart = $exam->columnsPerPart ? json_decode($exam->columnsPerPart, true) : [];
-        return view('exams.format', compact('course', 'exam', 'tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart'));
+
+        return compact('tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart');
     }
 
 public function answerKey(Course $course, Exam $exam)

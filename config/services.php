@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Headless Chrome / Edge used to build the exact PDF preview of an exam.
+    // Leave CHROME_PATH empty to auto-detect Chrome or Edge.
+    'chrome' => [
+        'path' => env('CHROME_PATH'),
+        'no_sandbox' => env('CHROME_NO_SANDBOX', false),
+    ],
+
 ];

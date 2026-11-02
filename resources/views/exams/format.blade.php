@@ -6,7 +6,8 @@
     <style>
         body { font-family: Arial, sans-serif; background: #f4f5f7; margin: 0; padding: 20px; }
         .layout { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
-        .settings { width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .settings { width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;
+                    position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain; }   /* settings scroll on their own; preview stays put */
         .settings h2 { font-size: 16px; color: #1f2937; margin-top: 0; }
         .settings h3 { font-size: 13px; color: #374151; margin-top: 18px; border-top: 1px solid #e5e7eb; padding-top: 12px; }
         .settings label { display: block; margin-top: 12px; font-size: 13px; color: #374151; }
@@ -22,6 +23,13 @@
         .settings .direction-reset { width: auto; margin: 0; padding: 2px 8px; background: #fff; color: #2563eb; border: 1px solid #d1d5db; font-size: 11px; }
         .settings .direction-reset:hover { background: #eff6ff; }
         .settings .direction-edited { font-size: 11px; color: #b45309; }
+        .settings a.print-btn { display: block; box-sizing: border-box; margin-top: 8px; padding: 8px; background: #16a34a; color: #fff; border-radius: 4px; text-align: center; text-decoration: none; font-size: 13px; }
+        .settings a.print-btn-alt { background: #2563eb; }
+        .pdf-preview { position: relative; width: 100%; min-width: 0; height: calc(100vh - 40px); min-height: 600px; background: #525659; border-radius: 4px; overflow: hidden; }
+        .pdf-frame { display: block; width: 100%; height: 100%; border: 0; }
+        .preview-wrapper:has(> .pdf-preview) { position: sticky; top: 20px; flex: 1; min-width: 0; padding: 0; background: none; }
+        .pdf-status { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; pointer-events: none; }
+        .pdf-status[hidden] { display: none; }
         .status { color: #15803d; font-size: 12px; margin-bottom: 8px; }
         .error { color: #b91c1c; font-size: 12px; margin-bottom: 8px; }
         .back-link { display: block; margin-top: 14px; color: #2563eb; text-decoration: none; font-size: 13px; }
@@ -105,6 +113,9 @@
            The page margins are rebuilt with a table: the empty <thead>/<tfoot> rows repeat on every
            printed page, so every page keeps a top and bottom margin. The MarSU header and footer are
            positioned on the first page only. ---- */
+        /* The watermark must never take up space (".paper > *" would otherwise make it position:relative
+           and push the questions down). On paper it is fixed, so it repeats centered on every page. */
+        .paper > .watermark-text, .paper > .watermark-img { position: absolute; z-index: 0; }
         .sheet { width: 100%; border-collapse: collapse; border-spacing: 0; }
         .sheet > thead > tr > td, .sheet > tbody > tr > td, .sheet > tfoot > tr > td { padding: 0; vertical-align: top; }
         .sheet-top, .sheet-bottom, .first-page-gap { height: 0; }
@@ -112,6 +123,8 @@
         @media print {
             body { background: #fff; padding: 0; }
             .paper, .paper.has-marsu-header, .paper.has-marsu-footer { padding: 0 50px; overflow: visible; }   /* overflow:hidden would clip the last page's footer */
+            .pdf-preview { display: none; }
+            .paper > .watermark-text, .paper > .watermark-img { position: fixed; }
             .sheet-top, .sheet-bottom { height: 0.5in; }
             .paper.has-marsu-footer .sheet-bottom { height: 1.3in; }
             .first-page-gap { height: max(0px, calc(var(--header-top, 50px) - 0.5in)); }
@@ -147,9 +160,15 @@
     $headerTpl = $exam->headerTemplate ?? 'classic';
     $footerTpl = $exam->footerTemplate ?? 'simple';
     $headerTop = (int) ($exam->headerTop ?? 50);
+
+    // printMode = the page Chrome turns into the PDF (no settings panel, images embedded).
+    $printMode = $printMode ?? false;
+    $pdfAvailable = $pdfAvailable ?? false;
+    $src = fn ($path) => $printMode ? \App\Services\ExamPdf::dataUri($path) : asset($path);
 @endphp
 
     <div class="layout">
+        @unless ($printMode)
         <div class="settings">
             <h2>Format Settings</h2>
 
@@ -338,29 +357,47 @@
                 })();
             </script>
 
-            <button type="button" class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+            @if ($pdfAvailable)
+                <a class="print-btn" href="{{ route('courses.exams.format.pdf', [$course, $exam]) }}?download=1">Download PDF</a>
+                <a class="print-btn print-btn-alt" href="{{ route('courses.exams.format.pdf', [$course, $exam]) }}" target="_blank" rel="noopener">Open PDF to print</a>
+            @else
+                <div class="hint">Exact PDF preview is off. Install Google Chrome or Microsoft Edge on this computer, or set CHROME_PATH in .env.</div>
+                <button type="button" class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+            @endif
 
             <a href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
         </div>
+        @endunless
 
         <div class="preview-wrapper">
+            @if (! $printMode && $pdfAvailable)
+                <div class="pdf-preview">
+                    <div class="pdf-status" id="pdfStatus" role="status">Building the exact print preview&hellip;</div>
+                    <iframe id="pdfFrame" class="pdf-frame" title="Exact print preview of the exam (PDF)" src="{{ route('courses.exams.format.pdf', [$course, $exam]) }}?v={{ now()->timestamp }}#view=FitH"></iframe>
+                </div>
+                <script>
+                    document.getElementById('pdfFrame').addEventListener('load', function () {
+                        document.getElementById('pdfStatus').hidden = true;
+                    });
+                </script>
+            @else
             <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }} {{ $headerTpl === 'marsu' ? 'has-marsu-header' : '' }} {{ $footerTpl === 'marsu' ? 'has-marsu-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --page-h: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '14in' : '11in' }};">
                 @if ($exam->watermarkImagePath)
-                    <img src="{{ asset('storage/' . $exam->watermarkImagePath) }}" class="watermark-img">
+                    <img src="{{ $src('storage/' . $exam->watermarkImagePath) }}" class="watermark-img">
                 @elseif ($exam->watermarkText)
                     <div class="watermark-text">{{ $exam->watermarkText }}</div>
                 @endif
 
                 @if ($headerTpl === 'marsu')
                     <div class="marsu-header">
-                        <img class="mh-logo-r" src="{{ asset('images/exam-templates/marsu/college-logo.png') }}" alt="">
+                        <img class="mh-logo-r" src="{{ $src('images/exam-templates/marsu/college-logo.png') }}" alt="">
                         <div class="mh-text">
                             @foreach ($headerLines as $line)
                                 <p>{{ $line }}</p>
                             @endforeach
                         </div>
-                        <img class="mh-rule" src="{{ asset('images/exam-templates/marsu/rule.png') }}" alt="">
-                        <img class="mh-logo-l" src="{{ asset('images/exam-templates/marsu/seal.jpg') }}" alt="">
+                        <img class="mh-rule" src="{{ $src('images/exam-templates/marsu/rule.png') }}" alt="">
+                        <img class="mh-logo-l" src="{{ $src('images/exam-templates/marsu/seal.jpg') }}" alt="">
                     </div>
                 @endif
 
@@ -374,7 +411,7 @@
                 @else
                     @php $headerClass = 'header-' . ($exam->headerTemplate ?? 'classic'); @endphp
                     <div class="{{ $headerClass }}">
-                        <img src="{{ asset($headerImageMap[$exam->headerTemplate ?? 'classic']) }}">
+                        <img src="{{ $src($headerImageMap[$exam->headerTemplate ?? 'classic']) }}">
                         <div class="school">{{ $exam->schoolName ?? 'School Name' }}</div>
                         <div class="dept">{{ $exam->department ?? 'Department' }}</div>
                         <div class="title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
@@ -445,7 +482,7 @@
 
                 @if ($footerTpl !== 'marsu' && $exam->footerText)
                     @php $footerClass = 'footer-' . ($exam->footerTemplate ?? 'simple'); @endphp
-                    <img src="{{ asset($footerImageMap[$exam->footerTemplate ?? 'simple']) }}" style="width:100%; display:block; margin-top:30px;">
+                    <img src="{{ $src($footerImageMap[$exam->footerTemplate ?? 'simple']) }}" style="width:100%; display:block; margin-top:30px;">
                     @if ($exam->footerTemplate == 'paged')
                         <div class="{{ $footerClass }}" style="margin-top:4px; border-top:none;">
                             <span>{{ $exam->footerText }}</span>
@@ -461,8 +498,8 @@
                 @if ($footerTpl === 'marsu')
                     <div class="marsu-footer">
                         <svg class="mf-rule" viewBox="0 0 752.64 6.667" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="752.64" height="4" fill="#F79646"/><rect x="0" y="5.333" width="752.64" height="1.334" fill="#F79646"/></svg>
-                        <img class="mf-iso" src="{{ asset('images/exam-templates/marsu/iso-badge.jpg') }}" alt="">
-                        <img class="mf-seal" src="{{ asset('images/exam-templates/marsu/seal.jpg') }}" alt="">
+                        <img class="mf-iso" src="{{ $src('images/exam-templates/marsu/iso-badge.jpg') }}" alt="">
+                        <img class="mf-seal" src="{{ $src('images/exam-templates/marsu/seal.jpg') }}" alt="">
                         <div class="mf-text">
                             @foreach ($footerLines as $line)
                                 @php $hasLabel = preg_match('/^([^:]{1,24}:)\s*(.*)$/u', $line, $m); @endphp
@@ -472,9 +509,11 @@
                     </div>
                 @endif
             </div>
+            @endif
         </div>
     </div>
 
+    @unless ($printMode)
     <script>
         // Choosing the MarSU header moves it to the exact distance used in the Word file (30 px),
         // unless the distance was already changed from the default.
@@ -487,5 +526,6 @@
             });
         })();
     </script>
+    @endunless
 </body>
 </html>
