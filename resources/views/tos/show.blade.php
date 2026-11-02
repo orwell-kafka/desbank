@@ -48,14 +48,14 @@
                                     <td class="work-course-name">{{ $row->topicName }}</td>
                                     <td class="work-num">{{ $row->contactHours }}</td>
                                     <td class="work-num">{{ $row->generatedWeight }}%</td>
-                                    <td class="work-num">{{ $row->assignedPoints }}</td>
+                                    <td class="work-num">{{ rtrim(rtrim(number_format($row->assignedPoints, 2, '.', ''), '0'), '.') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="3">Total</td>
-                                <td class="work-num">{{ number_format($topicPointsTotal, 2) }}</td>
+                                <td class="work-num">{{ rtrim(rtrim(number_format($topicPointsTotal, 2, '.', ''), '0'), '.') }}</td>
                             </tr>
                         </tfoot>
                     </table>

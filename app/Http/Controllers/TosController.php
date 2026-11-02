@@ -198,6 +198,17 @@ class TosController extends Controller
             ->orderBy('topic.topicName')
             ->get();
 
+        // ToS saved before whole-point allocation may hold decimals; show them as whole points too.
+        if ($topicRows->contains(fn ($r) => abs($r->assignedPoints - round($r->assignedPoints)) > 0.00001)) {
+            $hours = [];
+            foreach ($topicRows as $i => $r) {
+                $hours[$i] = (float) $r->contactHours;
+            }
+            foreach (self::allocatePoints($hours, (float) $tos->totalScore) as $i => $points) {
+                $topicRows[$i]->assignedPoints = $points;
+            }
+        }
+
         $bloomRows = DB::table('tosbloom')
             ->where('tosId', $tos->tosId)
             ->orderBy('bloomLevel')
@@ -221,6 +232,63 @@ class TosController extends Controller
         return redirect()->route('courses.tos.index', $course)->with('status', 'ToS deleted.');
     }
 
+    /**
+     * Splits the total score across topics in proportion to their contact hours, in WHOLE points
+     * (largest-remainder method), so the points always add up exactly to the total score.
+     * If the total score itself is not a whole number, points keep 2 decimals as before.
+     *
+     * @param  array<int|string, float>  $hoursByKey  contact hours keyed by topic id
+     * @return array<int|string, int|float>
+     */
+    public static function allocatePoints(array $hoursByKey, float $totalScore): array
+    {
+        $totalHours = array_sum($hoursByKey);
+        $result = array_fill_keys(array_keys($hoursByKey), 0);
+
+        if ($totalHours <= 0) {
+            return $result;
+        }
+
+        if (abs($totalScore - round($totalScore)) > 0.00001) {
+            $running = 0.0;
+            $keys = array_keys($hoursByKey);
+            $last = end($keys);
+            foreach ($hoursByKey as $key => $hours) {
+                $points = $key === $last
+                    ? round($totalScore - $running, 2)
+                    : round(($hours / $totalHours) * $totalScore, 2);
+                $running += $points;
+                $result[$key] = $points;
+            }
+
+            return $result;
+        }
+
+        $target = (int) round($totalScore);
+        $remainders = [];
+        $assigned = 0;
+
+        foreach ($hoursByKey as $key => $hours) {
+            $exact = ($hours / $totalHours) * $target;
+            $whole = (int) floor($exact + 1e-9);
+            $result[$key] = $whole;
+            $assigned += $whole;
+            $remainders[$key] = $exact - $whole;
+        }
+
+        // Hand the leftover points to the topics with the biggest fractions (ties: more contact hours first).
+        $order = array_keys($hoursByKey);
+        usort($order, function ($a, $b) use ($remainders, $hoursByKey) {
+            return [$remainders[$b], $hoursByKey[$b]] <=> [$remainders[$a], $hoursByKey[$a]];
+        });
+
+        for ($i = 0; $assigned < $target && $i < count($order); $i++, $assigned++) {
+            $result[$order[$i]]++;
+        }
+
+        return $result;
+    }
+
     private function computeAndValidate(Request $request, array $data): array
     {
         $totalScore = round((float) $data['totalScore'], 2);
@@ -238,26 +306,22 @@ class TosController extends Controller
         }
 
         $topics = [];
-        $pointsRunningTotal = 0;
         $topicIdsSorted = $topicIds;
         sort($topicIdsSorted);
 
-        foreach ($topicIdsSorted as $i => $topicId) {
-            $hours = (float) ($contactHoursInput[$topicId] ?? 0);
-            $weight = round(($hours / $totalContactHours) * 100, 2);
-            $points = round(($weight / 100) * $totalScore, 2);
+        $hoursById = [];
+        foreach ($topicIdsSorted as $topicId) {
+            $hoursById[$topicId] = (float) ($contactHoursInput[$topicId] ?? 0);
+        }
+        $pointsById = self::allocatePoints($hoursById, $totalScore);
 
-            if ($i === count($topicIdsSorted) - 1) {
-                $points = round($totalScore - $pointsRunningTotal, 2);
-            } else {
-                $pointsRunningTotal += $points;
-            }
-
+        foreach ($topicIdsSorted as $topicId) {
+            $hours = $hoursById[$topicId];
             $topics[] = [
                 'topicId' => $topicId,
                 'contactHours' => $hours,
-                'generatedWeight' => $weight,
-                'assignedPoints' => $points,
+                'generatedWeight' => round(($hours / $totalContactHours) * 100, 2),
+                'assignedPoints' => $pointsById[$topicId],
             ];
         }
 
