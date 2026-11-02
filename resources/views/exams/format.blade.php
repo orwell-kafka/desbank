@@ -63,8 +63,12 @@
         .header-minimal .dept { font-size: 12px; color: #4b5563; }
         .header-minimal .title { font-size: 13px; font-weight: bold; margin-top: 6px; }
 
-        .info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; }
-        .info-row span { border-bottom: 1px solid #000; min-width: 150px; display: inline-block; }
+        /* Two columns, two rows: Name | Score on top, Section | Date underneath.
+           The right column starts about 60% across. Each field is "Label:" followed by its own line. */
+        .info-row { display: grid; grid-template-columns: 1.5fr 1fr; column-gap: 36px; row-gap: 16px; font-size: 13px; margin-bottom: 15px; }
+        .info-field { display: flex; align-items: flex-end; gap: 6px; }
+        .info-line { flex: 1; min-width: 40px; height: 14px; border-bottom: 1px solid #000; }
+        .info-half { width: 52%; }   /* Score and Date lines are about half the length of the column */
 
         .part-header { font-weight: bold; font-size: 13px; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; }
         .part-direction { font-size: 12px; font-style: italic; margin-bottom: 10px; }
@@ -419,10 +423,10 @@
                 @endif
 
                 <div class="info-row">
-                    <span>Name:</span>
-                    <span>Score: ___ / {{ $exam->totalScore }}</span>
-                    <span>Date:</span>
-                    <span>Section:</span>
+                    <div class="info-field"><span>Name:</span><span class="info-line"></span></div>
+                    <div class="info-field info-half"><span>Score:</span><span class="info-line"></span></div>
+                    <div class="info-field"><span>Section:</span><span class="info-line"></span></div>
+                    <div class="info-field info-half"><span>Date:</span><span class="info-line"></span></div>
                 </div>
 
                @php $partNum = 1; $romanParts = ['I','II','III','IV','V','VI']; $letters = ['A','B','C','D','E','F','G','H','I','J','K','L']; @endphp
