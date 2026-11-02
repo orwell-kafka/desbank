@@ -70,7 +70,10 @@
                     <span class="work-count" id="examItemCount" data-total="{{ count($questions) }}">{{ count($questions) }} {{ count($questions) === 1 ? 'item' : 'items' }}</span>
                 </div>
 
-                @php $typeCounts = collect($questions)->countBy('questionType'); @endphp
+                @php
+                    $typeCounts = collect($questions)->countBy('questionType');
+                    $topicCounts = collect($questions)->countBy(fn ($q) => $q->topicName ?? '(no topic)');
+                @endphp
                 @if ($typeCounts->count() > 1)
                     <div class="work-tabs" id="typeFilter" role="group" aria-label="Show questions by type" data-exam="{{ $exam->examId }}">
                         <button type="button" class="work-tab" data-type="" aria-pressed="true">All <small>{{ count($questions) }}</small></button>
@@ -78,6 +81,19 @@
                             <button type="button" class="work-tab" data-type="{{ $type }}" aria-pressed="false">{{ $type }} <small>{{ $count }}</small></button>
                         @endforeach
                     </div>
+                @endif
+                @if ($topicCounts->count() > 1)
+                    <div style="margin:12px 29px 0;max-width:420px;">
+                        <label class="work-label" for="topicFilter">Filter by topic</label>
+                        <select id="topicFilter" class="work-select" data-exam="{{ $exam->examId }}">
+                            <option value="">All topics ({{ count($questions) }})</option>
+                            @foreach ($topicCounts as $topicName => $count)
+                                <option value="{{ $topicName }}">{{ $topicName }} ({{ $count }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                @if ($typeCounts->count() > 1 || $topicCounts->count() > 1)
                     <p class="work-hint" id="typeFilterNote" role="status" aria-live="polite" style="margin:10px 29px 0;" hidden></p>
                 @endif
 
@@ -86,14 +102,16 @@
                         <thead><tr>
                             <th scope="col">#</th>
                             <th scope="col">Question</th>
+                            <th scope="col">Topic</th>
                             <th scope="col">Tags</th>
                             <th scope="col">Action</th>
                         </tr></thead>
                         <tbody>
                             @foreach ($questions as $i => $question)
-                                <tr data-type="{{ $question->questionType }}">
+                                <tr data-type="{{ $question->questionType }}" data-topic="{{ $question->topicName ?? '(no topic)' }}">
                                     <td class="work-table-num">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</td>
                                     <td><p class="work-q-text">{{ $question->content }}</p></td>
+                                    <td>{{ $question->topicName ?? '(no topic)' }}</td>
                                     <td>
                                         <span class="work-chip">{{ $question->bloomLevel }}</span>
                                         <span class="work-chip work-chip-gold">{{ $question->questionType }}</span>
@@ -120,52 +138,85 @@
     </div>
 
     <script>
-        // Temporary view filter for the exam's questions. It only hides rows: the order and the
-        // original item numbers never change, and "All" always brings everything back.
+        // Temporary view filters (question type + topic) for the exam's questions. They only hide
+        // rows: the order and the original item numbers never change, and "All" brings everything back.
         (function () {
-            var bar = document.getElementById('typeFilter');
-            if (!bar) return;
+            var typeBar = document.getElementById('typeFilter');
+            var topicSel = document.getElementById('topicFilter');
+            if (!typeBar && !topicSel) return;
             var rows = Array.prototype.slice.call(document.querySelectorAll('tbody tr[data-type]'));
             var count = document.getElementById('examItemCount');
             var note = document.getElementById('typeFilterNote');
             var total = parseInt(count.getAttribute('data-total'), 10) || rows.length;
-            var storeKey = 'desbank.examTypeFilter.' + bar.getAttribute('data-exam');
+            var examId = (typeBar || topicSel).getAttribute('data-exam');
+            var typeKey = 'desbank.examTypeFilter.' + examId;
+            var topicKey = 'desbank.examTopicFilter.' + examId;
+            var state = { type: '', topic: '' };
 
-            function apply(type) {
+            function apply() {
                 var shown = 0;
                 rows.forEach(function (row) {
-                    var match = !type || row.getAttribute('data-type') === type;
+                    var match = (!state.type || row.getAttribute('data-type') === state.type) &&
+                                (!state.topic || row.getAttribute('data-topic') === state.topic);
                     row.hidden = !match;
                     if (match) shown++;
                 });
-                Array.prototype.forEach.call(bar.querySelectorAll('[data-type]'), function (btn) {
-                    var on = btn.getAttribute('data-type') === type;
-                    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-                    if (on) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
-                });
-                if (type) {
+                if (typeBar) {
+                    Array.prototype.forEach.call(typeBar.querySelectorAll('[data-type]'), function (btn) {
+                        var on = btn.getAttribute('data-type') === state.type;
+                        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+                        if (on) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
+                    });
+                }
+                if (topicSel) topicSel.value = state.topic;
+                if (state.type || state.topic) {
+                    var parts = [];
+                    if (state.type) parts.push(state.type);
+                    if (state.topic) parts.push('topic "' + state.topic + '"');
                     count.textContent = shown + ' of ' + total + ' items';
-                    note.textContent = 'Showing only ' + type + '. Item numbers match the full exam.';
-                    note.hidden = false;
+                    if (note) {
+                        note.textContent = 'Showing only ' + parts.join(' in ') + '. Item numbers match the full exam.';
+                        note.hidden = false;
+                    }
                 } else {
                     count.textContent = total + (total === 1 ? ' item' : ' items');
-                    note.hidden = true;
+                    if (note) note.hidden = true;
                 }
             }
 
-            bar.addEventListener('click', function (e) {
-                var btn = e.target.closest('[data-type]');
-                if (!btn) return;
-                var type = btn.getAttribute('data-type');
-                apply(type);
-                try { type ? sessionStorage.setItem(storeKey, type) : sessionStorage.removeItem(storeKey); } catch (err) {}
-            });
+            function save(key, value) {
+                try { value ? sessionStorage.setItem(key, value) : sessionStorage.removeItem(key); } catch (err) {}
+            }
 
-            // Keep the chosen type after replacing a question (the page reloads), for this tab only.
-            var saved = '';
-            try { saved = sessionStorage.getItem(storeKey) || ''; } catch (err) {}
-            var valid = saved && bar.querySelector('[data-type="' + (window.CSS && CSS.escape ? CSS.escape(saved) : saved) + '"]');
-            apply(valid ? saved : '');
+            if (typeBar) {
+                typeBar.addEventListener('click', function (e) {
+                    var btn = e.target.closest('[data-type]');
+                    if (!btn) return;
+                    state.type = btn.getAttribute('data-type');
+                    save(typeKey, state.type);
+                    apply();
+                });
+            }
+            if (topicSel) {
+                topicSel.addEventListener('change', function () {
+                    state.topic = topicSel.value;
+                    save(topicKey, state.topic);
+                    apply();
+                });
+            }
+
+            // Keep the chosen filters after replacing a question (the page reloads), for this tab only.
+            function restore(key) { try { return sessionStorage.getItem(key) || ''; } catch (err) { return ''; } }
+            var savedType = restore(typeKey), savedTopic = restore(topicKey);
+            if (typeBar && savedType) {
+                var esc = window.CSS && CSS.escape ? CSS.escape(savedType) : savedType;
+                if (typeBar.querySelector('[data-type="' + esc + '"]')) state.type = savedType;
+            }
+            if (topicSel && savedTopic) {
+                var found = Array.prototype.some.call(topicSel.options, function (o) { return o.value === savedTopic; });
+                if (found) state.topic = savedTopic;
+            }
+            apply();
         })();
     </script>
 </body>

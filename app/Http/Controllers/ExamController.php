@@ -383,8 +383,9 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
 
         $questions = DB::table('examquestion')
             ->join('question', 'question.questionId', '=', 'examquestion.questionId')
+            ->leftJoin('topic', 'topic.topicId', '=', 'question.topicId')
             ->where('examquestion.examId', $exam->examId)
-            ->select('question.*')
+            ->select('question.*', 'topic.topicName')
             ->orderBy('question.bloomLevel')
             ->orderBy('question.questionType')
             ->get();
