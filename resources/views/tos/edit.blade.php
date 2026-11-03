@@ -174,6 +174,53 @@
                         </div>
                     </section>
 
+                    @if (! empty($matrixRows) && count($matrix) > 0)
+                        @php
+                            $useCustom = (bool) old('customMatrix');
+                            $oldMatrix = (array) old('matrix', []);
+                        @endphp
+                        <details class="work-section" @if ($errors->has('matrix') || $useCustom) open @endif>
+                            <summary style="cursor:pointer;padding:14px 29px;font-weight:600;">Fine-tune topic distribution (optional)</summary>
+                            <div class="work-section-body" data-error-key="matrix">
+                                <p class="work-hint">The system already splits each row of Table 2 across the topics so every topic gets points close to its contact-hours share, and the exam is generated to match. Only open this if you want to move items between topics yourself. It applies to the rows as saved now, so if you changed Table 2 above, leave it unticked.</p>
+                                <label style="display:flex;gap:8px;align-items:center;margin:10px 0;">
+                                    <input type="checkbox" name="customMatrix" value="1" class="work-check" {{ $useCustom ? 'checked' : '' }}>
+                                    <span>Use my own distribution</span>
+                                </label>
+                                <div class="work-table-scroll work-table-framed" role="region" aria-label="Items per topic and Bloom row" tabindex="0">
+                                    <table class="work-table work-table-inset">
+                                        <thead><tr>
+                                            <th scope="col">Topic</th>
+                                            @foreach ($matrixRows as $key => $mrow)
+                                                @php [$mLevel, $mType] = explode('|', $key, 2); @endphp
+                                                <th scope="col" class="work-num">{{ $mLevel }}<br><small>{{ $mType }} ({{ rtrim(rtrim(number_format($mrow['points'], 2, '.', ''), '0'), '.') }} pt)</small></th>
+                                            @endforeach
+                                        </tr></thead>
+                                        <tbody>
+                                            @foreach ($topics as $topic)
+                                                @continue(! isset($matrix[$topic->topicId]))
+                                                <tr>
+                                                    <td class="work-course-name">{{ $topic->topicName }}</td>
+                                                    @foreach ($matrixRows as $key => $mrow)
+                                                        <td class="work-num"><input type="number" min="0" step="1" class="work-input work-hours" name="matrix[{{ $topic->topicId }}][{{ $key }}]" value="{{ $oldMatrix[$topic->topicId][$key] ?? $matrix[$topic->topicId][$key] ?? 0 }}" aria-label="{{ $topic->topicName }}: {{ $key }}"></td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td>Row total</td>
+                                                @foreach ($matrixRows as $key => $mrow)
+                                                    <td class="work-num">{{ $mrow['count'] }}</td>
+                                                @endforeach
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </details>
+                    @endif
+
                     <div class="work-form-actions">
                         <button type="submit" class="work-action-primary" data-pending-label="Updating…">Update ToS <span aria-hidden="true">→</span></button>
                         <a href="{{ route('courses.tos.index', $course) }}" class="work-form-cancel">Cancel</a>

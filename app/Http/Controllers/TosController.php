@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Tos;
+use App\Support\TosMatrix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -59,12 +60,16 @@ class TosController extends Controller
             return $row->bloomLevel . '|' . $row->questionType;
         });
 
+        $distribution = TosMatrix::forTos($tos->tosId);
+
         return view('tos.edit', [
             'course' => $course,
             'tos' => $tos,
             'topics' => $topics,
             'existingTopics' => $existingTopics,
             'existingBloom' => $existingBloom,
+            'matrix' => $distribution['matrix'],
+            'matrixRows' => $distribution['rows'],
             'bloomLevels' => self::BLOOM_LEVELS,
             'questionTypes' => self::QUESTION_TYPES,
             'examTypes' => self::EXAM_TYPES,
@@ -101,6 +106,7 @@ class TosController extends Controller
                 'totalScore' => $data['totalScore'],
             ]);
 
+            DB::table('tostopicbloom')->where('tosId', $tos->tosId)->delete();
             DB::table('tostopic')->where('tosId', $tos->tosId)->delete();
             DB::table('tosbloom')->where('tosId', $tos->tosId)->delete();
 
@@ -124,6 +130,8 @@ class TosController extends Controller
                     'generatedScore' => $bloomRow['score'],
                 ]);
             }
+
+            $this->saveMatrix($tos->tosId, $result['matrix']);
         });
 
         return redirect()->route('courses.tos.index', $course)->with('status', 'ToS updated.');
@@ -181,6 +189,8 @@ class TosController extends Controller
                     'generatedScore' => $bloomRow['score'],
                 ]);
             }
+
+            $this->saveMatrix($tosId, $result['matrix']);
         });
 
         return redirect()->route('courses.tos.index', $course)->with('status', 'ToS created.');
@@ -191,21 +201,22 @@ class TosController extends Controller
         $this->authorizeOwner($course);
         $this->authorizeBelongsToCourse($course, $tos);
 
+        // Points per topic are what the topic x Bloom/type distribution really adds up to, so this page
+        // always agrees with the generated exam (older ToS get their distribution computed on the fly).
+        $distribution = TosMatrix::forTos($tos->tosId);
+        $pointsByKey = array_map(fn ($r) => $r['points'], $distribution['rows']);
+        $pointsByTopic = TosMatrix::topicPoints($distribution['matrix'], $pointsByKey);
+
         $topicRows = DB::table('tostopic')
             ->join('topic', 'topic.topicId', '=', 'tostopic.topicId')
             ->where('tostopic.tosId', $tos->tosId)
-            ->select('topic.topicName', 'tostopic.contactHours', 'tostopic.generatedWeight', 'tostopic.assignedPoints')
+            ->select('tostopic.topicId', 'topic.topicName', 'tostopic.contactHours', 'tostopic.generatedWeight', 'tostopic.assignedPoints')
             ->orderBy('topic.topicName')
             ->get();
 
-        // ToS saved before whole-point allocation may hold decimals; show them as whole points too.
-        if ($topicRows->contains(fn ($r) => abs($r->assignedPoints - round($r->assignedPoints)) > 0.00001)) {
-            $hours = [];
-            foreach ($topicRows as $i => $r) {
-                $hours[$i] = (float) $r->contactHours;
-            }
-            foreach (self::allocatePoints($hours, (float) $tos->totalScore) as $i => $points) {
-                $topicRows[$i]->assignedPoints = $points;
+        foreach ($topicRows as $row) {
+            if (array_key_exists($row->topicId, $pointsByTopic)) {
+                $row->assignedPoints = $pointsByTopic[$row->topicId];
             }
         }
 
@@ -224,6 +235,7 @@ class TosController extends Controller
         $this->authorizeBelongsToCourse($course, $tos);
 
         DB::transaction(function () use ($tos) {
+            DB::table('tostopicbloom')->where('tosId', $tos->tosId)->delete();
             DB::table('tostopic')->where('tosId', $tos->tosId)->delete();
             DB::table('tosbloom')->where('tosId', $tos->tosId)->delete();
             DB::table('tos')->where('tosId', $tos->tosId)->delete();
@@ -313,7 +325,6 @@ class TosController extends Controller
         foreach ($topicIdsSorted as $topicId) {
             $hoursById[$topicId] = (float) ($contactHoursInput[$topicId] ?? 0);
         }
-        $pointsById = self::allocatePoints($hoursById, $totalScore);
 
         foreach ($topicIdsSorted as $topicId) {
             $hours = $hoursById[$topicId];
@@ -321,7 +332,7 @@ class TosController extends Controller
                 'topicId' => $topicId,
                 'contactHours' => $hours,
                 'generatedWeight' => round(($hours / $totalContactHours) * 100, 2),
-                'assignedPoints' => $pointsById[$topicId],
+                'assignedPoints' => 0, // filled in below, from the topic x Bloom/type distribution
             ];
         }
 
@@ -363,7 +374,72 @@ class TosController extends Controller
             return ['error' => "Bloom's Taxonomy total score ({$bloomScoreTotal}) does not match the ToS total score ({$totalScore}). Adjust item counts or points per item and try again.", 'field' => 'bloomKey'];
         }
 
-        return ['topics' => $topics, 'bloom' => $bloom];
+        // How many items of each Bloom/type row belong to each topic. Normally worked out automatically
+        // (closest to each topic's contact-hours share); the user may supply their own on the edit page.
+        $rowsByKey = [];
+        foreach ($bloom as $b) {
+            $rowsByKey[TosMatrix::key($b['bloomLevel'], $b['questionType'])] = [
+                'points' => $b['pointsPerItem'],
+                'count' => $b['itemCount'],
+            ];
+        }
+
+        if ($request->boolean('customMatrix')) {
+            $matrix = [];
+            $given = (array) $request->input('matrix', []);
+            foreach ($hoursById as $topicId => $hours) {
+                foreach ($rowsByKey as $key => $row) {
+                    $value = $given[$topicId][$key] ?? 0;
+                    if (! is_numeric($value) || $value < 0 || floor((float) $value) != (float) $value) {
+                        return ['error' => 'Topic distribution: item counts must be whole numbers, zero or more.', 'field' => 'matrix'];
+                    }
+                    $matrix[$topicId][$key] = (int) $value;
+                }
+            }
+
+            foreach ($rowsByKey as $key => $row) {
+                $sum = 0;
+                foreach ($matrix as $cells) {
+                    $sum += $cells[$key];
+                }
+                if ($sum !== $row['count']) {
+                    [$level, $type] = explode('|', $key, 2);
+
+                    return ['error' => "Topic distribution: {$level} / {$type} has {$sum} item(s) across topics but Table 2 says {$row['count']}. Fix the counts, or untick \"Use my own distribution\" to let the system split them.", 'field' => 'matrix'];
+                }
+            }
+        } else {
+            $matrix = TosMatrix::allocate($hoursById, $rowsByKey, TosMatrix::bankCaps(array_map('intval', array_keys($hoursById))));
+        }
+
+        $pointsByKey = array_map(fn ($r) => $r['points'], $rowsByKey);
+        $pointsByTopic = TosMatrix::topicPoints($matrix, $pointsByKey);
+        foreach ($topics as &$topicRow) {
+            $topicRow['assignedPoints'] = $pointsByTopic[$topicRow['topicId']] ?? 0;
+        }
+        unset($topicRow);
+
+        return ['topics' => $topics, 'bloom' => $bloom, 'matrix' => $matrix];
+    }
+
+    /** Stores the topic x Bloom/type item counts (zero cells are left out). */
+    private function saveMatrix(int $tosId, array $matrix): void
+    {
+        foreach ($matrix as $topicId => $cells) {
+            foreach ($cells as $key => $count) {
+                if ($count <= 0) {
+                    continue;
+                }
+                [$level, $type] = explode('|', $key, 2);
+                DB::table('tostopicbloom')->insert([
+                    'tosId' => $tosId,
+                    'topicId' => $topicId,
+                    'bloomLevel' => $level,
+                    'questionType' => $type,
+                    'itemCount' => $count,
+                ]);
+            }
+        }
     }
 
     private function authorizeOwner(Course $course): void

@@ -64,6 +64,41 @@
                 </div>
             </section>
 
+            <section class="work-directory" style="margin-top:0;" aria-labelledby="work-topics">
+                <div class="work-directory-heading">
+                    <div><p class="work-eyebrow">REALIZED</p><h2 id="work-topics">Points by topic</h2></div>
+                </div>
+                <div class="work-table-scroll" role="region" aria-label="Points by topic" tabindex="0">
+                    <table class="work-table work-table-plain work-table-narrow">
+                        <thead><tr>
+                            <th scope="col">Topic</th>
+                            <th scope="col" class="work-num">Items</th>
+                            <th scope="col" class="work-num">Points</th>
+                            <th scope="col" class="work-num">ToS assigned</th>
+                        </tr></thead>
+                        <tbody>
+                            @php $fmt = fn ($n) => rtrim(rtrim(number_format((float) $n, 2, '.', ''), '0'), '.'); @endphp
+                            @foreach ($topicSummary as $row)
+                                <tr>
+                                    <td>{{ $row['name'] }}</td>
+                                    <td class="work-num">{{ $row['items'] }}</td>
+                                    <td class="work-num">{{ $fmt($row['points']) }}</td>
+                                    <td class="work-num">{{ $row['target'] === null ? '—' : $fmt($row['target']) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Total</td>
+                                <td class="work-num">{{ collect($topicSummary)->sum('items') }}</td>
+                                <td class="work-num">{{ $fmt(collect($topicSummary)->sum('points')) }}</td>
+                                <td class="work-num">{{ $fmt(collect($topicSummary)->sum(fn ($r) => $r['target'] ?? 0)) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
             <section class="work-directory" style="margin-top:0;" aria-labelledby="work-questions">
                 <div class="work-directory-heading">
                     <div><p class="work-eyebrow">EXAM CONTENT</p><h2 id="work-questions">Questions</h2></div>

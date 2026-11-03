@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Tos;
+use App\Support\TosMatrix;
 use App\Services\ExamPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,20 +38,35 @@ class ExamController extends Controller
         $topicIds = DB::table('tostopic')->where('tosId', $tos->tosId)->pluck('topicId');
         $bloomRows = DB::table('tosbloom')->where('tosId', $tos->tosId)->get();
 
+        // How many items each topic should contribute to each Bloom/type row (see TosMatrix).
+        $distribution = TosMatrix::forTos($tos->tosId);
+        $matrix = $distribution['matrix'];
+
         $shortages = [];
         $eligibleByRow = [];
 
         foreach ($bloomRows as $row) {
-            $eligibleIds = Question::whereIn('topicId', $topicIds)
+            $key = TosMatrix::key($row->bloomLevel, $row->questionType);
+
+            // Eligible question ids of this row, grouped by topic.
+            $byTopic = Question::whereIn('topicId', $topicIds)
                 ->where('bloomLevel', $row->bloomLevel)
                 ->where('questionType', $row->questionType)
-                ->pluck('questionId')
+                ->get(['questionId', 'topicId'])
+                ->groupBy('topicId')
+                ->map(fn ($g) => $g->pluck('questionId')->all())
                 ->all();
 
-            $eligibleByRow[] = ['row' => $row, 'ids' => $eligibleIds];
+            $available = array_sum(array_map('count', $byTopic));
 
-            if (count($eligibleIds) < $row->generatedItemCount) {
-                $shortages[] = "{$row->bloomLevel} / {$row->questionType}: need {$row->generatedItemCount}, only " . count($eligibleIds) . ' available';
+            $eligibleByRow[] = [
+                'row' => $row,
+                'byTopic' => $byTopic,
+                'wanted' => array_map(fn ($cells) => (int) ($cells[$key] ?? 0), $matrix),
+            ];
+
+            if ($available < $row->generatedItemCount) {
+                $shortages[] = "{$row->bloomLevel} / {$row->questionType}: need {$row->generatedItemCount}, only {$available} available";
             }
         }
 
@@ -75,7 +91,7 @@ class ExamController extends Controller
 
             foreach ($eligibleByRow as $entry) {
                 $row = $entry['row'];
-                $picked = collect($entry['ids'])->shuffle()->take((int) $row->generatedItemCount);
+                $picked = collect($this->pickForRow($entry['byTopic'], $entry['wanted'], (int) $row->generatedItemCount));
 
                 foreach ($picked as $questionId) {
                     DB::table('examquestion')->insert([
@@ -107,6 +123,44 @@ class ExamController extends Controller
 
         return redirect()->route('courses.exams.show', [$course, $examId])->with('status', 'Exam generated.');
     }
+    /**
+     * Picks $need questions for one Bloom/type row: from each topic as many as the ToS distribution
+     * asks for ($wanted[topicId]). If a topic's bank has fewer than that, the gap is filled from the
+     * topics that still have questions left, so the exam is still generated.
+     *
+     * @param  array<int, array<int>>  $byTopic  eligible question ids per topic
+     * @param  array<int, int>  $wanted  items wanted per topic
+     * @return array<int>
+     */
+    private function pickForRow(array $byTopic, array $wanted, int $need): array
+    {
+        $picked = [];
+        $left = [];
+
+        foreach ($byTopic as $topicId => $ids) {
+            $ids = collect($ids)->shuffle()->values()->all();
+            $take = min((int) ($wanted[$topicId] ?? 0), count($ids));
+            $picked = array_merge($picked, array_slice($ids, 0, $take));
+            $left[$topicId] = array_slice($ids, $take);
+        }
+
+        while (count($picked) < $need) {
+            // take from the topic with the most unused questions
+            $topicId = null;
+            foreach ($left as $id => $ids) {
+                if (! empty($ids) && ($topicId === null || count($ids) > count($left[$topicId]))) {
+                    $topicId = $id;
+                }
+            }
+            if ($topicId === null) {
+                break;
+            }
+            $picked[] = array_shift($left[$topicId]);
+        }
+
+        return array_slice($picked, 0, $need);
+    }
+
     public function editFormat(Course $course, Exam $exam)
     {
         $this->authorizeOwner($course);
@@ -392,20 +446,45 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
 
         $bloomConfig = DB::table('exambloomconfig')->where('examId', $exam->examId)->get();
 
-        return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig'));
+        // Points per topic as this exam really adds up, next to what the ToS assigned to each topic.
+        $pointsByKey = DB::table('tosbloom')->where('tosId', $exam->tosId)->get()
+            ->mapWithKeys(fn ($r) => [TosMatrix::key($r->bloomLevel, $r->questionType) => (float) $r->pointsPerItem])
+            ->all();
+
+        $targets = DB::table('tostopic')
+            ->join('topic', 'topic.topicId', '=', 'tostopic.topicId')
+            ->where('tostopic.tosId', $exam->tosId)
+            ->select('tostopic.topicId', 'topic.topicName', 'tostopic.assignedPoints')
+            ->orderBy('topic.topicName')
+            ->get();
+
+        $topicSummary = [];
+        foreach ($targets as $t) {
+            $topicSummary[$t->topicId] = ['name' => $t->topicName, 'items' => 0, 'points' => 0.0, 'target' => (float) $t->assignedPoints];
+        }
+        foreach ($questions as $q) {
+            $id = $q->topicId;
+            if (! isset($topicSummary[$id])) {
+                $topicSummary[$id] = ['name' => $q->topicName ?? '(no topic)', 'items' => 0, 'points' => 0.0, 'target' => null];
+            }
+            $topicSummary[$id]['items']++;
+            $topicSummary[$id]['points'] += $pointsByKey[TosMatrix::key($q->bloomLevel, $q->questionType)] ?? 0;
+        }
+
+        return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig', 'topicSummary'));
     }
 
     /**
-     * Questions that may replace $question in this exam: same ToS topics, same Bloom level and
-     * question type (so the ToS distribution still holds), and not already used in the exam.
+     * Questions that may replace $question in this exam: same topic, same Bloom level and
+     * question type (so the ToS distribution and each topic's points still hold), and not already
+     * used in the exam.
      */
     private function replacementPool(Exam $exam, Question $question)
     {
-        $tos = Tos::findOrFail($exam->tosId);
-        $topicIds = DB::table('tostopic')->where('tosId', $tos->tosId)->pluck('topicId');
         $currentQuestionIds = DB::table('examquestion')->where('examId', $exam->examId)->pluck('questionId');
 
-        return Question::whereIn('topicId', $topicIds)
+        // Same topic as the question being replaced, so each topic keeps the points the ToS gave it.
+        return Question::where('topicId', $question->topicId)
             ->where('bloomLevel', $question->bloomLevel)
             ->where('questionType', $question->questionType)
             ->whereNotIn('questionId', $currentQuestionIds);
@@ -456,7 +535,7 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             $replacement = $pool->inRandomOrder()->first();
 
             if (! $replacement) {
-                return back()->withErrors(['exam' => 'No other question available in the Question Bank for that same Bloom level/question type slot.']);
+                return back()->withErrors(['exam' => 'No other question available in the Question Bank for that same topic, Bloom level and question type. Add one to the bank, or the topic would no longer match its ToS points.']);
             }
         }
 
