@@ -154,6 +154,7 @@
                                     <button type="button" id="addBloomRowBtn" class="work-action-primary">Add row <span aria-hidden="true">+</span></button>
                                 </div>
                             </div>
+                            @include('partials.tos-bank-indicator')
                             <p id="bloomRowError" class="work-builder-error" role="alert" hidden></p>
 
                             <div class="work-table-scroll work-table-framed" role="region" aria-label="Bloom distribution rows" tabindex="0">

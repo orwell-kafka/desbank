@@ -96,6 +96,88 @@
         statusEl.textContent = msg;
     }
 
+    // ---- Question bank availability -------------------------------------------------------------
+    // Shows how many questions the bank holds for the selected Bloom level / question type, counting
+    // only the topics ticked in Table 1 (all topics while none is ticked), so teachers know how many
+    // items they can plan before generating the exam.
+    var bankEl = document.getElementById('bankIndicator');
+    var bank = { topics: {}, counts: {} };
+    if (bankEl) {
+        try { bank = JSON.parse(bankEl.getAttribute('data-bank') || '{}'); } catch (e) { /* keep empty */ }
+        bank.topics = bank.topics || {};
+        bank.counts = bank.counts || {};
+    }
+    var levelSel = document.getElementById('newBloomLevel');
+    var typeSel = document.getElementById('newQuestionType');
+    var countInput = document.getElementById('newCount');
+
+    function selectedTopicIds() {
+        var ids = Array.prototype.map.call(form.querySelectorAll('input[name="topicId[]"]:checked'), function (c) { return c.value; });
+        return ids.length ? ids : Object.keys(bank.topics);
+    }
+
+    function bankFor(level, type, topicIds) {
+        var key = level + '|' + type;
+        return topicIds.reduce(function (n, id) { return n + ((bank.counts[id] && bank.counts[id][key]) || 0); }, 0);
+    }
+
+    function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+    function updateBank() {
+        if (!bankEl || !levelSel || !typeSel) return;
+        var level = levelSel.value, type = typeSel.value;
+        var ticked = form.querySelectorAll('input[name="topicId[]"]:checked').length;
+        var ids = selectedTopicIds();
+        var available = bankFor(level, type, ids);
+        var wanted = parseInt(countInput.value, 10) || 0;
+        var planned = 0;
+        rows.forEach(function (r) { if (r.level === level && r.type === type) planned = r.count; });
+
+        var typeTotal = 0;
+        ids.forEach(function (id) {
+            Object.keys(bank.counts[id] || {}).forEach(function (k) {
+                if (k.split('|')[1] === type) typeTotal += bank.counts[id][k];
+            });
+        });
+
+        document.getElementById('bankFor').textContent = level + ' / ' + type;
+        document.getElementById('bankAvailable').textContent = String(available);
+
+        var main = document.getElementById('bankMain');
+        var state = '';
+        if (available === 0) {
+            state = 'is-none';
+            main.textContent = 'No ' + level + ' / ' + type + ' questions in ' + (ticked ? 'the selected topics' : 'this course') + ' yet. Add some to the question bank before generating an exam.';
+        } else if (wanted > available) {
+            state = 'is-over';
+            main.textContent = plural(available, 'question') + ' available, but you are asking for ' + wanted + '. You can add at most ' + available + ' for this row.';
+        } else {
+            state = 'is-ok';
+            main.textContent = plural(available, 'question') + ' available in ' + (ticked ? 'the selected topics' : 'all topics') + ', so you can add up to ' + available + ' item' + (available === 1 ? '' : 's') + ' for this row.';
+        }
+        if (planned > 0) {
+            main.textContent += ' This row currently plans ' + planned + '.';
+        }
+        bankEl.className = 'work-bank' + (state ? ' ' + state : '');
+
+        document.getElementById('bankType').textContent = type + ' in total (all Bloom levels): ' + plural(typeTotal, 'question') + '.';
+
+        var list = document.getElementById('bankTopics');
+        list.textContent = '';
+        ids.forEach(function (id) {
+            var n = bankFor(level, type, [id]);
+            var li = document.createElement('li');
+            li.className = n === 0 ? 'is-empty' : '';
+            var name = document.createElement('span');
+            name.textContent = bank.topics[id] || 'Topic';
+            var num = document.createElement('b');
+            num.textContent = String(n);
+            li.appendChild(name);
+            li.appendChild(num);
+            list.appendChild(li);
+        });
+    }
+
     function render() {
         body.textContent = '';
         var total = 0;
@@ -125,7 +207,18 @@
             tr.appendChild(td(chip(row.level)));
             tr.appendChild(td(chip(row.type, 'work-chip-gold')));
             tr.appendChild(td(String(row.points), 'work-num'));
-            tr.appendChild(td(String(row.count), 'work-num'));
+            var countCell = td(String(row.count), 'work-num');
+            if (bankEl) {
+                var inBank = bankFor(row.level, row.type, selectedTopicIds());
+                if (row.count > inBank) {
+                    var warn = document.createElement('small');
+                    warn.className = 'work-bank-warn';
+                    warn.textContent = 'only ' + inBank + ' in bank';
+                    countCell.appendChild(document.createElement('br'));
+                    countCell.appendChild(warn);
+                }
+            }
+            tr.appendChild(countCell);
             tr.appendChild(td(score.toFixed(2), 'work-num'));
             tr.appendChild(td(remove));
             body.appendChild(tr);
@@ -134,6 +227,7 @@
         touchedKey = null;
         totalEl.textContent = total.toFixed(2);
         updateStatus(total);
+        updateBank();
     }
 
     function currentTotal() {
@@ -186,6 +280,15 @@
         var remaining = body.querySelectorAll('.removeBloomRow');
         (remaining.length ? remaining[Math.min(i, remaining.length - 1)] : addBtn).focus();
     });
+
+    if (bankEl) {
+        [levelSel, typeSel].forEach(function (el) { el.addEventListener('change', updateBank); });
+        countInput.addEventListener('input', updateBank);
+        // Ticking or unticking a topic in Table 1 changes which questions count.
+        form.addEventListener('change', function (e) {
+            if (e.target && e.target.name === 'topicId[]') render();
+        });
+    }
 
     if (targetInput) {
         targetInput.addEventListener('input', function () { updateStatus(currentTotal()); });

@@ -84,8 +84,8 @@
                             <div class="work-field">
                                 <label class="work-label" for="sortOrder">Sort by</label>
                                 <select name="sort" id="sortOrder" class="work-select" onchange="this.form.submit()">
-                                    <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Date Modified (Newest)</option>
-                                    <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Date Modified (Oldest)</option>
+                                    <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Date Added (Newest first)</option>
+                                    <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Date Added (Oldest first)</option>
                                     <option value="az" {{ $sort == 'az' ? 'selected' : '' }}>Question Text (A&ndash;Z)</option>
                                     <option value="za" {{ $sort == 'za' ? 'selected' : '' }}>Question Text (Z&ndash;A)</option>
                                     <option value="bloom" {{ $sort == 'bloom' ? 'selected' : '' }}>Bloom's Level</option>

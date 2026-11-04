@@ -32,12 +32,14 @@ class QuestionController extends Controller
                 $questions = $questions->where('bloomLevel', $bloomFilter);
             }
 
+            // "Newest" is the order questions were added (ids only ever grow), so a new question is
+            // always at the top, and editing an old one does not push it above the latest additions.
             $questions = match ($sort) {
-                'oldest' => $questions->sortBy('updated_at'),
+                'oldest' => $questions->sortBy('questionId'),
                 'az' => $questions->sortBy(fn ($q) => strtolower($q->content)),
                 'za' => $questions->sortByDesc(fn ($q) => strtolower($q->content)),
-                'bloom' => $questions->sortBy('bloomLevel'),
-                default => $questions->sortByDesc('updated_at'),
+                'bloom' => $questions->sortBy([['bloomLevel', 'asc'], ['questionId', 'desc']]),
+                default => $questions->sortByDesc('questionId'),
             };
 
             $questions = $questions->values();
@@ -104,7 +106,10 @@ class QuestionController extends Controller
             'correctAnswer' => $data['correctAnswer'] ?? null,
         ]);
 
-        return redirect()->route('courses.topics.questions.index', [$course, $topic])->with('status', 'Question added.');
+        // Land on the list of that question type (newest first), so the new question is right at the top.
+        return redirect()
+            ->to(route('courses.topics.questions.index', [$course, $topic, 'type' => $data['questionType']]) . '#work-results')
+            ->with('status', 'Question added.');
     }
 
     public function edit(Course $course, Topic $topic, Question $question)

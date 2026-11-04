@@ -47,7 +47,6 @@
                     <div class="work-table-scroll" role="region" aria-label="Exams table" tabindex="0">
                         <table class="work-table">
                             <thead><tr>
-                                <th scope="col">No.</th>
                                 <th scope="col">ToS</th>
                                 <th scope="col" class="work-num">Total items</th>
                                 <th scope="col" class="work-num">Total score</th>
@@ -57,7 +56,6 @@
                             <tbody>
                                 @foreach ($exams as $exam)
                                     <tr>
-                                        <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
                                         <td class="work-tos-title">{{ $exam->tosTitle }}</td>
                                         <td class="work-num">{{ $exam->totalItems }}</td>
                                         <td class="work-num">{{ $exam->totalScore }}</td>

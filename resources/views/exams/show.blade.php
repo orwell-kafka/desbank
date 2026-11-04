@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Exam #{{ $exam->examId }} · DESBank</title>
+    <title>{{ $tosTitle }} exam · DESBank</title>
     @include('partials.head-assets')
     @include('partials.workspace-assets')
 </head>
@@ -13,12 +13,12 @@
 
         <main id="main-content" class="work-main">
             <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.index', $course) }}">{{ $course->courseName }} exams</a><span aria-hidden="true">/</span><span aria-current="page">Exam #{{ $exam->examId }}</span>
+                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.index', $course) }}">{{ $course->courseName }} exams</a><span aria-hidden="true">/</span><span aria-current="page">{{ $tosTitle }}</span>
             </nav>
             <header class="work-heading work-heading-compact">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Generated exam</p>
-                    <h1>Exam #{{ $exam->examId }}<span class="work-title-period">.</span></h1>
+                    <h1>{{ $tosTitle }}<span class="work-title-period">.</span></h1>
                     <p class="work-intro">Replace any question by choosing another from the question bank, or let the system pick one, then format and print the paper.</p>
                 </div>
                 <div class="work-heading-actions">
@@ -167,7 +167,7 @@
                 </div>
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.exams.index', $course) }}">← Back to exams</a><span>Exam #{{ $exam->examId }}</span></div>
+            <div class="work-below-directory"><a href="{{ route('courses.exams.index', $course) }}">← Back to exams</a><span>{{ $tosTitle }}</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

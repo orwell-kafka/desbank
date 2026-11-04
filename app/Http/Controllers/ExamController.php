@@ -195,7 +195,7 @@ class ExamController extends Controller
             return response('Could not build the PDF preview: '.$e->getMessage(), 500);
         }
 
-        $name = Str::slug(($data['tos']->title ?? 'exam').'-exam-'.$exam->examId).'.pdf';
+        $name = Str::slug(($data['tos']->title ?? 'exam').'-exam').'.pdf';
 
         return response($pdf, 200, [
             'Content-Type' => 'application/pdf',
@@ -471,7 +471,10 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             $topicSummary[$id]['points'] += $pointsByKey[TosMatrix::key($q->bloomLevel, $q->questionType)] ?? 0;
         }
 
-        return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig', 'topicSummary'));
+        // Exams are identified by their ToS title, not by a number.
+        $tosTitle = Tos::find($exam->tosId)->title ?? 'Exam';
+
+        return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig', 'topicSummary', 'tosTitle'));
     }
 
     /**
@@ -508,10 +511,12 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         $this->authorizeExamBelongsToCourse($course, $exam);
         $this->authorizeQuestionInExam($exam, $question);
 
-        $candidates = $this->replacementPool($exam, $question)->orderBy('topicId')->orderBy('questionId')->get();
+        // Newest questions first, so recently added ones are easy to find.
+        $candidates = $this->replacementPool($exam, $question)->orderByDesc('questionId')->get();
         $topicNames = DB::table('topic')->whereIn('topicId', $candidates->pluck('topicId')->unique())->pluck('topicName', 'topicId');
+        $tosTitle = Tos::find($exam->tosId)->title ?? 'Exam';
 
-        return view('exams.replace', compact('course', 'exam', 'question', 'candidates', 'topicNames'));
+        return view('exams.replace', compact('course', 'exam', 'question', 'candidates', 'topicNames', 'tosTitle'));
     }
 
     public function replace(Request $request, Course $course, Exam $exam, Question $question)

@@ -42,6 +42,7 @@ class TosController extends Controller
         return view('tos.create', [
             'course' => $course,
             'topics' => $topics,
+            'bank' => $this->bankCounts($topics),
             'bloomLevels' => self::BLOOM_LEVELS,
             'questionTypes' => self::QUESTION_TYPES,
             'examTypes' => self::EXAM_TYPES,
@@ -66,6 +67,7 @@ class TosController extends Controller
             'course' => $course,
             'tos' => $tos,
             'topics' => $topics,
+            'bank' => $this->bankCounts($topics),
             'existingTopics' => $existingTopics,
             'existingBloom' => $existingBloom,
             'matrix' => $distribution['matrix'],
@@ -440,6 +442,20 @@ class TosController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * How many questions the Question Bank holds right now, per topic and "Bloom level|Question type".
+     * The ToS form uses this to show teachers how many items they can plan before generating an exam.
+     *
+     * @param  \Illuminate\Support\Collection|iterable  $topics  the course's topics
+     * @return array<int, array<string, int>>
+     */
+    private function bankCounts($topics): array
+    {
+        $ids = collect($topics)->pluck('topicId')->map(fn ($id) => (int) $id)->all();
+
+        return $ids ? TosMatrix::bankCaps($ids) : [];
     }
 
     private function authorizeOwner(Course $course): void

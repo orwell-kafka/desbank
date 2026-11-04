@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Replace question · Exam #{{ $exam->examId }} · DESBank</title>
+    <title>Replace question · {{ $tosTitle }} · DESBank</title>
     @include('partials.head-assets')
     @include('partials.workspace-assets')
 </head>
@@ -13,7 +13,7 @@
 
         <main id="main-content" class="work-main">
             <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.index', $course) }}">{{ $course->courseName }} exams</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.show', [$course, $exam]) }}">Exam #{{ $exam->examId }}</a><span aria-hidden="true">/</span><span aria-current="page">Replace question</span>
+                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.index', $course) }}">{{ $course->courseName }} exams</a><span aria-hidden="true">/</span><a href="{{ route('courses.exams.show', [$course, $exam]) }}">{{ $tosTitle }}</a><span aria-hidden="true">/</span><span aria-current="page">Replace question</span>
             </nav>
             <header class="work-heading work-heading-compact">
                 <div>
@@ -103,7 +103,7 @@
                 @endif
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.exams.show', [$course, $exam]) }}">← Back to exam</a><span>Exam #{{ $exam->examId }}</span></div>
+            <div class="work-below-directory"><a href="{{ route('courses.exams.show', [$course, $exam]) }}">← Back to exam</a><span>{{ $tosTitle }}</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>
