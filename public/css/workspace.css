@@ -301,7 +301,15 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
 
 .work-note { margin: 0 0 20px; padding: 11px 14px; border-left: 3px solid #d49a45; background: #fdf6ea; color: #6a4a14; font-size: 12.5px; line-height: 1.65; }
 
-.work-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; padding: 18px 29px; border-top: 1px solid var(--work-line); background: #f5f7f8; }
+/* The Save button always sits at the bottom-right of the form and stays pinned to the bottom of the
+   window while the form is longer than the screen, so it never has to be scrolled to. In the markup
+   the button comes first (keyboard order: Save, then Cancel); row-reverse puts it at the right. */
+.work-form-actions { position: sticky; bottom: 0; z-index: 30; display: flex; flex-direction: row-reverse; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 14px 18px; padding: 14px 29px; border-top: 1px solid var(--work-line); background: #f5f7f8; box-shadow: 0 -8px 16px -10px rgba(16, 40, 63, .28); }
+.work-form-actions .work-action-primary { min-width: 150px; justify-content: center; }
+/* Sticky needs a form that does not scroll on its own: "clip" still rounds the corners like "hidden". */
+@supports (overflow: clip) { .work-form { overflow: clip; } }
+/* Keep a field that gets keyboard focus from hiding behind the pinned bar. */
+html { scroll-padding-bottom: 96px; }
 .work-form-cancel { color: #2a5375; font: 600 13px var(--font-body, sans-serif); text-decoration: none; padding: 8px 2px; }
 .work-form-cancel:hover { color: #a16a18; text-decoration: underline; }
 
@@ -447,7 +455,8 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
     .work-section-head { grid-template-columns: 30px minmax(0, 1fr); }
     .work-section-body { margin-left: 0; }
     .work-field-row { grid-template-columns: 1fr; }
-    .work-form-actions { padding: 16px 20px; }
+    .work-form-actions { padding: 12px 20px; gap: 10px 14px; }
+    .work-form-actions .work-action-primary { flex: 1 1 auto; }
     .work-meta > div { padding: 14px 18px 15px; }
     .work-type { grid-template-columns: 30px minmax(0, 1fr) auto 18px; gap: 0 10px; padding: 17px 20px; }
     .work-type-count span { display: none; }
@@ -472,7 +481,7 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
 @media (prefers-reduced-motion: reduce) { .is-flash { animation: none; outline: 3px solid var(--work-gold); } }
 
 /* ---- ToS score summary ---- */
-.work-score-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0 0 14px; border: 1px solid var(--work-line); border-radius: 4px; background: #fff; overflow: hidden; }
+.work-score-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 0 0 14px; border: 1px solid var(--work-line); border-radius: 4px; background: #fff; overflow: hidden; }
 .work-score-stat { padding: 12px 16px; border-left: 1px solid var(--work-line); }
 .work-score-stat:first-child { border-left: 0; }
 .work-score-label { display: block; font: 500 11px var(--font-mono, monospace); letter-spacing: .07em; text-transform: uppercase; color: #607181; }
@@ -482,7 +491,7 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
 .work-score-bar span { display: block; height: 100%; width: 0; background: #d49a45; transition: width .25s ease; }
 .work-score-summary.is-ok .work-score-bar span { background: #23825d; }
 .work-score-summary.is-over .work-score-bar span { background: #c24848; }
-.work-score-summary.is-ok #scoreRemaining { color: var(--work-ok); }
+.work-score-summary.is-ok #scoreAccumulated { color: var(--work-ok); }
 .work-score-summary.is-over #scoreRemaining { color: var(--work-bad); }
 @media (max-width: 700px) { .work-score-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .work-score-stat:nth-child(3) { border-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .work-score-bar span { transition: none; } }
@@ -555,3 +564,7 @@ tr[hidden] { display: none; }
 .work-bank.is-none .work-bank-count, .work-bank.is-over .work-bank-count { color: var(--work-bad); }
 .work-bank-warn { color: var(--work-bad); font: 500 11px var(--font-mono, monospace); }
 @media (max-width: 700px) { .work-bank-body { flex-direction: column; gap: 6px; } }
+
+/* ---- Live preview of the row being typed (ToS builder) ---- */
+.work-pending { min-height: 20px; margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: #3b5b78; }
+.work-pending:empty { display: none; }

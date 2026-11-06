@@ -25,7 +25,7 @@
 
             <dl class="work-meta">
                 <div><dt>Exam type</dt><dd>{{ $tos->examType }}</dd></div>
-                <div><dt>Total score</dt><dd>{{ $tos->totalScore }}</dd></div>
+                <div><dt>Total score</dt><dd>{{ \App\Support\Points::format($tos->totalScore) }}</dd></div>
             </dl>
 
             <section class="work-directory" aria-labelledby="work-t1">
@@ -48,14 +48,14 @@
                                     <td class="work-course-name">{{ $row->topicName }}</td>
                                     <td class="work-num">{{ $row->contactHours }}</td>
                                     <td class="work-num">{{ $row->generatedWeight }}%</td>
-                                    <td class="work-num">{{ rtrim(rtrim(number_format($row->assignedPoints, 2, '.', ''), '0'), '.') }}</td>
+                                    <td class="work-num">{{ \App\Support\Points::format($row->assignedPoints) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="3">Total</td>
-                                <td class="work-num">{{ rtrim(rtrim(number_format($topicPointsTotal, 2, '.', ''), '0'), '.') }}</td>
+                                <td class="work-num">{{ \App\Support\Points::format($topicPointsTotal) }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -83,7 +83,7 @@
                                     <td><span class="work-chip">{{ $row->bloomLevel }}</span></td>
                                     <td>{{ $row->questionType }}</td>
                                     <td class="work-num">{{ $row->generatedItemCount }}</td>
-                                    <td class="work-num">{{ $row->generatedScore }}</td>
+                                    <td class="work-num">{{ \App\Support\Points::format($row->generatedScore) }}</td>
                                     <td class="work-num">{{ $tos->totalScore > 0 ? number_format(($row->generatedScore / $tos->totalScore) * 100, 2) : 0 }}%</td>
                                 </tr>
                             @endforeach
@@ -91,7 +91,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="3">Total</td>
-                                <td class="work-num">{{ number_format($bloomScoreTotal, 2) }}</td>
+                                <td class="work-num">{{ \App\Support\Points::format($bloomScoreTotal) }}</td>
                                 <td></td>
                             </tr>
                         </tfoot>

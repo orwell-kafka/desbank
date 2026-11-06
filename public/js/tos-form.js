@@ -13,16 +13,10 @@
     var statusEl = document.getElementById('bloomTotalStatus');
     var errorEl = document.getElementById('bloomRowError');
     var addBtn = document.getElementById('addBloomRowBtn');
-    var targetInput = form.querySelector('input[name="totalScore"]');
     var COLS = 6;
 
     var accEl = document.getElementById('scoreAccumulated');
-    var tgtEl = document.getElementById('scoreTarget');
-    var remEl = document.getElementById('scoreRemaining');
-    var remNoteEl = document.getElementById('scoreRemainingNote');
     var itemsEl = document.getElementById('scoreItems');
-    var barEl = document.getElementById('scoreBar');
-    var barFillEl = document.getElementById('scoreBarFill');
     var summaryEl = document.getElementById('scoreSummary');
 
     var rows = [];
@@ -32,6 +26,16 @@
     });
 
     var touchedKey = null;
+
+    // Points are shown without trailing zeroes and with the word "Points": 20 -> "20 Points",
+    // 2.5 -> "2.5 Points", 1 -> "1 Point". Keep in step with App\Support\Points in PHP.
+    function fmtNumber(n) {
+        var t = (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace(/\.?0+$/, '');
+        return (t === '' || t === '-0') ? '0' : t;
+    }
+    function fmtPoints(n) {
+        return fmtNumber(n) + (Math.abs((Number(n) || 0) - 1) < 0.00001 ? ' Point' : ' Points');
+    }
 
     function td(content, cls) {
         var cell = document.createElement('td');
@@ -47,50 +51,24 @@
         return s;
     }
 
-    // Accumulated total, target, remaining and item count, kept in sync on every change.
-    function updateSummary(total, target) {
+    // The total score is never typed in: it is the sum of the Table 2 rows and is saved that way.
+    // It is recalculated on every add, remove and change, together with the item count.
+    function updateSummary(total) {
         if (!summaryEl) return;
         var items = rows.reduce(function (n, r) { return n + r.count; }, 0);
-        var hasTarget = !isNaN(target) && target > 0;
-        var diff = hasTarget ? target - total : NaN;
-        var state = !hasTarget ? '' : (Math.abs(diff) < 0.005 ? 'is-ok' : (diff < 0 ? 'is-over' : 'is-short'));
-
-        accEl.textContent = total.toFixed(2);
+        accEl.textContent = fmtPoints(total);
         itemsEl.textContent = String(items);
-        tgtEl.textContent = hasTarget ? target.toFixed(2) : '\u2014';
-        if (!hasTarget) {
-            remEl.textContent = '\u2014';
-            remNoteEl.textContent = 'enter a target';
-        } else if (state === 'is-ok') {
-            remEl.textContent = '0.00';
-            remNoteEl.textContent = 'target reached';
-        } else if (diff > 0) {
-            remEl.textContent = diff.toFixed(2);
-            remNoteEl.textContent = 'still to add';
-        } else {
-            remEl.textContent = Math.abs(diff).toFixed(2);
-            remNoteEl.textContent = 'over target';
-        }
-        var pct = hasTarget ? Math.max(0, Math.min(100, (total / target) * 100)) : 0;
-        barFillEl.style.width = pct.toFixed(1) + '%';
-        barEl.setAttribute('aria-valuenow', String(Math.round(pct)));
-        summaryEl.className = 'work-score-summary' + (state ? ' ' + state : '');
+        summaryEl.className = 'work-score-summary' + (rows.length ? ' is-ok' : '');
     }
 
     function updateStatus(total) {
-        var target = targetInput ? parseFloat(targetInput.value) : NaN;
-        updateSummary(total, target);
+        updateSummary(total);
         var cls = 'work-status', msg;
         if (!rows.length) {
             msg = 'Add at least one row';
-        } else if (isNaN(target)) {
-            msg = 'Enter a total score to compare';
-        } else if (Math.abs(total - target) < 0.005) {
-            cls += ' is-ok'; msg = 'Matches total score (' + target.toFixed(2) + ')';
-        } else if (total < target) {
-            cls += ' is-bad'; msg = 'Short by ' + (target - total).toFixed(2) + ' of ' + target.toFixed(2);
         } else {
-            cls += ' is-bad'; msg = 'Over by ' + (total - target).toFixed(2) + ' of ' + target.toFixed(2);
+            cls += ' is-ok';
+            msg = 'Total score: ' + fmtPoints(total) + ' (' + rows.length + (rows.length === 1 ? ' row' : ' rows') + ')';
         }
         statusEl.className = cls;
         statusEl.textContent = msg;
@@ -206,7 +184,7 @@
 
             tr.appendChild(td(chip(row.level)));
             tr.appendChild(td(chip(row.type, 'work-chip-gold')));
-            tr.appendChild(td(String(row.points), 'work-num'));
+            tr.appendChild(td(fmtPoints(row.points), 'work-num'));
             var countCell = td(String(row.count), 'work-num');
             if (bankEl) {
                 var inBank = bankFor(row.level, row.type, selectedTopicIds());
@@ -219,15 +197,35 @@
                 }
             }
             tr.appendChild(countCell);
-            tr.appendChild(td(score.toFixed(2), 'work-num'));
+            tr.appendChild(td(fmtPoints(score), 'work-num'));
             tr.appendChild(td(remove));
             body.appendChild(tr);
         });
 
         touchedKey = null;
-        totalEl.textContent = total.toFixed(2);
+        totalEl.textContent = fmtPoints(total);
         updateStatus(total);
         updateBank();
+        updatePending();
+    }
+
+    // Live preview of the row being typed, so the effect on the total is visible before pressing
+    // "Add row", not only after every row has been entered.
+    function updatePending() {
+        var el = document.getElementById('pendingPreview');
+        if (!el) return;
+        var level = document.getElementById('newBloomLevel').value;
+        var type = document.getElementById('newQuestionType').value;
+        var points = parseFloat(document.getElementById('newPoints').value) || 0;
+        var count = parseInt(document.getElementById('newCount').value, 10) || 0;
+        if (points <= 0 || count <= 0) { el.textContent = ''; return; }
+
+        var rowScore = points * count;
+        var replaced = 0;
+        rows.forEach(function (r) { if (r.level === level && r.type === type) replaced = r.points * r.count; });
+        var after = currentTotal() - replaced + rowScore;
+        var msg = 'Adding this row: ' + count + ' \u00d7 ' + fmtPoints(points) + ' = ' + fmtPoints(rowScore) + (replaced ? ' (replaces ' + fmtPoints(replaced) + ')' : '') + '. Total score will be ' + fmtPoints(after) + '.';
+        el.textContent = msg;
     }
 
     function currentTotal() {
@@ -290,8 +288,41 @@
         });
     }
 
-    if (targetInput) {
-        targetInput.addEventListener('input', function () { updateStatus(currentTotal()); });
+    ['newBloomLevel', 'newQuestionType'].forEach(function (id) {
+        document.getElementById(id).addEventListener('change', updatePending);
+    });
+    ['newPoints', 'newCount'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', updatePending);
+    });
+
+    // Optional "Fine-tune topic distribution" table: row totals, per-topic points and the grand total
+    // follow every keystroke instead of waiting for the form to be saved.
+    var matrixEl = document.getElementById('matrixTable');
+    function updateMatrix() {
+        if (!matrixEl) return;
+        var perKey = {}, grand = 0;
+        Array.prototype.forEach.call(matrixEl.querySelectorAll('tr[data-matrix-topic]'), function (tr) {
+            var topicPoints = 0;
+            Array.prototype.forEach.call(tr.querySelectorAll('input[data-matrix-key]'), function (inp) {
+                var n = parseInt(inp.value, 10) || 0;
+                var key = inp.getAttribute('data-matrix-key');
+                perKey[key] = (perKey[key] || 0) + n;
+                topicPoints += n * (parseFloat(inp.getAttribute('data-points')) || 0);
+            });
+            tr.querySelector('[data-topic-points]').textContent = fmtPoints(topicPoints);
+            grand += topicPoints;
+        });
+        Array.prototype.forEach.call(matrixEl.querySelectorAll('[data-row-total]'), function (cell) {
+            var key = cell.getAttribute('data-row-total');
+            var got = perKey[key] || 0, want = parseInt(cell.getAttribute('data-expected'), 10) || 0;
+            cell.textContent = got + (got === want ? '' : ' / ' + want);
+            cell.className = 'work-num' + (got === want ? '' : ' work-bank-warn');
+        });
+        document.getElementById('matrixTotalPoints').textContent = fmtPoints(grand);
+    }
+    if (matrixEl) {
+        matrixEl.addEventListener('input', updateMatrix);
+        updateMatrix();
     }
 
     form.addEventListener('submit', function () {

@@ -63,7 +63,7 @@
                                         <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
                                         <td class="work-tos-title">{{ $tos->title }}</td>
                                         <td><span class="work-chip work-chip-gold">{{ $tos->examType }}</span></td>
-                                        <td class="work-num">{{ $tos->totalScore }}</td>
+                                        <td class="work-num">{{ \App\Support\Points::format($tos->totalScore) }}</td>
                                         <td>
                                             <div class="work-row-actions">
                                                 <form method="POST" action="{{ route('courses.tos.generate', [$course, $tos]) }}" data-pending>

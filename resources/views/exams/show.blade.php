@@ -36,7 +36,7 @@
 
             <dl class="work-meta">
                 <div><dt>Total items</dt><dd>{{ $exam->totalItems }}</dd></div>
-                <div><dt>Total score</dt><dd>{{ $exam->totalScore }}</dd></div>
+                <div><dt>Total score</dt><dd>{{ \App\Support\Points::format($exam->totalScore) }}</dd></div>
                 <div><dt>Created</dt><dd>{{ $exam->created }}</dd></div>
             </dl>
 
@@ -56,7 +56,7 @@
                                 <tr>
                                     <td><span class="work-chip">{{ $row->bloomLevel }}</span></td>
                                     <td class="work-num">{{ $row->numberItems }}</td>
-                                    <td class="work-num">{{ $row->numScore }}</td>
+                                    <td class="work-num">{{ \App\Support\Points::format($row->numScore) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -77,7 +77,7 @@
                             <th scope="col" class="work-num">ToS assigned</th>
                         </tr></thead>
                         <tbody>
-                            @php $fmt = fn ($n) => rtrim(rtrim(number_format((float) $n, 2, '.', ''), '0'), '.'); @endphp
+                            @php $fmt = fn ($n) => \App\Support\Points::format($n); @endphp
                             @foreach ($topicSummary as $row)
                                 <tr>
                                     <td>{{ $row['name'] }}</td>

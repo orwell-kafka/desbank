@@ -69,10 +69,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="work-field">
-                                    <label class="work-label" for="totalScore">Total score</label>
-                                    <input type="number" step="0.01" id="totalScore" name="totalScore" class="work-input {{ $errors->has('totalScore') ? 'is-invalid' : '' }}" value="{{ old('totalScore', $tos->totalScore) }}" required @if ($errors->has('totalScore')) aria-invalid="true" @endif>
-                                </div>
                             </div>
                         </div>
                     </section>
@@ -112,15 +108,12 @@
                     <section class="work-section" aria-labelledby="tf-bloom">
                         <div class="work-section-head">
                             <span class="work-section-num" aria-hidden="true">03</span>
-                            <div><h2 id="tf-bloom">Table 2 — Bloom's taxonomy distribution</h2><p>Pick a Bloom level, question type, points per item, and item count, then add the row. The total score across all rows must equal the Total Score above.</p></div>
+                            <div><h2 id="tf-bloom">Table 2 — Bloom's taxonomy distribution</h2><p>Pick a Bloom level, question type, points per item, and item count, then add the row. The total score is added up automatically from the rows you add.</p></div>
                         </div>
                         <div class="work-section-body">
                             <div class="work-score-summary" id="scoreSummary" aria-label="Score summary">
-                                <div class="work-score-stat"><span class="work-score-label">Total score</span><strong id="scoreAccumulated">0.00</strong><small>added so far</small></div>
-                                <div class="work-score-stat"><span class="work-score-label">Target score</span><strong id="scoreTarget">&mdash;</strong><small>from Details</small></div>
-                                <div class="work-score-stat"><span class="work-score-label">Remaining</span><strong id="scoreRemaining">&mdash;</strong><small id="scoreRemainingNote">enter a target</small></div>
+                                <div class="work-score-stat"><span class="work-score-label">Total score</span><strong id="scoreAccumulated">0 Points</strong><small>adds up as you add rows</small></div>
                                 <div class="work-score-stat"><span class="work-score-label">Items</span><strong id="scoreItems">0</strong><small>questions planned</small></div>
-                                <div class="work-score-bar" id="scoreBar" role="progressbar" aria-label="Progress toward target score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scoreBarFill"></span></div>
                             </div>
                             <div class="work-builder {{ $errors->has('bloomKey') ? 'is-invalid' : '' }}" data-error-key="bloomKey itemCount pointsPerItem" role="group" aria-label="Add a distribution row">
                                 <div class="work-field">
@@ -151,6 +144,7 @@
                                     <button type="button" id="addBloomRowBtn" class="work-action-primary">Add row <span aria-hidden="true">+</span></button>
                                 </div>
                             </div>
+                            <p class="work-pending" id="pendingPreview" aria-live="polite"></p>
                             @include('partials.tos-bank-indicator')
                             <p id="bloomRowError" class="work-builder-error" role="alert" hidden></p>
 
@@ -168,7 +162,7 @@
                                 </table>
                             </div>
                             <div class="work-total">
-                                <span>Table 2 total <strong id="bloomRunningTotal">0.00</strong></span>
+                                <span>Table 2 total <strong id="bloomRunningTotal">0 Points</strong></span>
                                 <span id="bloomTotalStatus" class="work-status" role="status" aria-live="polite"></span>
                             </div>
                             <div id="bloomHiddenInputs"></div>
@@ -189,22 +183,24 @@
                                     <span>Use my own distribution</span>
                                 </label>
                                 <div class="work-table-scroll work-table-framed" role="region" aria-label="Items per topic and Bloom row" tabindex="0">
-                                    <table class="work-table work-table-inset">
+                                    <table class="work-table work-table-inset" id="matrixTable">
                                         <thead><tr>
                                             <th scope="col">Topic</th>
                                             @foreach ($matrixRows as $key => $mrow)
                                                 @php [$mLevel, $mType] = explode('|', $key, 2); @endphp
-                                                <th scope="col" class="work-num">{{ $mLevel }}<br><small>{{ $mType }} ({{ rtrim(rtrim(number_format($mrow['points'], 2, '.', ''), '0'), '.') }} pt)</small></th>
+                                                <th scope="col" class="work-num">{{ $mLevel }}<br><small>{{ $mType }} ({{ \App\Support\Points::format($mrow['points']) }} each)</small></th>
                                             @endforeach
+                                            <th scope="col" class="work-num">Topic points</th>
                                         </tr></thead>
                                         <tbody>
                                             @foreach ($topics as $topic)
                                                 @continue(! isset($matrix[$topic->topicId]))
-                                                <tr>
+                                                <tr data-matrix-topic>
                                                     <td class="work-course-name">{{ $topic->topicName }}</td>
                                                     @foreach ($matrixRows as $key => $mrow)
-                                                        <td class="work-num"><input type="number" min="0" step="1" class="work-input work-hours" name="matrix[{{ $topic->topicId }}][{{ $key }}]" value="{{ $oldMatrix[$topic->topicId][$key] ?? $matrix[$topic->topicId][$key] ?? 0 }}" aria-label="{{ $topic->topicName }}: {{ $key }}"></td>
+                                                        <td class="work-num"><input type="number" min="0" step="1" class="work-input work-hours" data-matrix-key="{{ $key }}" data-points="{{ $mrow['points'] }}" name="matrix[{{ $topic->topicId }}][{{ $key }}]" value="{{ $oldMatrix[$topic->topicId][$key] ?? $matrix[$topic->topicId][$key] ?? 0 }}" aria-label="{{ $topic->topicName }}: {{ $key }}"></td>
                                                     @endforeach
+                                                    <td class="work-num"><strong data-topic-points>0 Points</strong></td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -212,8 +208,9 @@
                                             <tr>
                                                 <td>Row total</td>
                                                 @foreach ($matrixRows as $key => $mrow)
-                                                    <td class="work-num">{{ $mrow['count'] }}</td>
+                                                    <td class="work-num" data-row-total="{{ $key }}" data-expected="{{ $mrow['count'] }}">{{ $mrow['count'] }}</td>
                                                 @endforeach
+                                                <td class="work-num"><strong id="matrixTotalPoints">0 Points</strong></td>
                                             </tr>
                                         </tfoot>
                                     </table>

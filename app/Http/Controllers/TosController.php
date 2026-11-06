@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Tos;
+use App\Support\Points;
 use App\Support\TosMatrix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,6 @@ class TosController extends Controller
     private const VALIDATION_MESSAGES = [
         'title.required' => 'Required: enter a ToS title.',
         'examType.required' => 'Required: choose an exam type.',
-        'totalScore.required' => 'Required: enter the total score.',
         'topicId.required' => 'Required: check at least one topic in Table 1.',
         'topicId.min' => 'Required: check at least one topic in Table 1.',
         'contactHours.required' => 'Required: enter contact hours for the checked topics.',
@@ -86,7 +86,6 @@ class TosController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'examType' => ['required', 'in:' . implode(',', self::EXAM_TYPES)],
-            'totalScore' => ['required', 'numeric', 'min:1'],
             'topicId' => ['required', 'array', 'min:1'],
             'topicId.*' => ['integer'],
             'contactHours' => ['required', 'array'],
@@ -98,14 +97,14 @@ class TosController extends Controller
         $result = $this->computeAndValidate($request, $data);
 
         if (isset($result['error'])) {
-            return back()->withErrors([($result['field'] ?? 'totalScore') => $result['error']])->withInput();
+            return back()->withErrors([($result['field'] ?? 'bloomKey') => $result['error']])->withInput();
         }
 
         DB::transaction(function () use ($tos, $data, $result) {
             DB::table('tos')->where('tosId', $tos->tosId)->update([
                 'title' => $data['title'],
                 'examType' => $data['examType'],
-                'totalScore' => $data['totalScore'],
+                'totalScore' => $result['totalScore'],
             ]);
 
             DB::table('tostopicbloom')->where('tosId', $tos->tosId)->delete();
@@ -146,7 +145,6 @@ class TosController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'examType' => ['required', 'in:' . implode(',', self::EXAM_TYPES)],
-            'totalScore' => ['required', 'numeric', 'min:1'],
             'topicId' => ['required', 'array', 'min:1'],
             'topicId.*' => ['integer'],
             'contactHours' => ['required', 'array'],
@@ -158,7 +156,7 @@ class TosController extends Controller
         $result = $this->computeAndValidate($request, $data);
 
         if (isset($result['error'])) {
-            return back()->withErrors([($result['field'] ?? 'totalScore') => $result['error']])->withInput();
+            return back()->withErrors([($result['field'] ?? 'bloomKey') => $result['error']])->withInput();
         }
 
         DB::transaction(function () use ($course, $data, $result) {
@@ -166,7 +164,7 @@ class TosController extends Controller
                 'courseId' => $course->courseId,
                 'title' => $data['title'],
                 'examType' => $data['examType'],
-                'totalScore' => $data['totalScore'],
+                'totalScore' => $result['totalScore'],
                 'contactHours' => 0,
                 'generatedWeight' => 0,
             ], 'tosId');
@@ -305,8 +303,6 @@ class TosController extends Controller
 
     private function computeAndValidate(Request $request, array $data): array
     {
-        $totalScore = round((float) $data['totalScore'], 2);
-
         $topicIds = $data['topicId'];
         $contactHoursInput = $request->input('contactHours', []);
 
@@ -372,9 +368,7 @@ class TosController extends Controller
 
         $bloomScoreTotal = round($bloomScoreTotal, 2);
 
-        if (abs($bloomScoreTotal - $totalScore) > 0.01) {
-            return ['error' => "Bloom's Taxonomy total score ({$bloomScoreTotal}) does not match the ToS total score ({$totalScore}). Adjust item counts or points per item and try again.", 'field' => 'bloomKey'];
-        }
+        // The total score is not asked for: it is simply the sum of the Table 2 rows.
 
         // How many items of each Bloom/type row belong to each topic. Normally worked out automatically
         // (closest to each topic's contact-hours share); the user may supply their own on the edit page.
@@ -421,7 +415,7 @@ class TosController extends Controller
         }
         unset($topicRow);
 
-        return ['topics' => $topics, 'bloom' => $bloom, 'matrix' => $matrix];
+        return ['topics' => $topics, 'bloom' => $bloom, 'matrix' => $matrix, 'totalScore' => $bloomScoreTotal];
     }
 
     /** Stores the topic x Bloom/type item counts (zero cells are left out). */

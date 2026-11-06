@@ -58,7 +58,7 @@
                                     <tr>
                                         <td class="work-tos-title">{{ $exam->tosTitle }}</td>
                                         <td class="work-num">{{ $exam->totalItems }}</td>
-                                        <td class="work-num">{{ $exam->totalScore }}</td>
+                                        <td class="work-num">{{ \App\Support\Points::format($exam->totalScore) }}</td>
                                         <td class="work-email">{{ $exam->created }}</td>
                                         <td>
                                             <div class="work-row-actions">

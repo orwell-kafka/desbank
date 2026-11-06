@@ -67,12 +67,10 @@
                                 <label class="work-label" for="content">Question text</label>
                                 <textarea name="content" id="content" rows="4" required class="work-textarea {{ $errors->has('content') ? 'is-invalid' : '' }}">{{ old('content') }}</textarea>
                             </div>
-                            <div id="blankTools" class="work-blank-tools" role="group" aria-label="Blanks and answer lines">
-                                <span class="work-blank-tools-label">Blanks &amp; answer lines</span>
+                            <div id="blankTools" class="work-blank-tools" role="group" aria-label="Blanks">
+                                <span class="work-blank-tools-label">Blanks</span>
                                 <div class="work-blank-tools-row">
                                     <button type="button" class="work-row-btn work-row-btn-primary" data-blank="cursor">Insert blank at cursor</button>
-                                    <button type="button" class="work-row-btn" data-blank="start">Answer line at start</button>
-                                    <button type="button" class="work-row-btn" data-blank="end">Answer line at end</button>
                                     <button type="button" class="work-row-btn" data-blank="clear">Remove blanks</button>
                                     <label class="work-blank-len">Length
                                         <select id="blankLength" class="work-select" aria-label="Blank length">

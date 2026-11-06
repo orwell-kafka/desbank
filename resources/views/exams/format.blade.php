@@ -16,6 +16,10 @@
         .settings .checkbox-line { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; }
         .settings .checkbox-line input { width: auto; margin: 0; }
         .settings button { margin-top: 16px; width: 100%; padding: 8px; background: #2563eb; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        /* Update Preview stays pinned to the bottom-right of the settings panel while it scrolls. */
+        .settings { scroll-padding-bottom: 72px; }
+        .settings .save-bar { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: flex-end; margin: 16px -20px 0; padding: 12px 20px; background: #fff; border-top: 1px solid #e5e7eb; box-shadow: 0 -8px 14px -10px rgba(0,0,0,.25); }
+        .settings .save-bar button { width: auto; min-width: 150px; margin: 0; padding: 9px 20px; font-size: 13px; font-weight: 600; }
         .settings .print-btn { background: #16a34a; margin-top: 8px; }
         .settings textarea { width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 12px; font-family: inherit; line-height: 1.45; resize: vertical; }
         .settings .direction-block { margin-top: 10px; }
@@ -320,7 +324,7 @@
                 @endif
                 <input type="file" name="watermarkImage" accept="image/*">
 
-                <button type="submit">Update Preview</button>
+                <div class="save-bar"><button type="submit">Update Preview</button></div>
             
 <script>
                     (function () {
