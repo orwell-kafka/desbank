@@ -238,7 +238,11 @@ class ExamController extends Controller
 
         $columnsPerPart = $exam->columnsPerPart ? json_decode($exam->columnsPerPart, true) : [];
 
-        return compact('tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart');
+        $answerLineTypes = self::ANSWER_LINE_TYPES;
+        $answerLineDefault = self::ANSWER_LINE_DEFAULT;
+        $answerLines = $this->resolveAnswerLines($exam);
+
+        return compact('tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart', 'answerLineTypes', 'answerLineDefault', 'answerLines');
     }
 
 public function answerKey(Course $course, Exam $exam)
@@ -348,7 +352,24 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             'partOrder' => ['nullable', 'array'],
             'directions' => ['nullable', 'array'],
             'directions.*' => ['nullable', 'string', 'max:600'],
-        ], [], ['directions.*' => 'direction text']);
+            'answerLines' => ['nullable', 'array'],
+            'answerLines.*' => ['nullable', 'numeric', 'between:0,4'],
+        ], [], ['directions.*' => 'direction text', 'answerLines.*' => 'answer line length']);
+
+        // Answer lines: keep only the types that print one. Blank = default length; 0 = no line.
+        // Only values that differ from the default are stored.
+        $lineOverrides = [];
+        foreach ((array) ($data['answerLines'] ?? []) as $type => $len) {
+            if (! in_array($type, self::ANSWER_LINE_TYPES, true) || $len === null || $len === '') {
+                continue;
+            }
+            $len = round((float) $len, 1);
+            if ($len !== self::ANSWER_LINE_DEFAULT) {
+                $lineOverrides[$type] = $len;
+            }
+        }
+        unset($data['answerLines']);
+        $data['answerLineLengths'] = $lineOverrides ? json_encode($lineOverrides) : null;
 
         // Directions: keep only known parts, and store only text that differs from the default.
         // An empty box (or text equal to the default) resets that part to the default wording.
@@ -401,6 +422,27 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
     }
 
     
+
+    /** Question types that print a blank answer line before the item number. */
+    public const ANSWER_LINE_TYPES = ['True/False', 'Enumeration', 'Matching Type'];
+
+    /** Default answer-line length, in inches. */
+    public const ANSWER_LINE_DEFAULT = 0.8;
+
+    /** Answer-line length (inches) per type: the default, with this exam's saved edits applied. */
+    private function resolveAnswerLines(Exam $exam): array
+    {
+        $lines = array_fill_keys(self::ANSWER_LINE_TYPES, self::ANSWER_LINE_DEFAULT);
+        $saved = $exam->answerLineLengths ? json_decode($exam->answerLineLengths, true) : [];
+        if (is_array($saved)) {
+            foreach ($saved as $type => $len) {
+                if (array_key_exists($type, $lines) && is_numeric($len)) {
+                    $lines[$type] = max(0.0, min(4.0, (float) $len));
+                }
+            }
+        }
+        return $lines;
+    }
 
     /** Default printed direction for each question type. */
     public static function defaultDirections(): array

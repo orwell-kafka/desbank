@@ -26,6 +26,12 @@
         .settings .direction-block .direction-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #4b5563; }
         .settings .direction-reset { width: auto; margin: 0; padding: 2px 8px; background: #fff; color: #2563eb; border: 1px solid #d1d5db; font-size: 11px; }
         .settings .direction-reset:hover { background: #eff6ff; }
+        .settings .direction-edit { width: auto; margin: 0; padding: 2px 10px; background: #fff; color: #2563eb; border: 1px solid #d1d5db; font-size: 11px; }
+        .settings .direction-edit:hover { background: #eff6ff; }
+        .settings .direction-view { margin-top: 4px; padding: 6px 8px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 12px; line-height: 1.45; color: #374151; white-space: pre-line; }
+        .settings .direction-editor[hidden], .settings .direction-view[hidden], .settings .direction-edit[hidden] { display: none; }
+        .settings .direction-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+        .settings .direction-ok { width: auto; margin: 0; padding: 4px 14px; font-size: 12px; font-weight: 600; }
         .settings .direction-edited { font-size: 11px; color: #b45309; }
         .settings a.print-btn { display: block; box-sizing: border-box; margin-top: 8px; padding: 8px; background: #16a34a; color: #fff; border-radius: 4px; text-align: center; text-decoration: none; font-size: 13px; }
         .settings a.print-btn-alt { background: #2563eb; }
@@ -81,7 +87,18 @@
         .question-item { font-size: 13px; margin-bottom: 10px; break-inside: avoid; }
         .choices { margin-top: 4px; margin-left: 15px; }
         .choices div { font-size: 12px; margin-bottom: 2px; }
+        /* Choices sit side by side when they all fit on one line; otherwise they stack (see $choicesFit in the view). */
+        .choices.choices-row { display: flex; flex-wrap: wrap; column-gap: 28px; row-gap: 2px; }
+        .choices.choices-row div { margin-bottom: 0; }
         .essay-lines { margin-top: 8px; height: 100px; }
+
+        /* Blank answer line printed before the item number (True/False, Enumeration, Matching Type).
+           Its length comes from --len (inches), set per section in the settings panel. */
+        .answer-line { display: inline-block; width: var(--len, 0.8in); height: 0.95em; margin-right: 6px; border-bottom: 1px solid #000; vertical-align: baseline; }
+        .answer-line.is-off { display: none; }
+        .settings .al-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+        .settings .al-row span { font-size: 12px; color: #4b5563; }
+        .settings .al-row input { width: 80px; margin-top: 0; }
 
         .matching-layout { display: flex; gap: 30px; margin-top: 8px; }
         .matching-col-a { flex: 1; }
@@ -252,6 +269,17 @@
                     </div>
                 @endforeach
 
+                <h3>Answer Lines</h3>
+                <div class="hint" style="margin-bottom:6px;">A blank line is printed before the item number. Set its length in inches (0 hides it). Leave empty for the default ({{ rtrim(rtrim(number_format($answerLineDefault, 1), '0'), '.') }} in).</div>
+                @foreach ($presentTypes as $type)
+                    @continue(! in_array($type, $answerLineTypes, true))
+                    @php $alVal = old('answerLines.' . $type, $answerLines[$type] ?? $answerLineDefault); @endphp
+                    <div class="al-row">
+                        <span>{{ $type }}</span>
+                        <input type="number" name="answerLines[{{ $type }}]" data-answer-line="{{ $type }}" data-default="{{ $answerLineDefault }}" min="0" max="4" step="0.1" value="{{ $alVal }}" aria-label="Answer line length for {{ $type }} (inches)">
+                    </div>
+                @endforeach
+
                 <h3>Section Order</h3>
                 <div class="hint" style="margin-bottom:6px;">Drag to reorder which section prints first.</div>
                 @php $currentOrder = $questions->keys(); @endphp
@@ -265,15 +293,26 @@
                 <div id="partOrderInputs"></div>
 
                 <h3>Section Directions</h3>
-                <div class="hint" style="margin-bottom:6px;">Edit the instruction printed under each part. Leave a box empty, or press Reset, to use the default wording.</div>
+                <div class="hint" style="margin-bottom:6px;">The instruction printed under each part is shown below. Click Edit to change it, then Okay to save. Clearing the box, or pressing Reset, restores the default wording.</div>
                 @foreach ($presentTypes as $type)
-                    @php $directionValue = old('directions.' . $type, $directions[$type] ?? ''); @endphp
-                    <div class="direction-block">
+                    @php
+                        $directionValue = old('directions.' . $type, $directions[$type] ?? '');
+                        $directionShown = trim((string) $directionValue) === '' ? ($defaultDirections[$type] ?? '') : $directionValue;
+                        $directionOpen = $errors->has('directions.' . $type);
+                    @endphp
+                    <div class="direction-block" data-direction-block>
                         <div class="direction-head">
                             <label for="direction-{{ $loop->index }}" style="margin:0; font-size:12px;">{{ $type }}</label>
-                            <button type="button" class="direction-reset" data-target="direction-{{ $loop->index }}">Reset</button>
+                            <button type="button" class="direction-edit" data-edit="direction-{{ $loop->index }}" {{ $directionOpen ? 'hidden' : '' }}>Edit</button>
                         </div>
-                        <textarea id="direction-{{ $loop->index }}" name="directions[{{ $type }}]" rows="3" maxlength="600" data-type="{{ $type }}" data-default="{{ $defaultDirections[$type] ?? '' }}">{{ $directionValue }}</textarea>
+                        <div class="direction-view" data-type="{{ $type }}" {{ $directionOpen ? 'hidden' : '' }}>{{ $directionShown }}</div>
+                        <div class="direction-editor" {{ $directionOpen ? '' : 'hidden' }}>
+                            <textarea id="direction-{{ $loop->index }}" name="directions[{{ $type }}]" rows="3" maxlength="600" data-type="{{ $type }}" data-default="{{ $defaultDirections[$type] ?? '' }}">{{ $directionValue }}</textarea>
+                            <div class="direction-actions">
+                                <button type="button" class="direction-reset" data-target="direction-{{ $loop->index }}">Reset</button>
+                                <button type="submit" class="direction-ok">Okay</button>
+                            </div>
+                        </div>
                     </div>
                 @endforeach
 
@@ -389,12 +428,42 @@
                             .find(function (el) { return el.dataset.type === type; });
                     }
                     function sync(box) {
-                        const target = paperText(box.dataset.type);
-                        if (!target) return;
                         const text = box.value.trim() === '' ? box.dataset.default : box.value.trim();
-                        target.querySelector('.direction-text').textContent = text;
+                        // The read-only text under the Edit button (always present).
+                        const view = Array.from(document.querySelectorAll('.direction-view[data-type]'))
+                            .find(function (el) { return el.dataset.type === box.dataset.type; });
+                        if (view) view.textContent = text;
+                        // The paper preview (only present when the exact PDF preview is off).
+                        const target = paperText(box.dataset.type);
+                        if (target) target.querySelector('.direction-text').textContent = text;
                     }
                     boxes.forEach(function (box) { box.addEventListener('input', function () { sync(box); }); });
+
+                    // Live preview for answer-line length (inches). Empty = default, 0 = hidden.
+                    document.querySelectorAll('input[data-answer-line]').forEach(function (input) {
+                        input.addEventListener('input', function () {
+                            var raw = input.value.trim();
+                            var len = raw === '' ? parseFloat(input.dataset.default) : parseFloat(raw);
+                            if (isNaN(len)) len = parseFloat(input.dataset.default);
+                            len = Math.max(0, Math.min(4, len));
+                            document.querySelectorAll('.answer-line[data-type]').forEach(function (el) {
+                                if (el.dataset.type !== input.dataset.answerLine) return;
+                                el.style.setProperty('--len', len + 'in');
+                                el.classList.toggle('is-off', len === 0);
+                            });
+                        });
+                    });
+                    // The edit box stays hidden until Edit is clicked. Okay submits the form (saving every
+                    // setting, including this direction), and the reloaded page shows the box hidden again.
+                    document.querySelectorAll('.direction-edit').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var block = btn.closest('[data-direction-block]');
+                            block.querySelector('.direction-editor').hidden = false;
+                            block.querySelector('.direction-view').hidden = true;
+                            btn.hidden = true;
+                            block.querySelector('textarea').focus();
+                        });
+                    });
                     document.querySelectorAll('.direction-reset').forEach(function (btn) {
                         btn.addEventListener('click', function () {
                             const box = document.getElementById(btn.dataset.target);
@@ -499,6 +568,11 @@
                     </div>
                     <div class="part-direction" data-type="{{ $type }}">Direction: <span class="direction-text">{{ $directions[$type] ?? '' }}</span></div>
 
+                   @php
+                        $alLen = in_array($type, $answerLineTypes, true) ? ($answerLines[$type] ?? $answerLineDefault) : null;
+                        $alStyle = $alLen === null ? '' : '--len: ' . rtrim(rtrim(number_format($alLen, 1, '.', ''), '0'), '.') . 'in;';
+                        $alClass = ($alLen !== null && $alLen <= 0) ? 'answer-line is-off' : 'answer-line';
+                   @endphp
                    @if ($type === 'Matching Type')
                         @php
                             mt_srand($exam->examId);
@@ -510,7 +584,7 @@
                         <div class="matching-layout">
                             <div class="matching-col-a">
                                 @foreach ($group as $question)
-                                    <div class="item">{{ $itemCounter }}. ______ {{ $question->content }}</div>
+                                    <div class="item"><span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span>{{ $itemCounter }}. {{ $question->content }}</div>
                                     @php $itemCounter++; @endphp
                                 @endforeach
                             </div>
@@ -521,14 +595,29 @@
                             </div>
                         </div>
                     @else
-                        @php $sectionCols = $columnsPerPart[$type] ?? 1; @endphp
+                        @php
+                            $sectionCols = $columnsPerPart[$type] ?? 1;
+                            // Usable width of one column in px: page text width (8.5in minus 50px side padding, 96px/in)
+                            // less the 30px column gaps and the 15px choice indent. Choices go side by side only when the
+                            // estimated width of all of them (about 6.4px per character at 12px, plus the 28px gaps) fits.
+                            $colWidthPx = ((8.5 * 96 - 100) - 30 * ($sectionCols - 1)) / $sectionCols - 15;
+                            $choicesFit = function ($choices) use ($colWidthPx, $letters) {
+                                $need = 0;
+                                foreach ($choices as $i => $c) {
+                                    $need += mb_strlen(($letters[$i] ?? '') . '. ' . trim($c)) * 6.4;
+                                }
+                                $need += 28 * max(0, count($choices) - 1);
+                                return $need <= $colWidthPx;
+                            };
+                        @endphp
                         <div class="question-list" style="--cols: {{ $sectionCols }};">
                             @foreach ($group as $question)
                                 <div class="question-item">
-                                    {{ $itemCounter }}. {{ $question->content }}
+                                    @if ($alLen !== null)<span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span>@endif{{ $itemCounter }}. {{ $question->content }}
                                     @if ($question->choices)
-                                        <div class="choices">
-                                            @foreach (explode(',', $question->choices) as $i => $choice)
+                                        @php $choiceList = explode(',', $question->choices); @endphp
+                                        <div class="choices {{ $choicesFit($choiceList) ? 'choices-row' : '' }}">
+                                            @foreach ($choiceList as $i => $choice)
                                                 <div>{{ $letters[$i] ?? '' }}. {{ trim($choice) }}</div>
                                             @endforeach
                                         </div>
