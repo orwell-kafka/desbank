@@ -5,19 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Tos;
 use App\Support\Points;
+use App\Support\TosHeading;
 use App\Support\TosMatrix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TosController extends Controller
 {
-    private const EXAM_TYPES = ['Midterm', 'Final', 'Quarterly Quiz', 'Long Quiz'];
+    // A ToS exists only for the major exams. Quizzes do not get one.
+    private const EXAM_TYPES = Tos::EXAM_TYPES;
+    private const SEMESTERS = ['1st semester', '2nd semester', 'Summer'];
     private const BLOOM_LEVELS = ['Remembering', 'Understanding', 'Applying', 'Analyzing', 'Evaluating', 'Creating'];
     private const QUESTION_TYPES = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
 
     private const VALIDATION_MESSAGES = [
-        'title.required' => 'Required: enter a ToS title.',
-        'examType.required' => 'Required: choose an exam type.',
+        'examType.required' => 'Required: choose Midterm or Final.',
+        'examType.in' => 'A ToS can only be made for a Midterm or Final exam.',
+        'academicYear.required' => 'Required: enter the academic year, e.g. 2025-2026.',
+        'academicYear.regex' => 'Academic year must look like 2025-2026.',
+        'semester.required' => 'Required: choose the semester.',
+        'hoursPerWeek.required' => 'Required: enter the hours per week.',
+        'hoursPerWeek.min' => 'Hours per week must be greater than zero.',
         'topicId.required' => 'Required: check at least one topic in Table 1.',
         'topicId.min' => 'Required: check at least one topic in Table 1.',
         'contactHours.required' => 'Required: enter contact hours for the checked topics.',
@@ -46,6 +54,7 @@ class TosController extends Controller
             'bloomLevels' => self::BLOOM_LEVELS,
             'questionTypes' => self::QUESTION_TYPES,
             'examTypes' => self::EXAM_TYPES,
+            'semesters' => self::SEMESTERS,
         ]);
     }
 
@@ -75,6 +84,7 @@ class TosController extends Controller
             'bloomLevels' => self::BLOOM_LEVELS,
             'questionTypes' => self::QUESTION_TYPES,
             'examTypes' => self::EXAM_TYPES,
+            'semesters' => self::SEMESTERS,
         ]);
     }
 
@@ -84,8 +94,15 @@ class TosController extends Controller
         $this->authorizeBelongsToCourse($course, $tos);
 
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:150'],
             'examType' => ['required', 'in:' . implode(',', self::EXAM_TYPES)],
+            'academicYear' => ['required', 'regex:/^\d{4}-\d{4}$/', function ($attribute, $value, $fail) {
+                [$from, $to] = array_map('intval', explode('-', (string) $value) + [1 => 0]);
+                if ($to !== $from + 1) {
+                    $fail('Academic year must be two consecutive years, e.g. 2025-2026.');
+                }
+            }],
+            'semester' => ['required', 'in:' . implode(',', self::SEMESTERS)],
+            'hoursPerWeek' => ['required', 'numeric', 'min:0.5', 'max:99'],
             'topicId' => ['required', 'array', 'min:1'],
             'topicId.*' => ['integer'],
             'contactHours' => ['required', 'array'],
@@ -100,10 +117,13 @@ class TosController extends Controller
             return back()->withErrors([($result['field'] ?? 'bloomKey') => $result['error']])->withInput();
         }
 
-        DB::transaction(function () use ($tos, $data, $result) {
+        DB::transaction(function () use ($course, $tos, $data, $result) {
             DB::table('tos')->where('tosId', $tos->tosId)->update([
-                'title' => $data['title'],
+                'title' => Tos::headingTitle($course),
                 'examType' => $data['examType'],
+                'academicYear' => $data['academicYear'],
+                'semester' => $data['semester'],
+                'hoursPerWeek' => $data['hoursPerWeek'],
                 'totalScore' => $result['totalScore'],
             ]);
 
@@ -143,8 +163,15 @@ class TosController extends Controller
         $this->authorizeOwner($course);
 
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:150'],
             'examType' => ['required', 'in:' . implode(',', self::EXAM_TYPES)],
+            'academicYear' => ['required', 'regex:/^\d{4}-\d{4}$/', function ($attribute, $value, $fail) {
+                [$from, $to] = array_map('intval', explode('-', (string) $value) + [1 => 0]);
+                if ($to !== $from + 1) {
+                    $fail('Academic year must be two consecutive years, e.g. 2025-2026.');
+                }
+            }],
+            'semester' => ['required', 'in:' . implode(',', self::SEMESTERS)],
+            'hoursPerWeek' => ['required', 'numeric', 'min:0.5', 'max:99'],
             'topicId' => ['required', 'array', 'min:1'],
             'topicId.*' => ['integer'],
             'contactHours' => ['required', 'array'],
@@ -162,8 +189,11 @@ class TosController extends Controller
         DB::transaction(function () use ($course, $data, $result) {
             $tosId = DB::table('tos')->insertGetId([
                 'courseId' => $course->courseId,
-                'title' => $data['title'],
+                'title' => Tos::headingTitle($course),
                 'examType' => $data['examType'],
+                'academicYear' => $data['academicYear'],
+                'semester' => $data['semester'],
+                'hoursPerWeek' => $data['hoursPerWeek'],
                 'totalScore' => $result['totalScore'],
                 'contactHours' => 0,
                 'generatedWeight' => 0,
@@ -201,8 +231,97 @@ class TosController extends Controller
         $this->authorizeOwner($course);
         $this->authorizeBelongsToCourse($course, $tos);
 
-        // Points per topic are what the topic x Bloom/type distribution really adds up to, so this page
-        // always agrees with the generated exam (older ToS get their distribution computed on the fly).
+        return view('tos.show', ['course' => $course, 'tos' => $tos] + $this->tableData($tos));
+    }
+
+    /** A clean, print-ready copy of the ToS: heading, Table 1 and Table 2 laid out like the paper form. */
+    public function print(Course $course, Tos $tos)
+    {
+        $this->authorizeOwner($course);
+        $this->authorizeBelongsToCourse($course, $tos);
+
+        $data = $this->tableData($tos);
+
+        // Topics in the order they were added to the course, numbered 1, 2, 3...
+        $data['topicRows'] = $data['topicRows']->sortBy('topicId')->values();
+
+        // Whole-number percentage per topic that adds up to exactly 100 (largest remainder).
+        $weights = $data['topicRows']->pluck('generatedWeight', 'topicId')->map(fn ($w) => (float) $w)->all();
+        $weightSum = array_sum($weights);
+        $topicPercent = array_fill_keys(array_keys($weights), 0);
+        if ($weightSum > 0) {
+            $exactPct = array_map(fn ($w) => $w / $weightSum * 100, $weights);
+            $given = 0;
+            foreach ($exactPct as $id => $v) {
+                $topicPercent[$id] = (int) floor($v + 1e-9);
+                $given += $topicPercent[$id];
+            }
+            $byFraction = array_keys($exactPct);
+            usort($byFraction, fn ($x, $y) => ($exactPct[$y] - floor($exactPct[$y])) <=> ($exactPct[$x] - floor($exactPct[$x])));
+            for ($i = 0; $given < 100 && $i < count($byFraction); $i++, $given++) {
+                $topicPercent[$byFraction[$i]]++;
+            }
+        }
+        $data['topicPercent'] = $topicPercent;
+
+        // Test numbering follows the usual exam part order; items run 1..n within each test,
+        // continuing from one Bloom level to the next for the same question type.
+        $typeOrder = array_values(array_intersect(self::QUESTION_TYPES, $data['bloomRows']->pluck('questionType')->unique()->all()));
+        $testNumber = array_flip($typeOrder);
+        $nextItem = array_fill_keys($typeOrder, 1);
+
+        $levels = [];
+        foreach (self::BLOOM_LEVELS as $level) {
+            $levels[$level] = ['rows' => [], 'items' => 0, 'percent' => 0];
+        }
+
+        foreach ($data['bloomRows']->sortBy(fn ($r) => [array_search($r->bloomLevel, self::BLOOM_LEVELS), $testNumber[$r->questionType]]) as $row) {
+            $count = (int) round((float) $row->generatedItemCount);
+            if ($count <= 0 || ! isset($levels[$row->bloomLevel])) {
+                continue;
+            }
+            $from = $nextItem[$row->questionType];
+            $to = $from + $count - 1;
+            $nextItem[$row->questionType] = $to + 1;
+
+            $levels[$row->bloomLevel]['rows'][] = [
+                'type' => $row->questionType,
+                'numbers' => 'Test ' . TosHeading::roman($testNumber[$row->questionType] + 1) . ' ' . $from . '-' . $to,
+                'count' => $count,
+            ];
+            $levels[$row->bloomLevel]['items'] += $count;
+        }
+
+        $totalItems = array_sum(array_column($levels, 'items'));
+
+        // Whole-number percentages that add up to exactly 100 (largest remainder).
+        if ($totalItems > 0) {
+            $exact = [];
+            $assigned = 0;
+            foreach ($levels as $name => $level) {
+                $exact[$name] = $level['items'] / $totalItems * 100;
+                $levels[$name]['percent'] = (int) floor($exact[$name]);
+                $assigned += $levels[$name]['percent'];
+            }
+            $order = array_keys($levels);
+            usort($order, fn ($x, $y) => ($exact[$y] - floor($exact[$y])) <=> ($exact[$x] - floor($exact[$x])));
+            for ($i = 0; $assigned < 100 && $i < count($order); $i++, $assigned++) {
+                if ($exact[$order[$i]] > 0) {
+                    $levels[$order[$i]]['percent']++;
+                }
+            }
+        }
+
+        return view('tos.print', ['course' => $course, 'tos' => $tos, 'levels' => $levels, 'totalItems' => $totalItems] + $data);
+    }
+
+    /**
+     * The two ToS tables as they should read. Points per topic are what the topic x Bloom/type
+     * distribution really adds up to, so this agrees with the generated exam (older ToS get their
+     * distribution computed on the fly).
+     */
+    private function tableData(Tos $tos): array
+    {
         $distribution = TosMatrix::forTos($tos->tosId);
         $pointsByKey = array_map(fn ($r) => $r['points'], $distribution['rows']);
         $pointsByTopic = TosMatrix::topicPoints($distribution['matrix'], $pointsByKey);
@@ -226,7 +345,7 @@ class TosController extends Controller
             ->orderBy('questionType')
             ->get();
 
-        return view('tos.show', compact('course', 'tos', 'topicRows', 'bloomRows'));
+        return compact('topicRows', 'bloomRows');
     }
 
     public function destroy(Course $course, Tos $tos)

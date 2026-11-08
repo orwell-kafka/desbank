@@ -14,6 +14,7 @@ class Course extends Model
         'accountId',
         'courseName',
         'courseCode',
+        'creditUnits',
     ];
 
     public function account()

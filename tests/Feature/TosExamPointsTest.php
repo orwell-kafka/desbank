@@ -46,7 +46,7 @@ class TosExamPointsTest extends TestCase
     private function tosPayload(array $extra = []): array
     {
         $payload = [
-            'title' => 'Test ToS', 'examType' => 'Midterm', 'totalScore' => 60,
+            'examType' => 'Midterm', 'academicYear' => '2025-2026', 'semester' => '1st semester', 'hoursPerWeek' => 3, 'totalScore' => 60,
             'topicId' => $this->topics,
             'contactHours' => [$this->topics[0] => 3, $this->topics[1] => 2, $this->topics[2] => 1],
             'bloomKey' => [], 'itemCount' => [], 'pointsPerItem' => [],

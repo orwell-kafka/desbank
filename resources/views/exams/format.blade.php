@@ -251,12 +251,6 @@
                     <option value="Legal" {{ old('paperSize', $exam->paperSize) == 'Legal' ? 'selected' : '' }}>Legal (Long)</option>
                 </select>
 
-                <label>School Name</label>
-                <input type="text" name="schoolName" value="{{ old('schoolName', $exam->schoolName) }}">
-
-                <label>Department</label>
-                <input type="text" name="department" value="{{ old('department', $exam->department) }}">
-
                 <label>Columns per Section</label>
                 @foreach ($presentTypes as $type)
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">

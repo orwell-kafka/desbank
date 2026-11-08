@@ -39,6 +39,10 @@
                                 <label class="work-label" for="courseCode">Course code</label>
                                 <input type="text" id="courseCode" name="courseCode" class="work-input {{ $errors->has('courseCode') ? 'is-invalid' : '' }}" value="{{ old('courseCode', $course->courseCode) }}" required @if ($errors->has('courseCode')) aria-invalid="true" @endif>
                             </div>
+                            <div class="work-field">
+                                <label class="work-label" for="creditUnits">Credit units</label>
+                                <input type="number" id="creditUnits" name="creditUnits" step="0.5" min="0.5" max="99" class="work-input {{ $errors->has('creditUnits') ? 'is-invalid' : '' }}" value="{{ old('creditUnits', isset($course->creditUnits) ? rtrim(rtrim(number_format((float) $course->creditUnits, 1, '.', ''), '0'), '.') : '') }}" required @if ($errors->has('creditUnits')) aria-invalid="true" @endif>
+                            </div>
                         </div>
                     </section>
 

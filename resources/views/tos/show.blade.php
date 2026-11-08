@@ -23,8 +23,9 @@
                 </div>
             </header>
 
+            @include('tos._heading')
+
             <dl class="work-meta">
-                <div><dt>Exam type</dt><dd>{{ $tos->examType }}</dd></div>
                 <div><dt>Total score</dt><dd>{{ \App\Support\Points::format($tos->totalScore) }}</dd></div>
             </dl>
 
@@ -99,7 +100,7 @@
                 </div>
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.tos.index', $course) }}">← Back to ToS list</a><span>Read-only</span></div>
+            <div class="work-below-directory"><a href="{{ route('courses.tos.index', $course) }}">← Back to ToS list</a><a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener">Print ToS ⎙</a></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

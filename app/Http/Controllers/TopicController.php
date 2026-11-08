@@ -13,7 +13,14 @@ class TopicController extends Controller
         $this->authorizeOwner($course);
         $topics = $course->topics()->orderBy('topicName')->get();
 
-        return view('topics.index', compact('course', 'topics'));
+        // Question count per topic, shown on each row.
+        $questionCounts = \Illuminate\Support\Facades\DB::table('question')
+            ->whereIn('topicId', $topics->pluck('topicId'))
+            ->selectRaw('topicId, count(*) as c')
+            ->groupBy('topicId')
+            ->pluck('c', 'topicId');
+
+        return view('topics.index', compact('course', 'topics', 'questionCounts'));
     }
 
     public function create(Course $course)

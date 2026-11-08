@@ -17,6 +17,9 @@ class Tos extends Model
         'totalScore',
         'contactHours',
         'generatedWeight',
+        'academicYear',
+        'semester',
+        'hoursPerWeek',
     ];
 
     public function course()
@@ -28,5 +31,14 @@ class Tos extends Model
     {
         return $this->belongsToMany(Topic::class, 'tostopic', 'tosId', 'topicId')
             ->withPivot(['contactHours', 'generatedWeight', 'assignedPoints']);
+    }
+
+    /** The two exam types a ToS can be made for. Quizzes get no ToS. */
+    public const EXAM_TYPES = ['Midterm', 'Final'];
+
+    /** The generated "Subject Code/ Title" line, e.g. "CPEC 1: Cognate Elective 1". */
+    public static function headingTitle(Course $course): string
+    {
+        return trim($course->courseCode . ': ' . $course->courseName);
     }
 }

@@ -13,7 +13,7 @@
 
         <main id="main-content" class="work-main">
             <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard.instructor') }}">Instructor workspace</a><span aria-hidden="true">/</span><a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><span aria-current="page">{{ $course->courseName }} ToS</span>
+                <a href="{{ route('dashboard.instructor') }}">Instructor workspace</a><span aria-hidden="true">/</span><a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.show', $course) }}">{{ $course->courseName }}</a><span aria-hidden="true">/</span><span aria-current="page">ToS</span>
             </nav>
             <header class="work-heading work-heading-compact">
                 <div>
@@ -72,6 +72,7 @@
                                                 </form>
                                                 <a href="{{ route('courses.tos.show', [$course, $tos]) }}" class="work-row-link work-row-link-main">View <span aria-hidden="true">↗</span></a>
                                                 <a href="{{ route('courses.tos.edit', [$course, $tos]) }}" class="work-row-link">Edit</a>
+                                                <a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener" class="work-row-link">Print</a>
                                                 <form method="POST" action="{{ route('courses.tos.destroy', [$course, $tos]) }}" data-confirm="Delete this ToS?" data-confirm-item="{{ $tos->title }}" data-confirm-label="Delete ToS">
                                                     @csrf
                                                     @method('DELETE')
@@ -87,7 +88,7 @@
                 @endif
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.index') }}">← Back to courses</a><span>Topics / ToS / Exams</span></div>
+            <div class="work-below-directory"><a href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Topics / ToS / Exams</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

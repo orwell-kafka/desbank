@@ -12,6 +12,8 @@ class Exam extends Model
 
     protected $fillable = [
         'tosId',
+        'courseId',
+        'title',
         'totalItems',
         'totalScore',
         'created',
@@ -20,5 +22,11 @@ class Exam extends Model
     public function tos()
     {
         return $this->belongsTo(Tos::class, 'tosId', 'tosId');
+    }
+
+    /** A quiz is an exam that was built without a ToS. */
+    public function isQuiz(): bool
+    {
+        return $this->tosId === null;
     }
 }

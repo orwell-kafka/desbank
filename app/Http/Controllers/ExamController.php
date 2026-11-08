@@ -18,13 +18,18 @@ class ExamController extends Controller
     {
         $this->authorizeOwner($course);
 
-        $exams = Exam::whereIn('tosId', $course->tos()->pluck('tosId'))
+        $tosIds = $course->tos()->pluck('tosId');
+        $exams = Exam::where(fn ($q) => $q->whereIn('tosId', $tosIds)->orWhere('courseId', $course->courseId))
             ->orderBy('examId', 'desc')
             ->get();
 
         $tosTitles = $course->tos()->pluck('title', 'tosId');
+        $tosTypes = $course->tos()->pluck('examType', 'tosId');
         foreach ($exams as $exam) {
-            $exam->tosTitle = $tosTitles[$exam->tosId] ?? '(unknown ToS)';
+            $exam->kind = $exam->isQuiz() ? 'Quiz' : ($tosTypes[$exam->tosId] ?? 'Exam');
+            $exam->tosTitle = $exam->isQuiz()
+                ? ($exam->title ?: 'Quiz')
+                : ($tosTitles[$exam->tosId] ?? '(unknown ToS)');
         }
 
         return view('exams.index', compact('course', 'exams'));
@@ -207,7 +212,7 @@ class ExamController extends Controller
     /** Data the exam paper needs, shared by the on-screen page and the PDF. */
     private function formatViewData(Exam $exam): array
     {
-        $tos = Tos::find($exam->tosId);
+        $tos = $this->tosForHeader($exam);
 
         $defaultOrder = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
 
@@ -250,7 +255,7 @@ public function answerKey(Course $course, Exam $exam)
         $this->authorizeOwner($course);
         $this->authorizeExamBelongsToCourse($course, $exam);
 
-        $tos = Tos::find($exam->tosId);
+        $tos = $this->tosForHeader($exam);
 
         $defaultOrder = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
         $letters = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -337,8 +342,6 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
 
         $data = $request->validate([
             'paperSize' => ['required', 'in:Letter,Legal'],
-            'schoolName' => ['nullable', 'string', 'max:150'],
-            'department' => ['nullable', 'string', 'max:150'],
             'footerText' => ['nullable', 'string', 'max:255'],
             'watermarkText' => ['nullable', 'string', 'max:100'],
             'columns' => ['nullable', 'array'],
@@ -489,16 +492,24 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         $bloomConfig = DB::table('exambloomconfig')->where('examId', $exam->examId)->get();
 
         // Points per topic as this exam really adds up, next to what the ToS assigned to each topic.
-        $pointsByKey = DB::table('tosbloom')->where('tosId', $exam->tosId)->get()
-            ->mapWithKeys(fn ($r) => [TosMatrix::key($r->bloomLevel, $r->questionType) => (float) $r->pointsPerItem])
-            ->all();
+        // A quiz has no ToS, so its points are stored per question and there are no targets.
+        if ($exam->isQuiz()) {
+            $questionPoints = DB::table('examquestion')->where('examId', $exam->examId)->pluck('points', 'questionId');
+            $targets = collect();
+            $pointsByKey = [];
+        } else {
+            $questionPoints = null;
+            $pointsByKey = DB::table('tosbloom')->where('tosId', $exam->tosId)->get()
+                ->mapWithKeys(fn ($r) => [TosMatrix::key($r->bloomLevel, $r->questionType) => (float) $r->pointsPerItem])
+                ->all();
 
-        $targets = DB::table('tostopic')
-            ->join('topic', 'topic.topicId', '=', 'tostopic.topicId')
-            ->where('tostopic.tosId', $exam->tosId)
-            ->select('tostopic.topicId', 'topic.topicName', 'tostopic.assignedPoints')
-            ->orderBy('topic.topicName')
-            ->get();
+            $targets = DB::table('tostopic')
+                ->join('topic', 'topic.topicId', '=', 'tostopic.topicId')
+                ->where('tostopic.tosId', $exam->tosId)
+                ->select('tostopic.topicId', 'topic.topicName', 'tostopic.assignedPoints')
+                ->orderBy('topic.topicName')
+                ->get();
+        }
 
         $topicSummary = [];
         foreach ($targets as $t) {
@@ -510,11 +521,13 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
                 $topicSummary[$id] = ['name' => $q->topicName ?? '(no topic)', 'items' => 0, 'points' => 0.0, 'target' => null];
             }
             $topicSummary[$id]['items']++;
-            $topicSummary[$id]['points'] += $pointsByKey[TosMatrix::key($q->bloomLevel, $q->questionType)] ?? 0;
+            $topicSummary[$id]['points'] += $questionPoints !== null
+                ? (float) ($questionPoints[$q->questionId] ?? 0)
+                : ($pointsByKey[TosMatrix::key($q->bloomLevel, $q->questionType)] ?? 0);
         }
 
-        // Exams are identified by their ToS title, not by a number.
-        $tosTitle = Tos::find($exam->tosId)->title ?? 'Exam';
+        // Exams are identified by their ToS title (quizzes by their own title), not by a number.
+        $tosTitle = $this->examTitle($exam);
 
         return view('exams.show', compact('course', 'exam', 'questions', 'bloomConfig', 'topicSummary', 'tosTitle'));
     }
@@ -527,6 +540,13 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
     private function replacementPool(Exam $exam, Question $question)
     {
         $currentQuestionIds = DB::table('examquestion')->where('examId', $exam->examId)->pluck('questionId');
+
+        // A quiz has no ToS to keep to: any question of the same type from this course will do.
+        if ($exam->isQuiz()) {
+            return Question::whereIn('topicId', DB::table('topic')->where('courseId', $exam->courseId)->pluck('topicId'))
+                ->where('questionType', $question->questionType)
+                ->whereNotIn('questionId', $currentQuestionIds);
+        }
 
         // Same topic as the question being replaced, so each topic keeps the points the ToS gave it.
         return Question::where('topicId', $question->topicId)
@@ -556,7 +576,7 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         // Newest questions first, so recently added ones are easy to find.
         $candidates = $this->replacementPool($exam, $question)->orderByDesc('questionId')->get();
         $topicNames = DB::table('topic')->whereIn('topicId', $candidates->pluck('topicId')->unique())->pluck('topicName', 'topicId');
-        $tosTitle = Tos::find($exam->tosId)->title ?? 'Exam';
+        $tosTitle = $this->examTitle($exam);
 
         return view('exams.replace', compact('course', 'exam', 'question', 'candidates', 'topicNames', 'tosTitle'));
     }
@@ -582,7 +602,9 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             $replacement = $pool->inRandomOrder()->first();
 
             if (! $replacement) {
-                return back()->withErrors(['exam' => 'No other question available in the Question Bank for that same topic, Bloom level and question type. Add one to the bank, or the topic would no longer match its ToS points.']);
+                return back()->withErrors(['exam' => $exam->isQuiz()
+                    ? 'No other question of this type is left in the Question Bank. Add one to the bank first.'
+                    : 'No other question available in the Question Bank for that same topic, Bloom level and question type. Add one to the bank, or the topic would no longer match its ToS points.']);
             }
         }
 
@@ -624,9 +646,37 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
 
     private function authorizeExamBelongsToCourse(Course $course, Exam $exam): void
     {
+        if ($exam->isQuiz()) {
+            if ($exam->courseId !== $course->courseId) {
+                abort(404);
+            }
+
+            return;
+        }
+
         $tos = Tos::find($exam->tosId);
         if (! $tos || $tos->courseId !== $course->courseId) {
             abort(404);
         }
+    }
+
+    /** The name an exam goes by: its ToS title, or a quiz's own title. */
+    private function examTitle(Exam $exam): string
+    {
+        if ($exam->isQuiz()) {
+            return $exam->title ?: 'Quiz';
+        }
+
+        return Tos::find($exam->tosId)->title ?? 'Exam';
+    }
+
+    /** What the printed header reads its title and exam type from (a quiz has no ToS). */
+    private function tosForHeader(Exam $exam)
+    {
+        if ($exam->isQuiz()) {
+            return (object) ['title' => $exam->title ?: 'Quiz', 'examType' => 'Quiz'];
+        }
+
+        return Tos::find($exam->tosId);
     }
 }

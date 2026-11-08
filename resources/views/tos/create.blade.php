@@ -53,29 +53,7 @@
                     @csrf
                     @include('partials.work-errors')
 
-                    <section class="work-section" aria-labelledby="tf-details">
-                        <div class="work-section-head">
-                            <span class="work-section-num" aria-hidden="true">01</span>
-                            <div><h2 id="tf-details">Details</h2><p>Name the plan and set the exam type and total score.</p></div>
-                        </div>
-                        <div class="work-section-body">
-                            <div class="work-field">
-                                <label class="work-label" for="tosTitle">ToS title</label>
-                                <input type="text" id="tosTitle" name="title" class="work-input {{ $errors->has('title') ? 'is-invalid' : '' }}" value="{{ old('title') }}" required @if ($errors->has('title')) aria-invalid="true" @endif>
-                            </div>
-                            <div class="work-field-row">
-                                <div class="work-field">
-                                    <label class="work-label" for="examType">Exam type</label>
-                                    <select name="examType" id="examType" class="work-select {{ $errors->has('examType') ? 'is-invalid' : '' }}" required>
-                                        <option value="">-- Select --</option>
-                                        @foreach ($examTypes as $type)
-                                            <option value="{{ $type }}" {{ old('examType') == $type ? 'selected' : '' }}>{{ $type }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    @include('tos._details')
 
                     <section class="work-section" aria-labelledby="tf-topics">
                         <div class="work-section-head">

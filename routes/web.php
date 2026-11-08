@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\TosController;
@@ -26,7 +27,7 @@ Route::middleware('auth')->group(function () {
         return view('dashboard.instructor');
     })->name('dashboard.instructor');
 
-    Route::resource('courses', CourseController::class)->except(['show']);
+    Route::resource('courses', CourseController::class);
 
     Route::resource('courses.topics', TopicController::class)
         ->except(['show'])
@@ -36,10 +37,13 @@ Route::middleware('auth')->group(function () {
         ->except(['show'])
         ->parameters(['topics' => 'topic', 'questions' => 'question']);
 
+    Route::get('/courses/{course}/tos/{tos}/print', [TosController::class, 'print'])->name('courses.tos.print');
     Route::resource('courses.tos', TosController::class)
         ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
         ->parameters(['tos' => 'tos']);
 
+    Route::get('/courses/{course}/quizzes/create', [QuizController::class, 'create'])->name('courses.quizzes.create');
+    Route::post('/courses/{course}/quizzes', [QuizController::class, 'store'])->name('courses.quizzes.store');
     Route::get('/courses/{course}/exams', [ExamController::class, 'index'])->name('courses.exams.index');
     Route::post('/courses/{course}/tos/{tos}/generate', [ExamController::class, 'generate'])->name('courses.tos.generate');
     Route::get('/courses/{course}/exams/{exam}', [ExamController::class, 'show'])->name('courses.exams.show');
