@@ -36,6 +36,7 @@
             .paper { box-shadow: none; margin: 0; }
         }
     </style>
+<script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}"></script>
 </head>
 <body>
     <div class="layout">
@@ -49,7 +50,7 @@
 
             <button type="button" onclick="window.print()">Print / Save as PDF</button>
 
-            <a href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
+            <a data-back href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
         </div>
 
         <div class="preview-wrapper">

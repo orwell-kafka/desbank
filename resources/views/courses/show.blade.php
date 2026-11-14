@@ -49,7 +49,7 @@
             </nav>
 
             <div class="dp" style="--c: {{ $color }};">
-                <a href="{{ route('courses.index') }}" class="dp-back">← Back to course list</a>
+                <a data-back href="{{ route('courses.index') }}" class="dp-back">← Back to course list</a>
 
                 <header class="dp-head">
                     <span class="dp-code">{{ $course->courseCode }}</span>

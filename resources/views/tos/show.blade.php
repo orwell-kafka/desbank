@@ -100,7 +100,7 @@
                 </div>
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.tos.index', $course) }}">← Back to ToS list</a><a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener">Print ToS ⎙</a></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.tos.index', $course) }}">← Back to ToS list</a><a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener">Print ToS ⎙</a></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

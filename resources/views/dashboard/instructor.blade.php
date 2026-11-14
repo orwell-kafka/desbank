@@ -6,6 +6,7 @@
     <title>Instructor Workspace · DESBank</title>
     @include('partials.head-assets')
     <link rel="stylesheet" href="{{ asset('css/workspace.css') }}">
+    <script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}"></script>
 </head>
 <body class="workspace">
     <div class="db-shell">

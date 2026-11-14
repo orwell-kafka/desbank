@@ -102,7 +102,7 @@
                     });
                 </script>
             @endif
-            <div class="work-below-directory"><a href="{{ route('dashboard.instructor') }}">← Back to instructor workspace</a><span>Courses / Topics / Questions / Exams</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('dashboard.instructor') }}">← Back to instructor workspace</a><span>Courses / Topics / Questions / Exams</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

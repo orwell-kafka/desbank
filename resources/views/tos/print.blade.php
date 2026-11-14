@@ -29,6 +29,7 @@
             .paper { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
         }
     </style>
+<script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}"></script>
 </head>
 <body>
     @php
@@ -38,7 +39,7 @@
     @endphp
     <div class="toolbar">
         <button type="button" onclick="window.print()">Print / Save as PDF</button>
-        <a href="{{ route('courses.tos.show', [$course, $tos]) }}">← Back to ToS</a>
+        <a data-back href="{{ route('courses.tos.show', [$course, $tos]) }}">← Back to ToS</a>
     </div>
 
     <div class="paper">

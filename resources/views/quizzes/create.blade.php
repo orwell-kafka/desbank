@@ -99,7 +99,7 @@
 
                         <div class="work-form-actions">
                             <button type="submit" class="work-action-primary" data-pending-label="Creating…">Create quiz <span aria-hidden="true">→</span></button>
-                            <a href="{{ route('courses.show', $course) }}" class="work-form-cancel">Cancel</a>
+                            <a data-back href="{{ route('courses.show', $course) }}" class="work-form-cancel">Cancel</a>
                         </div>
                     </form>
 
@@ -153,7 +153,7 @@
                 </script>
             @endif
 
-            <div class="work-below-directory"><a href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Quiz</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Quiz</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

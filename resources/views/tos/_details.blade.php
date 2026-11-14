@@ -12,7 +12,7 @@
             <div class="work-field">
                 <label class="work-label" for="examType">Exam</label>
                 <select name="examType" id="examType" class="work-select {{ $errors->has('examType') ? 'is-invalid' : '' }}" required>
-                    <option value="">-- Select --</option>
+                    <option value="" disabled hidden {{ old('examType', $t->examType ?? null) ? '' : 'selected' }}>-- Select --</option>
                     @foreach ($examTypes as $type)
                         <option value="{{ $type }}" {{ old('examType', $t->examType ?? null) == $type ? 'selected' : '' }}>{{ $type }} Examination</option>
                     @endforeach
@@ -27,7 +27,7 @@
             <div class="work-field">
                 <label class="work-label" for="semester">Semester</label>
                 <select name="semester" id="semester" class="work-select {{ $errors->has('semester') ? 'is-invalid' : '' }}" required>
-                    <option value="">-- Select --</option>
+                    <option value="" disabled hidden {{ old('semester', $t->semester ?? null) ? '' : 'selected' }}>-- Select --</option>
                     @foreach ($semesters as $sem)
                         <option value="{{ $sem }}" {{ old('semester', $t->semester ?? null) == $sem ? 'selected' : '' }}>{{ $sem }}</option>
                     @endforeach

@@ -64,7 +64,7 @@
             </style>
 
             <div class="ex">
-                <a href="{{ route('courses.show', $course) }}" class="ex-back">← Back to {{ $course->courseCode }}</a>
+                <a data-back href="{{ route('courses.show', $course) }}" class="ex-back">← Back to {{ $course->courseCode }}</a>
 
                 <header class="ex-head">
                     <div>

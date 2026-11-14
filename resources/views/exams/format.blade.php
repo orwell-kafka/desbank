@@ -23,6 +23,14 @@
         .settings .print-btn { background: #16a34a; margin-top: 8px; }
         .settings textarea { width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 12px; font-family: inherit; line-height: 1.45; resize: vertical; }
         .settings .direction-block { margin-top: 10px; }
+        .settings .direction-toggle { display: inline-flex; align-items: center; gap: 6px; width: auto; margin: 0; padding: 3px 4px 3px 0; background: none; color: #374151; border: 0; border-radius: 3px; font-size: 12px; font-weight: 600; text-align: left; cursor: pointer; }
+        .settings .direction-toggle:hover { color: #2563eb; }
+        .settings .direction-toggle:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+        .settings .direction-chevron { display: inline-block; font-size: 10px; transition: transform .15s ease; }
+        .settings .direction-block.is-open .direction-chevron { transform: rotate(90deg); }
+        .settings .direction-block:not(.is-open) .direction-edit { display: none; }
+        .settings .direction-body[hidden] { display: none; }
+        @media (prefers-reduced-motion: reduce) { .settings .direction-chevron { transition: none; } }
         .settings .direction-block .direction-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #4b5563; }
         .settings .direction-reset { width: auto; margin: 0; padding: 2px 8px; background: #fff; color: #2563eb; border: 1px solid #d1d5db; font-size: 11px; }
         .settings .direction-reset:hover { background: #eff6ff; }
@@ -186,6 +194,7 @@
         }
     </style>
     <style>@page { size: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '8.5in 14in' : '8.5in 11in' }}; margin: 0; }</style>
+<script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}"></script>
 </head>
 <body>
     @php
@@ -287,24 +296,26 @@
                 <div id="partOrderInputs"></div>
 
                 <h3>Section Directions</h3>
-                <div class="hint" style="margin-bottom:6px;">The instruction printed under each part is shown below. Click Edit to change it, then Okay to save. Clearing the box, or pressing Reset, restores the default wording.</div>
+                <div class="hint" style="margin-bottom:6px;">Click a part's name to show the instruction printed under it, then click Edit to change it and Okay to save. Clearing the box, or pressing Reset, restores the default wording.</div>
                 @foreach ($presentTypes as $type)
                     @php
                         $directionValue = old('directions.' . $type, $directions[$type] ?? '');
                         $directionShown = trim((string) $directionValue) === '' ? ($defaultDirections[$type] ?? '') : $directionValue;
                         $directionOpen = $errors->has('directions.' . $type);
                     @endphp
-                    <div class="direction-block" data-direction-block>
+                    <div class="direction-block {{ $directionOpen ? 'is-open' : '' }}" data-direction-block>
                         <div class="direction-head">
-                            <label for="direction-{{ $loop->index }}" style="margin:0; font-size:12px;">{{ $type }}</label>
+                            <button type="button" class="direction-toggle" data-direction-toggle aria-expanded="{{ $directionOpen ? 'true' : 'false' }}" aria-controls="direction-body-{{ $loop->index }}"><span class="direction-chevron" aria-hidden="true">&#9656;</span> {{ $type }}</button>
                             <button type="button" class="direction-edit" data-edit="direction-{{ $loop->index }}" {{ $directionOpen ? 'hidden' : '' }}>Edit</button>
                         </div>
-                        <div class="direction-view" data-type="{{ $type }}" {{ $directionOpen ? 'hidden' : '' }}>{{ $directionShown }}</div>
-                        <div class="direction-editor" {{ $directionOpen ? '' : 'hidden' }}>
-                            <textarea id="direction-{{ $loop->index }}" name="directions[{{ $type }}]" rows="3" maxlength="600" data-type="{{ $type }}" data-default="{{ $defaultDirections[$type] ?? '' }}">{{ $directionValue }}</textarea>
-                            <div class="direction-actions">
-                                <button type="button" class="direction-reset" data-target="direction-{{ $loop->index }}">Reset</button>
-                                <button type="submit" class="direction-ok">Okay</button>
+                        <div class="direction-body" id="direction-body-{{ $loop->index }}" {{ $directionOpen ? '' : 'hidden' }}>
+                            <div class="direction-view" data-type="{{ $type }}" {{ $directionOpen ? 'hidden' : '' }}>{{ $directionShown }}</div>
+                            <div class="direction-editor" {{ $directionOpen ? '' : 'hidden' }}>
+                                <textarea id="direction-{{ $loop->index }}" name="directions[{{ $type }}]" rows="3" maxlength="600" aria-label="{{ $type }} direction" data-type="{{ $type }}" data-default="{{ $defaultDirections[$type] ?? '' }}">{{ $directionValue }}</textarea>
+                                <div class="direction-actions">
+                                    <button type="button" class="direction-reset" data-target="direction-{{ $loop->index }}">Reset</button>
+                                    <button type="submit" class="direction-ok">Okay</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -447,6 +458,17 @@
                             });
                         });
                     });
+                    // Each part's direction stays hidden until its name is clicked.
+                    document.querySelectorAll('[data-direction-toggle]').forEach(function (toggle) {
+                        toggle.addEventListener('click', function () {
+                            var block = toggle.closest('[data-direction-block]');
+                            var body = document.getElementById(toggle.getAttribute('aria-controls'));
+                            var open = toggle.getAttribute('aria-expanded') !== 'true';
+                            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                            block.classList.toggle('is-open', open);
+                            body.hidden = !open;
+                        });
+                    });
                     // The edit box stays hidden until Edit is clicked. Okay submits the form (saving every
                     // setting, including this direction), and the reloaded page shows the box hidden again.
                     document.querySelectorAll('.direction-edit').forEach(function (btn) {
@@ -476,7 +498,7 @@
                 <button type="button" class="print-btn" onclick="window.print()">Print / Save as PDF</button>
             @endif
 
-            <a href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
+            <a data-back href="{{ route('courses.exams.show', [$course, $exam]) }}" class="back-link">&larr; Back to Exam</a>
         </div>
         @endunless
 

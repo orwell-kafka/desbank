@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Question;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
@@ -85,7 +86,7 @@ class QuestionController extends Controller
 
         $choices = $this->cleanChoices($data);
         if ($data['questionType'] === 'Multiple Choice' && count($choices) < 2) {
-            return back()->withErrors(['choices' => 'Add at least two answer choices for a Multiple Choice question.'])->withInput();
+            throw ValidationException::withMessages(['choices' => 'Add at least two answer choices for a Multiple Choice question.']);
         }
 
         // Simple duplicate check: same content already exists under this topic
@@ -94,7 +95,7 @@ class QuestionController extends Controller
             ->exists();
 
         if ($duplicate) {
-            return back()->withErrors(['content' => 'This exact question already exists for this topic.'])->withInput();
+            throw ValidationException::withMessages(['content' => 'This exact question already exists for this topic.']);
         }
 
         Question::create([
@@ -106,10 +107,18 @@ class QuestionController extends Controller
             'correctAnswer' => $data['correctAnswer'] ?? null,
         ]);
 
-        // Land on the list of that question type (newest first), so the new question is right at the top.
-        return redirect()
-            ->to(route('courses.topics.questions.index', [$course, $topic, 'type' => $data['questionType']]) . '#work-results')
-            ->with('status', 'Question added.');
+        // Stay on the add page with a fresh form (same question type pre-chosen) and confirm with a toast.
+        $next = route('courses.topics.questions.create', [$course, $topic, 'type' => $data['questionType']]);
+
+        // The add form saves in the background and swaps itself for a fresh copy (see question-save.js), so
+        // saving adds no extra browser-history entry and the Back button still leads to the question list.
+        if ($request->expectsJson()) {
+            $request->session()->flash('status', 'Question added.');
+
+            return response()->json(['redirect' => $next]);
+        }
+
+        return redirect()->to($next)->with('status', 'Question added.');
     }
 
     public function edit(Course $course, Topic $topic, Question $question)

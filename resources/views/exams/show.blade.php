@@ -7,7 +7,7 @@
     @include('partials.head-assets')
     @include('partials.workspace-assets')
 </head>
-<body class="workspace">
+<body class="workspace has-exam-dock">
     <div class="db-shell">
         @include('partials.navbar')
 
@@ -21,7 +21,7 @@
                     <h1>{{ $tosTitle }}<span class="work-title-period">.</span></h1>
                     <p class="work-intro">Replace any question by choosing another from the question bank, or let the system pick one, then format and print the paper.</p>
                 </div>
-                <div class="work-heading-actions">
+                <div class="work-heading-actions" id="examHeadActions">
                     <a href="{{ route('courses.exams.format', [$course, $exam]) }}" class="work-action-primary">Format &amp; print <span aria-hidden="true">→</span></a>
                     <a href="{{ route('courses.exams.answerkey', [$course, $exam]) }}" class="work-action-outline">Answer key <span aria-hidden="true">↗</span></a>
                 </div>
@@ -167,9 +167,17 @@
                 </div>
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.exams.index', $course) }}">← Back to exams</a><span>{{ $tosTitle }}</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.exams.index', $course) }}">← Back to exams</a><span>{{ $tosTitle }}</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
+
+        <div class="work-exam-dock" id="examDock" role="region" aria-label="Exam actions">
+            <p class="work-exam-dock-meta"><strong>{{ $tosTitle }}</strong><span>{{ $exam->totalItems }} {{ $exam->totalItems == 1 ? 'item' : 'items' }} · {{ \App\Support\Points::format($exam->totalScore) }}</span></p>
+            <div class="work-exam-dock-actions">
+                <a href="{{ route('courses.exams.answerkey', [$course, $exam]) }}" class="work-action-outline">Answer key <span aria-hidden="true">↗</span></a>
+                <a href="{{ route('courses.exams.format', [$course, $exam]) }}" class="work-action-primary">Format &amp; print <span aria-hidden="true">→</span></a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -252,6 +260,17 @@
                 if (found) state.topic = savedTopic;
             }
             apply();
+        })();
+    </script>
+    <script>
+        // Show the bottom action bar only once the header buttons have scrolled out of view.
+        (function () {
+            var head = document.getElementById('examHeadActions');
+            var dock = document.getElementById('examDock');
+            if (!head || !dock || !('IntersectionObserver' in window)) return;
+            new IntersectionObserver(function (entries) {
+                dock.classList.toggle('is-visible', !entries[0].isIntersecting);
+            }).observe(head);
         })();
     </script>
 </body>

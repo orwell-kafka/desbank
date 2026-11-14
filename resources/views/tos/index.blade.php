@@ -70,14 +70,21 @@
                                                     @csrf
                                                     <button type="submit" class="work-row-btn work-row-btn-primary" data-pending-label="Generating…">Generate exam</button>
                                                 </form>
-                                                <a href="{{ route('courses.tos.show', [$course, $tos]) }}" class="work-row-link work-row-link-main">View <span aria-hidden="true">↗</span></a>
-                                                <a href="{{ route('courses.tos.edit', [$course, $tos]) }}" class="work-row-link">Edit</a>
-                                                <a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener" class="work-row-link">Print</a>
-                                                <form method="POST" action="{{ route('courses.tos.destroy', [$course, $tos]) }}" data-confirm="Delete this ToS?" data-confirm-item="{{ $tos->title }}" data-confirm-label="Delete ToS">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="work-row-link work-row-delete">Delete</button>
-                                                </form>
+                                                <div class="work-menu" data-menu>
+                                                    <button type="button" class="work-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="tos-menu-{{ $loop->iteration }}" aria-label="More actions for {{ $tos->title }}">
+                                                        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                                                    </button>
+                                                    <div class="work-menu-list" id="tos-menu-{{ $loop->iteration }}" role="menu" hidden>
+                                                        <a href="{{ route('courses.tos.show', [$course, $tos]) }}" role="menuitem" class="work-menu-item">View</a>
+                                                        <a href="{{ route('courses.tos.edit', [$course, $tos]) }}" role="menuitem" class="work-menu-item">Edit</a>
+                                                        <a href="{{ route('courses.tos.print', [$course, $tos]) }}" target="_blank" rel="noopener" role="menuitem" class="work-menu-item">Print</a>
+                                                        <form method="POST" action="{{ route('courses.tos.destroy', [$course, $tos]) }}" role="none" data-confirm="Delete this ToS?" data-confirm-item="{{ $tos->title }}" data-confirm-label="Delete ToS">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" role="menuitem" class="work-menu-item work-menu-item-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -88,7 +95,7 @@
                 @endif
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Topics / ToS / Exams</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Topics / ToS / Exams</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

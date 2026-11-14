@@ -49,7 +49,7 @@
                                     <select name="questionType" id="questionType" required class="work-select {{ $errors->has('questionType') ? 'is-invalid' : '' }}">
                                         <option value="">-- Select --</option>
                                         @foreach ($questionTypes as $type)
-                                            <option value="{{ $type }}" {{ old('questionType') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                            <option value="{{ $type }}" {{ old('questionType', request('type')) == $type ? 'selected' : '' }}>{{ $type }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -67,7 +67,7 @@
                                 <label class="work-label" for="content">Question text</label>
                                 <textarea name="content" id="content" rows="4" required class="work-textarea {{ $errors->has('content') ? 'is-invalid' : '' }}">{{ old('content') }}</textarea>
                             </div>
-                            <div id="blankTools" class="work-blank-tools" role="group" aria-label="Blanks">
+                            <div id="blankTools" class="work-blank-tools" role="group" aria-label="Blanks" {{ old('questionType', request('type')) === 'Fill in the Blanks' ? '' : 'hidden' }}>
                                 <span class="work-blank-tools-label">Blanks</span>
                                 <div class="work-blank-tools-row">
                                     <button type="button" class="work-row-btn work-row-btn-primary" data-blank="cursor">Insert blank at cursor</button>
@@ -131,7 +131,7 @@
 
                     <div class="work-form-actions">
                         <button type="submit" class="work-action-primary" data-pending-label="Saving…">Save question <span aria-hidden="true">→</span></button>
-                        <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="work-form-cancel">Cancel</a>
+                        <a data-back href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="work-form-cancel">Cancel</a>
                     </div>
                 </form>
 
@@ -150,6 +150,14 @@
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>
 
+    @if (session('status'))
+        <div class="work-toast" data-toast role="status" aria-live="polite">
+            <span class="work-toast-icon" aria-hidden="true">✓</span>
+            <span class="work-toast-text">{{ session('status') }}</span>
+            <button type="button" class="work-toast-close" data-toast-close aria-label="Dismiss message">×</button>
+        </div>
+    @endif
+    <script src="{{ asset('js/question-save.js') }}?v={{ @filemtime(public_path('js/question-save.js')) }}" defer></script>
     <script src="{{ asset('js/question-choices.js') }}?v={{ @filemtime(public_path('js/question-choices.js')) }}"></script>
     <script src="{{ asset('js/question-blanks.js') }}?v={{ @filemtime(public_path('js/question-blanks.js')) }}"></script>
     <script>
@@ -163,9 +171,13 @@
         const answerTrueFalseSelect = document.getElementById('answerTrueFalseSelect');
         const matchingHint = document.getElementById('matchingHint');
         const essayHint = document.getElementById('essayHint');
+        const blankTools = document.getElementById('blankTools');
 
         function updateFields() {
             const type = typeSelect.value;
+
+            // Blank tools only apply to Fill in the Blanks questions.
+            blankTools.hidden = type !== 'Fill in the Blanks';
 
             choicesField.style.display = 'none';
             answerTextField.style.display = 'block';

@@ -103,7 +103,7 @@
                 @endif
             </section>
 
-            <div class="work-below-directory"><a href="{{ route('courses.exams.show', [$course, $exam]) }}">← Back to exam</a><span>{{ $tosTitle }}</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.exams.show', [$course, $exam]) }}">← Back to exam</a><span>{{ $tosTitle }}</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

@@ -42,6 +42,7 @@
                 .tp-go { color: #9aa9b6; font-size: 18px; }
                 .tp-row:hover .tp-go { color: var(--c); }
                 .tp-menu { position: relative; z-index: 3; }
+                .tp-menu[open] { z-index: 20; }
                 .tp-menu > summary { list-style: none; width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #607282; }
                 .tp-menu > summary::-webkit-details-marker { display: none; }
                 .tp-menu > summary:hover, .tp-menu[open] > summary { background: #eef2f6; color: #12263a; }
@@ -59,7 +60,7 @@
             </style>
 
             <div class="tp">
-                <a href="{{ route('courses.show', $course) }}" class="dp-back" style="display:inline-block;margin:4px 0 16px;font-size:14px;font-weight:600;color:#2a5375;text-decoration:none;">← Back to {{ $course->courseCode }}</a>
+                <a data-back href="{{ route('courses.show', $course) }}" class="dp-back" style="display:inline-block;margin:4px 0 16px;font-size:14px;font-weight:600;color:#2a5375;text-decoration:none;">← Back to {{ $course->courseCode }}</a>
 
                 <header class="tp-head">
                     <div>
@@ -98,7 +99,6 @@
                                 <details class="tp-menu">
                                     <summary aria-label="More options for {{ $topic->topicName }}" title="More options"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></summary>
                                     <div class="tp-menu-list">
-                                        <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}">Open questions</a>
                                         <a href="{{ route('courses.topics.edit', [$course, $topic]) }}">Edit</a>
                                         <form method="POST" action="{{ route('courses.topics.destroy', [$course, $topic]) }}" data-confirm="Delete this topic?" data-confirm-item="{{ $topic->topicName }}" data-confirm-label="Delete topic">
                                             @csrf

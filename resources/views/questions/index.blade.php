@@ -32,7 +32,7 @@
                         @endif
                     </p>
                 </div>
-                <a href="{{ route('courses.topics.questions.create', [$course, $topic]) }}" class="work-action-primary">Add a question <span aria-hidden="true">+</span></a>
+                <a href="{{ route('courses.topics.questions.create', [$course, $topic]) }}{{ $selectedType ? '?type=' . urlencode($selectedType) : '' }}" class="work-action-primary">Add a question <span aria-hidden="true">+</span></a>
             </header>
 
             @if (session('status'))
@@ -103,7 +103,7 @@
                                 @if ($bloomFilter)
                                     <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.index', [$course, $topic]) }}?type={{ urlencode($selectedType) }}">Clear the Bloom filter</a>
                                 @else
-                                    <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.create', [$course, $topic]) }}">Add one</a>
+                                    <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.create', [$course, $topic]) }}{{ $selectedType ? '?type=' . urlencode($selectedType) : '' }}">Add one</a>
                                 @endif
                             </div>
                         @else
@@ -154,7 +154,7 @@
                 </section>
             @endif
 
-            <div class="work-below-directory"><a href="{{ route('courses.topics.index', $course) }}">← Back to topics</a><span>Question bank</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.topics.index', $course) }}">← Back to topics</a><span>Question bank</span></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

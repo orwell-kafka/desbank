@@ -173,4 +173,96 @@
         flash.classList.add('is-flash');
         setTimeout(function () { flash.classList.remove('is-flash'); }, 2200);
     });
+
+    // 6. Row action menus (the "three dots"). Markup: <div data-menu> button.work-menu-btn + .work-menu-list[role=menu][hidden].
+    //    The list is positioned with position:fixed so the table's horizontal scroll area cannot clip it.
+    (function () {
+        var openMenu = null;
+
+        function items(menu) { return Array.prototype.slice.call(menu.querySelectorAll('[role="menuitem"]')); }
+
+        function place(menu) {
+            var btn = menu.querySelector('.work-menu-btn');
+            var list = menu.querySelector('.work-menu-list');
+            var r = btn.getBoundingClientRect();
+            list.style.top = '0px'; list.style.left = '0px';
+            var w = list.offsetWidth, h = list.offsetHeight;
+            var left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
+            var top = r.bottom + 4;
+            if (top + h > window.innerHeight - 8 && r.top - 4 - h > 8) top = r.top - 4 - h;   // flip up when there is no room below
+            list.style.left = left + 'px';
+            list.style.top = top + 'px';
+        }
+
+        function close(menu, returnFocus) {
+            if (!menu) return;
+            var btn = menu.querySelector('.work-menu-btn');
+            menu.querySelector('.work-menu-list').hidden = true;
+            btn.setAttribute('aria-expanded', 'false');
+            if (openMenu === menu) openMenu = null;
+            if (returnFocus) btn.focus();
+        }
+
+        function open(menu, focusIndex) {
+            if (openMenu && openMenu !== menu) close(openMenu, false);
+            var list = menu.querySelector('.work-menu-list');
+            list.hidden = false;
+            menu.querySelector('.work-menu-btn').setAttribute('aria-expanded', 'true');
+            openMenu = menu;
+            place(menu);
+            var els = items(menu);
+            if (els.length) els[focusIndex === 'last' ? els.length - 1 : 0].focus();
+        }
+
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.work-menu-btn');
+            if (btn) {
+                var menu = btn.closest('[data-menu]');
+                if (menu === openMenu) close(menu, false); else open(menu);
+                return;
+            }
+            if (openMenu && !e.target.closest('[data-menu]')) { close(openMenu, false); return; }
+            // Links close the menu; the Delete button stays so focus has somewhere to return if the confirm is cancelled.
+            if (openMenu && e.target.closest('a.work-menu-item')) close(openMenu, false);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            var menu = e.target.closest && e.target.closest('[data-menu]');
+            if (!menu) return;
+            var btn = menu.querySelector('.work-menu-btn');
+            if (e.target === btn && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                e.preventDefault(); open(menu, e.key === 'ArrowUp' ? 'last' : 0); return;
+            }
+            if (menu !== openMenu) return;
+            var els = items(menu), i = els.indexOf(document.activeElement);
+            if (e.key === 'Escape') { e.preventDefault(); close(menu, true); }
+            else if (e.key === 'Tab') { close(menu, false); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); els[(i + 1) % els.length].focus(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); els[(i - 1 + els.length) % els.length].focus(); }
+            else if (e.key === 'Home') { e.preventDefault(); els[0].focus(); }
+            else if (e.key === 'End') { e.preventDefault(); els[els.length - 1].focus(); }
+        });
+
+        // A fixed menu would drift away from its row, so close it when the page or the table scrolls or resizes.
+        window.addEventListener('scroll', function () { close(openMenu, false); }, true);
+        window.addEventListener('resize', function () { close(openMenu, false); });
+    })();
+
+    // 7. Toasts: <div data-toast> hides itself after a few seconds; [data-toast-close] dismisses it sooner.
+    (function () {
+        document.querySelectorAll('[data-toast]').forEach(function (toast) {
+            var timer;
+            function hide() {
+                clearTimeout(timer);
+                toast.classList.add('is-leaving');
+                setTimeout(function () { toast.hidden = true; }, 220);
+            }
+            function arm() { timer = setTimeout(hide, 4000); }
+            var close = toast.querySelector('[data-toast-close]');
+            if (close) close.addEventListener('click', hide);
+            toast.addEventListener('mouseenter', function () { clearTimeout(timer); });
+            toast.addEventListener('mouseleave', arm);
+            arm();
+        });
+    })();
 })();

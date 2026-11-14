@@ -152,7 +152,7 @@
 
                     <div class="work-form-actions">
                         <button type="submit" class="work-action-primary" data-pending-label="Saving…">Save ToS <span aria-hidden="true">→</span></button>
-                        <a href="{{ route('courses.tos.index', $course) }}" class="work-form-cancel">Cancel</a>
+                        <a data-back href="{{ route('courses.tos.index', $course) }}" class="work-form-cancel">Cancel</a>
                     </div>
                 </form>
             </div>

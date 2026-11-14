@@ -6,6 +6,7 @@
     <title>@yield('title', 'DESBank')</title>
     @include('partials.head-assets')
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}" data-reset></script>
 </head>
 <body class="auth-page">
     <div class="auth-layout">

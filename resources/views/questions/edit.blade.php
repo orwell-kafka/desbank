@@ -132,7 +132,7 @@
 
                     <div class="work-form-actions">
                         <button type="submit" class="work-action-primary" data-pending-label="Updating…">Update question <span aria-hidden="true">→</span></button>
-                        <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="work-form-cancel">Cancel</a>
+                        <a data-back href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="work-form-cancel">Cancel</a>
                     </div>
                 </form>
 
