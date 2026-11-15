@@ -12,9 +12,6 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard.instructor') }}">Instructor workspace</a><span aria-hidden="true">/</span><a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.show', $course) }}">{{ $course->courseName }}</a><span aria-hidden="true">/</span><span aria-current="page">exams</span>
-            </nav>
             @php $color = \App\Support\CourseTheme::color($course); @endphp
             <style>
                 .ex { --c: {{ $color }}; }

@@ -15,7 +15,16 @@ class Course extends Model
         'courseName',
         'courseCode',
         'creditUnits',
+        'coverImage',
     ];
+
+    public const COVER_DIR = 'uploads/course-covers';
+
+    /** Public URL of the cover picture, or null when the course has none. */
+    public function coverUrl(): ?string
+    {
+        return $this->coverImage ? asset(self::COVER_DIR . '/' . basename($this->coverImage)) : null;
+    }
 
     public function account()
     {

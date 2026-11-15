@@ -10,6 +10,8 @@
         .dp-back { display: inline-block; margin: 4px 0 16px; font-size: 14px; font-weight: 600; color: #2a5375; text-decoration: none; }
         .dp-back:hover { color: #12263a; text-decoration: underline; }
         .dp-head { border-left: 8px solid var(--c); background: #fff; border-top: 1px solid #dde4ea; border-right: 1px solid #dde4ea; border-bottom: 1px solid #dde4ea; border-radius: 4px 14px 14px 4px; padding: 22px 26px; }
+        .dp-head.has-cover { position: relative; isolation: isolate; }
+        .dp-head.has-cover::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 0 13px 13px 0; background: var(--cover) center / cover no-repeat; opacity: .16; pointer-events: none; }
         .dp-code { display: inline-block; font: 600 12px/1 ui-monospace, 'IBM Plex Mono', monospace; letter-spacing: .04em; color: var(--c); background: color-mix(in srgb, var(--c) 12%, #fff); padding: 6px 9px; border-radius: 6px; }
         .dp-head h1 { font-size: 30px; line-height: 1.2; color: #12263a; margin: 12px 0 4px; letter-spacing: -.01em; }
         .dp-head p { margin: 0; font-size: 14px; color: #607282; }
@@ -44,14 +46,11 @@
 
         @php $color = \App\Support\CourseTheme::color($course); @endphp
         <main id="main-content" class="work-main">
-            <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><span aria-current="page">{{ $course->courseCode }}</span>
-            </nav>
 
-            <div class="dp" style="--c: {{ $color }};">
+            <div class="dp" style="--c: {{ $color }};{{ $course->coverImage ? " --cover: url('" . $course->coverUrl() . "');" : '' }}">
                 <a data-back href="{{ route('courses.index') }}" class="dp-back">← Back to course list</a>
 
-                <header class="dp-head">
+                <header class="dp-head {{ $course->coverImage ? 'has-cover' : '' }}">
                     <span class="dp-code">{{ $course->courseCode }}</span>
                     <h1>{{ $course->courseName }}</h1>
                     <p>{{ $course->creditUnits !== null ? \App\Support\TosHeading::units($course->creditUnits) : 'Credit units not set' }}</p>

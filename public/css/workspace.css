@@ -622,3 +622,75 @@ body.has-exam-dock .db-shell { padding-bottom: 76px; }
     @keyframes work-toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 }
 @media print { .work-toast { display: none; } }
+
+/* Course cover picture field: a faint preview, the same way the picture appears on the course. */
+.work-optional { font-weight: 400; color: #607282; }
+.work-cover-preview { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; height: 110px; margin: 6px 0 10px; border: 1px dashed #b6c3ce; border-radius: 6px; background: #fff; font-size: 12px; color: #607282; overflow: hidden; }
+.work-cover-preview::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: var(--cover, none); background-position: center; background-size: cover; background-repeat: no-repeat; opacity: .17; }
+.work-cover-preview.has-image { border-style: solid; border-color: var(--work-line); }
+.work-cover-remove { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #36506a; cursor: pointer; }
+
+/* ==========================================================================
+   Side navigation: a narrow icon rail on the left that opens over the page
+   when the pointer reaches it (or when it has keyboard focus).
+   ========================================================================== */
+.workspace { --side-w: 64px; }
+.workspace:has(> .db-shell > .db-sidenav) { padding-left: var(--side-w); }
+.db-sidenav {
+    --label-op: 0;
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 80;
+    display: flex; flex-direction: column; box-sizing: border-box;
+    width: var(--side-w); padding: 10px 8px 12px;
+    background: var(--navy-dark, #0e2338); color: #c9d6e4;
+    border-right: 1px solid #1b3550;
+    overflow-x: hidden; overflow-y: auto;
+}
+.db-sidenav:hover, .db-sidenav:has(:focus-visible), .db-sidenav.is-open {
+    --label-op: 1;
+    width: 248px;
+    box-shadow: 10px 0 28px -10px rgba(8, 20, 32, .5);
+}
+.db-sidenav-top { display: flex; align-items: center; gap: 4px; min-height: 44px; margin-bottom: 14px; }
+.db-sidenav-toggle {
+    appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 44px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #c9d6e4; cursor: pointer;
+}
+.db-sidenav-toggle:hover { background: #17314a; color: #fff; }
+.db-sidenav-toggle svg, .db-sidenav-link svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.db-sidenav-brand {
+    font-family: var(--font-display, sans-serif); font-size: 18px; letter-spacing: -.04em; color: #fff; text-decoration: none; white-space: nowrap;
+    opacity: var(--label-op);
+}
+.db-sidenav-list { flex: none; display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.db-sidenav-link {
+    appearance: none; display: flex; align-items: center; gap: 14px; box-sizing: border-box; width: 100%; height: 44px; padding: 0 13px;
+    border: 0; border-radius: 6px; background: transparent; color: #c9d6e4;
+    font: 500 14px var(--font-body, sans-serif); text-decoration: none; text-align: left; white-space: nowrap; cursor: pointer;
+}
+.db-sidenav-link svg { flex: none; }
+.db-sidenav-link:hover { background: #17314a; color: #fff; }
+.db-sidenav-link[aria-current="page"] { background: #1d3d5c; color: #fff; box-shadow: inset 3px 0 0 var(--amber, #e8a33d); }
+.db-sidenav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; opacity: var(--label-op); }
+.db-sidenav-context {
+    margin: 12px 8px 6px; padding-top: 12px; border-top: 1px solid #29435d;
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #7c93ab;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.db-sidenav-foot { margin: auto 0 0; padding-top: 14px; }
+.db-sidenav :focus-visible { outline: 3px solid var(--amber, #e8a33d); outline-offset: -3px; }
+@media (prefers-reduced-motion: no-preference) {
+    .db-sidenav { transition: width .18s var(--ease-standard, ease), box-shadow .18s ease; }
+    .db-sidenav-label, .db-sidenav-brand { transition: opacity .12s ease; }
+}
+/* The exam action bar and other full-width bars start after the rail. */
+.workspace:has(> .db-shell > .db-sidenav) .work-exam-dock { left: var(--side-w); }
+@media (max-width: 680px) {
+    .workspace { --side-w: 52px; }
+    .db-sidenav { padding: 8px 4px 10px; }
+    .db-sidenav-toggle { width: 44px; }
+    .db-sidenav-link { padding: 0 11px; }
+}
+@media print {
+    .db-sidenav { display: none; }
+    .workspace:has(> .db-shell > .db-sidenav) { padding-left: 0; }
+}

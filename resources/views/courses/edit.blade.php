@@ -12,9 +12,6 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard.instructor') }}">Instructor workspace</a><span aria-hidden="true">/</span><a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><span aria-current="page">Edit course</span>
-            </nav>
             <header class="work-heading work-heading-compact">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Course directory</p>
@@ -24,7 +21,7 @@
             </header>
 
             <div class="work-form-layout">
-                <form method="POST" action="{{ route('courses.update', $course) }}" class="work-form" data-pending>
+                <form method="POST" action="{{ route('courses.update', $course) }}" class="work-form" enctype="multipart/form-data" data-pending>
                     @csrf
                     @method('PUT')
                     @include('partials.work-errors')
@@ -43,6 +40,7 @@
                                 <label class="work-label" for="creditUnits">Credit units</label>
                                 <input type="number" id="creditUnits" name="creditUnits" step="0.5" min="0.5" max="99" class="work-input {{ $errors->has('creditUnits') ? 'is-invalid' : '' }}" value="{{ old('creditUnits', isset($course->creditUnits) ? rtrim(rtrim(number_format((float) $course->creditUnits, 1, '.', ''), '0'), '.') : '') }}" required @if ($errors->has('creditUnits')) aria-invalid="true" @endif>
                             </div>
+                            @include('courses._cover-field')
                         </div>
                     </section>
 

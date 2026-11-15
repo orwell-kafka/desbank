@@ -12,9 +12,6 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('courses.index') }}">Courses</a><span aria-hidden="true">/</span><a href="{{ route('courses.topics.index', $course) }}">{{ $course->courseName }}</a><span aria-hidden="true">/</span><span aria-current="page">Edit topic</span>
-            </nav>
             <header class="work-heading work-heading-compact">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Topics</p>

@@ -12,9 +12,6 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <nav class="work-crumb" aria-label="Breadcrumb">
-                <a href="{{ route('dashboard.instructor') }}">Instructor workspace</a><span aria-hidden="true">/</span><span aria-current="page">Courses</span>
-            </nav>
             <style>
                 .dc-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 6px 0 22px; flex-wrap: wrap; }
                 .dc-top h1 { font-size: 28px; line-height: 1.15; color: #12263a; margin: 0; letter-spacing: -.01em; }
@@ -23,6 +20,10 @@
                 .dc-add:hover { background: #1d3d5c; }
                 .dc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; list-style: none; margin: 0; padding: 0; }
                 .dc-card { position: relative; display: flex; flex-direction: column; background: #fff; border: 1px solid #dde4ea; border-left: 6px solid var(--c); border-radius: 12px; padding: 16px 16px 12px 18px; transition: transform .15s ease, box-shadow .15s ease; }
+                /* The top part of the card (code, name, units) bleeds to the card's edges; the cover picture is drawn behind it only, so it stops above the links row. */
+                .dc-body { position: relative; margin: -16px -16px 0 -18px; padding: 16px 16px 16px 18px; }
+                .dc-card.has-cover { isolation: isolate; }
+                .dc-card.has-cover .dc-body::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 6px 11px 0 0; background: var(--cover) center / cover no-repeat; opacity: .17; pointer-events: none; }
                 .dc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(18, 38, 58, .1); }
                 .dc-card:focus-within { outline: 2px solid var(--c); outline-offset: 2px; }
                 .dc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -30,7 +31,7 @@
                 .dc-title { display: block; margin: 14px 0 4px; font-size: 19px; line-height: 1.3; font-weight: 700; color: #12263a; text-decoration: none; }
                 .dc-title::before { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 12px; }
                 .dc-units { margin: 0; font-size: 13px; color: #607282; min-height: 18px; }
-                .dc-links { display: flex; gap: 6px; margin-top: 16px; padding-top: 10px; border-top: 1px dashed #dde4ea; position: relative; z-index: 2; }
+                .dc-links { display: flex; gap: 6px; margin-top: 0; padding-top: 10px; border-top: 1px dashed #dde4ea; position: relative; z-index: 2; }
                 .dc-links a { font-size: 13px; font-weight: 600; color: #2a5375; text-decoration: none; padding: 5px 9px; border-radius: 6px; }
                 .dc-links a:hover { background: #eef3f7; color: #12263a; }
                 .dc-menu { position: relative; z-index: 3; }
@@ -71,7 +72,8 @@
             @else
                 <ul class="dc-grid">
                     @foreach ($courses as $course)
-                        <li class="dc-card" style="--c: {{ \App\Support\CourseTheme::color($course) }};">
+                        <li class="dc-card {{ $course->coverImage ? 'has-cover' : '' }}" style="--c: {{ \App\Support\CourseTheme::color($course) }};{{ $course->coverImage ? " --cover: url('" . $course->coverUrl() . "');" : '' }}">
+                            <div class="dc-body">
                             <div class="dc-row">
                                 <span class="dc-code">{{ $course->courseCode }}</span>
                                 <details class="dc-menu">
@@ -89,6 +91,7 @@
                             </div>
                             <a href="{{ route('courses.show', $course) }}" class="dc-title">{{ $course->courseName }}</a>
                             <p class="dc-units">{{ $course->creditUnits !== null ? \App\Support\TosHeading::units($course->creditUnits) : '' }}</p>
+                            </div>
                             <div class="dc-links">
                                 <a href="{{ route('courses.topics.index', $course) }}">Question bank</a>
                                 <a href="{{ route('courses.exams.index', $course) }}">Exams</a>
