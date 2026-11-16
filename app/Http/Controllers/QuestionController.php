@@ -23,28 +23,39 @@ class QuestionController extends Controller
             ->mapWithKeys(fn ($type) => [$type => $allQuestions->where('questionType', $type)->count()]);
 
         $selectedType = $request->query('type');
+        if (! in_array($selectedType, self::QUESTION_TYPES, true)) {
+            $selectedType = null;
+        }
         $bloomFilter = $request->query('bloom');
+        $search = trim((string) $request->query('q', ''));
         $sort = $request->query('sort', 'newest');
 
-        $questions = null;
+        // All of the topic's questions are listed right away; the type tabs, Bloom level and
+        // search box only narrow the list down.
+        $questions = $allQuestions;
+
         if ($selectedType) {
-            $questions = $allQuestions->where('questionType', $selectedType);
-            if ($bloomFilter) {
-                $questions = $questions->where('bloomLevel', $bloomFilter);
-            }
-
-            // "Newest" is the order questions were added (ids only ever grow), so a new question is
-            // always at the top, and editing an old one does not push it above the latest additions.
-            $questions = match ($sort) {
-                'oldest' => $questions->sortBy('questionId'),
-                'az' => $questions->sortBy(fn ($q) => strtolower($q->content)),
-                'za' => $questions->sortByDesc(fn ($q) => strtolower($q->content)),
-                'bloom' => $questions->sortBy([['bloomLevel', 'asc'], ['questionId', 'desc']]),
-                default => $questions->sortByDesc('questionId'),
-            };
-
-            $questions = $questions->values();
+            $questions = $questions->where('questionType', $selectedType);
         }
+        if ($bloomFilter) {
+            $questions = $questions->where('bloomLevel', $bloomFilter);
+        }
+        if ($search !== '') {
+            $questions = $questions->filter(fn ($q) => mb_stripos((string) $q->content, $search) !== false
+                || mb_stripos((string) $q->choices, $search) !== false);
+        }
+
+        // "Newest" is the order questions were added (ids only ever grow), so a new question is
+        // always at the top, and editing an old one does not push it above the latest additions.
+        $questions = match ($sort) {
+            'oldest' => $questions->sortBy('questionId'),
+            'az' => $questions->sortBy(fn ($q) => strtolower($q->content)),
+            'za' => $questions->sortByDesc(fn ($q) => strtolower($q->content)),
+            'bloom' => $questions->sortBy([['bloomLevel', 'asc'], ['questionId', 'desc']]),
+            default => $questions->sortByDesc('questionId'),
+        };
+
+        $questions = $questions->values();
 
         return view('questions.index', [
             'course' => $course,
@@ -53,6 +64,8 @@ class QuestionController extends Controller
             'selectedType' => $selectedType,
             'bloomFilter' => $bloomFilter,
             'sort' => $sort,
+            'search' => $search,
+            'total' => $allQuestions->count(),
             'questions' => $questions,
             'bloomLevels' => self::BLOOM_LEVELS,
         ]);
@@ -87,6 +100,9 @@ class QuestionController extends Controller
         $choices = $this->cleanChoices($data);
         if ($data['questionType'] === 'Multiple Choice' && count($choices) < 2) {
             throw ValidationException::withMessages(['choices' => 'Add at least two answer choices for a Multiple Choice question.']);
+        }
+        if ($data['questionType'] === 'Multiple Choice' && ! in_array(trim((string) ($data['correctAnswer'] ?? '')), $choices, true)) {
+            throw ValidationException::withMessages(['correctAnswer' => 'Pick the correct answer from your choices.']);
         }
 
         // Simple duplicate check: same content already exists under this topic
@@ -165,7 +181,7 @@ class QuestionController extends Controller
 
         // Return to the same Questions list the user was on (type, Bloom filter and sort
         // are carried by the delete form), so the updated list stays visible.
-        $view = array_filter($request->only(['type', 'bloom', 'sort']), fn ($v) => is_string($v) && $v !== '');
+        $view = array_filter($request->only(['type', 'bloom', 'sort', 'q']), fn ($v) => is_string($v) && $v !== '');
 
         return redirect()
             ->to(route('courses.topics.questions.index', array_merge([$course, $topic], $view)) . '#work-results')

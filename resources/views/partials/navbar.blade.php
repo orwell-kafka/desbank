@@ -1,8 +1,7 @@
 @php
     // Which entry is the current page. Topics and Questions are separate entries, so they are matched exactly.
     $navCourses   = request()->routeIs('courses.index', 'courses.create', 'courses.edit', 'courses.show');
-    $navTopics    = request()->routeIs('courses.topics.index', 'courses.topics.create', 'courses.topics.edit', 'courses.topics.show');
-    $navQuestions = request()->routeIs('courses.topics.questions.*');
+    $navTopics    = request()->routeIs('courses.topics.*');
     $navTos       = request()->routeIs('courses.tos.*');
     $navExams     = request()->routeIs('courses.exams.*', 'courses.quizzes.*');
 @endphp
@@ -36,14 +35,6 @@
                     <span class="db-sidenav-label">Topics</span>
                 </a>
             </li>
-            @isset($topic)
-                <li>
-                    <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}" class="db-sidenav-link" @if ($navQuestions) aria-current="page" @endif title="{{ $topic->topicName }} Questions">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1.1.9-1.1 1.7M12 16.6h.01"/></svg>
-                        <span class="db-sidenav-label">{{ $topic->topicName }} Questions</span>
-                    </a>
-                </li>
-            @endisset
             <li>
                 <a href="{{ route('courses.tos.index', $course) }}" class="db-sidenav-link" @if ($navTos) aria-current="page" @endif>
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 10h16M10 10v10"/></svg>

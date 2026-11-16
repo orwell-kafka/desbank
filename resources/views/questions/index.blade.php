@@ -17,11 +17,7 @@
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Question bank</p>
                     <h1>{{ $topic->topicName }}<span class="work-title-period">.</span></h1>
                     <p class="work-intro">
-                        @if ($selectedType)
-                            Reviewing <strong>{{ $selectedType }}</strong> questions. Filter by Bloom level, change the order, or edit an item.
-                        @else
-                            Choose a question type to review its items, or add a new question to this topic.
-                        @endif
+                        Browse every question in this topic. Search by keyword, filter by question type or Bloom level, or edit an item. The most recently added questions come first.
                     </p>
                 </div>
                 <a href="{{ route('courses.topics.questions.create', [$course, $topic]) }}{{ $selectedType ? '?type=' . urlencode($selectedType) : '' }}" class="work-action-primary">Add a question <span aria-hidden="true">+</span></a>
@@ -31,120 +27,124 @@
                 <div class="work-notice" role="status">{{ session('status') }}</div>
             @endif
 
-            @if (! $selectedType)
-                <section class="work-directory" aria-labelledby="work-types-title">
-                    <div class="work-directory-heading">
-                        <div>
-                            <p class="work-eyebrow">BY QUESTION TYPE</p>
-                            <h2 id="work-types-title">Question types</h2>
-                        </div>
-                        <span class="work-count">{{ $counts->sum() }} {{ $counts->sum() === 1 ? 'question' : 'questions' }}</span>
-                    </div>
-                    <ul class="work-types">
-                        @foreach ($counts as $type => $count)
-                            <li>
-                                <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}?type={{ urlencode($type) }}" class="work-type {{ $count == 0 ? 'is-empty' : '' }}">
-                                    <span class="work-type-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                                    <span class="work-type-name">{{ $type }}</span>
-                                    <span class="work-type-count"><b>{{ $count }}</b><span>question{{ $count == 1 ? '' : 's' }}</span></span>
-                                    <span class="work-type-arrow" aria-hidden="true">→</span>
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @else
-                <section class="work-directory" aria-labelledby="work-questions-title">
-                    <nav class="work-tabs" aria-label="Question types">
-                        @foreach ($counts as $type => $count)
-                            <a href="{{ route('courses.topics.questions.index', [$course, $topic]) }}?type={{ urlencode($type) }}" class="work-tab" @if ($type === $selectedType) aria-current="page" @endif>{{ $type }} <small>{{ $count }}</small></a>
-                        @endforeach
-                    </nav>
+            @php
+                $listUrl = route('courses.topics.questions.index', [$course, $topic]);
+                $keep = array_filter(['q' => $search, 'bloom' => $bloomFilter, 'sort' => $sort !== 'newest' ? $sort : null], fn ($v) => $v !== null && $v !== '');
+                $hasFilter = $selectedType || $bloomFilter || $search !== '';
+            @endphp
+            <section class="work-directory" aria-labelledby="work-questions-title">
+                <nav class="work-tabs" aria-label="Question types">
+                    <a href="{{ $listUrl }}{{ $keep ? '?' . http_build_query($keep) : '' }}" class="work-tab" @if (! $selectedType) aria-current="page" @endif>All <small>{{ $total }}</small></a>
+                    @foreach ($counts as $type => $count)
+                        <a href="{{ $listUrl }}?{{ http_build_query(array_merge(['type' => $type], $keep)) }}" class="work-tab" @if ($type === $selectedType) aria-current="page" @endif>{{ $type }} <small>{{ $count }}</small></a>
+                    @endforeach
+                </nav>
 
-                    <div class="work-toolbar">
-                        <form method="GET" action="{{ route('courses.topics.questions.index', [$course, $topic]) }}" data-filter-form="#work-results">
+                <div class="work-toolbar">
+                    <form method="GET" action="{{ $listUrl }}" role="search" data-filter-form="#work-results">
+                        @if ($selectedType)
                             <input type="hidden" name="type" value="{{ $selectedType }}">
-                            <div class="work-field">
-                                <label class="work-label" for="bloomFilter">Bloom's level</label>
-                                <select name="bloom" id="bloomFilter" class="work-select" onchange="this.form.submit()">
-                                    <option value="">All Levels</option>
-                                    @foreach ($bloomLevels as $level)
-                                        <option value="{{ $level }}" {{ $bloomFilter == $level ? 'selected' : '' }}>{{ $level }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="work-field">
-                                <label class="work-label" for="sortOrder">Sort by</label>
-                                <select name="sort" id="sortOrder" class="work-select" onchange="this.form.submit()">
-                                    <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Date Added (Newest first)</option>
-                                    <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Date Added (Oldest first)</option>
-                                    <option value="az" {{ $sort == 'az' ? 'selected' : '' }}>Question Text (A&ndash;Z)</option>
-                                    <option value="za" {{ $sort == 'za' ? 'selected' : '' }}>Question Text (Z&ndash;A)</option>
-                                    <option value="bloom" {{ $sort == 'bloom' ? 'selected' : '' }}>Bloom's Level</option>
-                                </select>
-                            </div>
-                            <noscript><button type="submit" class="work-row-btn">Apply filters</button></noscript>
-                        </form>
-                        <span class="work-count" id="work-questions-title">{{ $questions->count() }} {{ $questions->count() === 1 ? 'question' : 'questions' }}</span>
-                    </div>
+                        @endif
+                        <div class="work-field work-field-search">
+                            <label class="work-label" for="questionSearch">Search questions</label>
+                            <input type="search" name="q" id="questionSearch" class="work-input" value="{{ $search }}" placeholder="Search question text or choices" autocomplete="off">
+                        </div>
+                        <div class="work-field">
+                            <label class="work-label" for="bloomFilter">Bloom's level</label>
+                            <select name="bloom" id="bloomFilter" class="work-select" onchange="this.form.submit()">
+                                <option value="">All Levels</option>
+                                @foreach ($bloomLevels as $level)
+                                    <option value="{{ $level }}" {{ $bloomFilter == $level ? 'selected' : '' }}>{{ $level }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="work-field">
+                            <label class="work-label" for="sortOrder">Sort by</label>
+                            <select name="sort" id="sortOrder" class="work-select" onchange="this.form.submit()">
+                                <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Date Added (Newest first)</option>
+                                <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>Date Added (Oldest first)</option>
+                                <option value="az" {{ $sort == 'az' ? 'selected' : '' }}>Question Text (A&ndash;Z)</option>
+                                <option value="za" {{ $sort == 'za' ? 'selected' : '' }}>Question Text (Z&ndash;A)</option>
+                                <option value="bloom" {{ $sort == 'bloom' ? 'selected' : '' }}>Bloom's Level</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="work-row-btn">Search</button>
+                        @if ($hasFilter)
+                            <a href="{{ $listUrl }}" class="work-row-link work-row-link-main">Clear</a>
+                        @endif
+                    </form>
+                    <span class="work-count" id="work-questions-title">{{ $questions->count() }} {{ $questions->count() === 1 ? 'question' : 'questions' }}</span>
+                </div>
 
-                    <div class="work-results" id="work-results">
-                        @if ($questions->isEmpty())
-                            <div class="work-empty-inline">
-                                No {{ $selectedType }} questions match this filter.
-                                @if ($bloomFilter)
-                                    <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.index', [$course, $topic]) }}?type={{ urlencode($selectedType) }}">Clear the Bloom filter</a>
-                                @else
-                                    <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.create', [$course, $topic]) }}{{ $selectedType ? '?type=' . urlencode($selectedType) : '' }}">Add one</a>
-                                @endif
-                            </div>
-                        @else
-                            <div class="work-table-scroll" role="region" aria-label="{{ $selectedType }} questions" tabindex="0">
-                                <table class="work-table">
-                                    <thead><tr>
-                                        <th scope="col">No.</th>
-                                        <th scope="col">Question</th>
-                                        <th scope="col">Bloom level</th>
-                                        <th scope="col">Manage</th>
-                                    </tr></thead>
-                                    <tbody>
-                                        @foreach ($questions as $question)
-                                            <tr>
-                                                <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
-                                                <td>
-                                                    <p class="work-q-text">{{ $question->content }}</p>
-                                                    @if ($question->choices)
-                                                        @php $letters = ['A','B','C','D','E','F','G','H']; @endphp
-                                                        <ul class="work-choices" aria-label="Answer choices">
-                                                            @foreach (explode(',', $question->choices) as $i => $choice)
-                                                                <li><b>{{ $letters[$i] ?? '' }}.</b><span>{{ trim($choice) }}</span></li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </td>
-                                                <td><span class="work-chip">{{ $question->bloomLevel }}</span></td>
-                                                <td>
-                                                    <div class="work-row-actions">
-                                                        <a href="{{ route('courses.topics.questions.edit', [$course, $topic, $question]) }}" class="work-row-link work-row-link-main">Edit</a>
-                                                        <form method="POST" action="{{ route('courses.topics.questions.destroy', [$course, $topic, $question]) }}" data-confirm="Delete this question?" data-confirm-item="{{ \Illuminate\Support\Str::limit($question->content, 90) }}" data-confirm-label="Delete question">
+                <div class="work-results" id="work-results">
+                    @if ($questions->isEmpty())
+                        <div class="work-empty-inline">
+                            @if ($hasFilter)
+                                No questions match your search or filters.
+                                <a class="work-row-link work-row-link-main" href="{{ $listUrl }}">Clear filters</a>
+                            @else
+                                No questions in this topic yet.
+                                <a class="work-row-link work-row-link-main" href="{{ route('courses.topics.questions.create', [$course, $topic]) }}">Add one</a>
+                            @endif
+                        </div>
+                    @else
+                        <div class="work-table-scroll" role="region" aria-label="Questions" tabindex="0">
+                            <table class="work-table">
+                                <thead><tr>
+                                    <th scope="col">No.</th>
+                                    <th scope="col">Question</th>
+                                    @unless ($selectedType)
+                                        <th scope="col">Type</th>
+                                    @endunless
+                                    <th scope="col">Bloom level</th>
+                                    <th scope="col">Manage</th>
+                                </tr></thead>
+                                <tbody>
+                                    @foreach ($questions as $question)
+                                        <tr>
+                                            <td class="work-table-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                            <td>
+                                                <p class="work-q-text">{{ $question->content }}</p>
+                                                @if ($question->choices)
+                                                    @php $letters = ['A','B','C','D','E','F','G','H']; @endphp
+                                                    <ul class="work-choices" aria-label="Answer choices">
+                                                        @foreach (explode(',', $question->choices) as $i => $choice)
+                                                            <li><b>{{ $letters[$i] ?? '' }}.</b><span>{{ trim($choice) }}</span></li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
+                                            </td>
+                                            @unless ($selectedType)
+                                                <td><span class="work-chip work-chip-gold">{{ $question->questionType }}</span></td>
+                                            @endunless
+                                            <td><span class="work-chip">{{ $question->bloomLevel }}</span></td>
+                                            <td>
+                                                <div class="work-menu" data-menu>
+                                                    <button type="button" class="work-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="question-menu-{{ $question->questionId }}" aria-label="More actions for question {{ $loop->iteration }}">
+                                                        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                                                    </button>
+                                                    <div class="work-menu-list" id="question-menu-{{ $question->questionId }}" role="menu" hidden>
+                                                        <a href="{{ route('courses.topics.questions.edit', [$course, $topic, $question]) }}" role="menuitem" class="work-menu-item">Edit</a>
+                                                        <form method="POST" action="{{ route('courses.topics.questions.destroy', [$course, $topic, $question]) }}" role="none" data-confirm="Delete this question?" data-confirm-item="{{ \Illuminate\Support\Str::limit($question->content, 90) }}" data-confirm-label="Delete question">
                                                             @csrf
                                                             @method('DELETE')
                                                             <input type="hidden" name="type" value="{{ $selectedType }}">
                                                             <input type="hidden" name="bloom" value="{{ $bloomFilter }}">
                                                             <input type="hidden" name="sort" value="{{ $sort }}">
-                                                            <button type="submit" class="work-row-link work-row-delete">Delete</button>
+                                                            <input type="hidden" name="q" value="{{ $search }}">
+                                                            <button type="submit" role="menuitem" class="work-menu-item work-menu-item-danger">Delete</button>
                                                         </form>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-                    </div>
-                </section>
-            @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </section>
 
             <div class="work-below-directory"><a data-back href="{{ route('courses.topics.index', $course) }}">← Back to topics</a><span>Question bank</span></div>
         </main>

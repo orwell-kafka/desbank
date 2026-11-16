@@ -35,7 +35,7 @@
                                 <div class="work-field">
                                     <label class="work-label" for="bloomLevel">Bloom's taxonomy level</label>
                                     <select name="bloomLevel" id="bloomLevel" required class="work-select {{ $errors->has('bloomLevel') ? 'is-invalid' : '' }}">
-                                        <option value="">-- Select --</option>
+                                        <option value="" disabled hidden {{ old('bloomLevel') ? '' : 'selected' }}>-- Select --</option>
                                         @foreach ($bloomLevels as $level)
                                             <option value="{{ $level }}" {{ old('bloomLevel') == $level ? 'selected' : '' }}>{{ $level }}</option>
                                         @endforeach
@@ -44,7 +44,7 @@
                                 <div class="work-field">
                                     <label class="work-label" for="questionType">Question type</label>
                                     <select name="questionType" id="questionType" required class="work-select {{ $errors->has('questionType') ? 'is-invalid' : '' }}">
-                                        <option value="">-- Select --</option>
+                                        <option value="" disabled hidden {{ old('questionType', request('type')) ? '' : 'selected' }}>-- Select --</option>
                                         @foreach ($questionTypes as $type)
                                             <option value="{{ $type }}" {{ old('questionType', request('type')) == $type ? 'selected' : '' }}>{{ $type }}</option>
                                         @endforeach
@@ -99,6 +99,17 @@
                                 </div>
                             </div>
 
+                            <div id="answerChoiceField" class="work-dyn" style="display:none;" data-error-key="correctAnswer">
+                                <div class="work-field">
+                                    <label class="work-label" for="answerChoiceSelect">Correct Answer</label>
+                                    <select id="answerChoiceSelect" class="work-select {{ $errors->has('correctAnswer') ? 'is-invalid' : '' }}" data-correct="{{ old('correctAnswer') }}">
+                                        <option value="" disabled hidden selected>-- Select --</option>
+                                    </select>
+                                    <p id="answerChoiceError" class="work-builder-error" role="alert" hidden></p>
+                                    <p class="work-hint">Pick the correct answer from the choices you entered above.</p>
+                                </div>
+                            </div>
+
                             <div id="answerTextField" class="work-dyn">
                                 <div class="work-field">
                                     <label class="work-label" id="answerLabel" for="answerInput">Correct Answer</label>
@@ -110,7 +121,7 @@
                                 <div class="work-field">
                                     <label class="work-label" for="answerTrueFalseSelect">Correct Answer</label>
                                     <select id="answerTrueFalseSelect" class="work-select {{ $errors->has('correctAnswer') ? 'is-invalid' : '' }}" data-error-key="correctAnswer">
-                                        <option value="">-- Select --</option>
+                                        <option value="" disabled hidden {{ old('correctAnswer') ? '' : 'selected' }}>-- Select --</option>
                                         <option value="True" {{ old('correctAnswer') == 'True' ? 'selected' : '' }}>True</option>
                                         <option value="False" {{ old('correctAnswer') == 'False' ? 'selected' : '' }}>False</option>
                                     </select>
@@ -135,7 +146,7 @@
                 <aside class="work-aside" aria-label="Question types">
                     <h2>Answer format by type</h2>
                     <ol>
-                        <li><span class="work-step-num">MC</span><div><strong>Multiple Choice</strong><p>Add each choice with the Add answer button, then enter the correct answer.</p></div></li>
+                        <li><span class="work-step-num">MC</span><div><strong>Multiple Choice</strong><p>Add each choice with the Add answer button, then pick the correct answer from your choices.</p></div></li>
                         <li><span class="work-step-num">T/F</span><div><strong>True/False</strong><p>Pick True or False as the answer.</p></div></li>
                         <li><span class="work-step-num">Enum</span><div><strong>Enumeration</strong><p>Separate the correct answers with commas.</p></div></li>
                         <li><span class="work-step-num">Match</span><div><strong>Matching Type</strong><p>Enter the answer for this item. The answer pool is built at print time.</p></div></li>
@@ -162,6 +173,7 @@
         const typeSelect = document.getElementById('questionType');
         const choicesField = document.getElementById('choicesField');
         const answerTextField = document.getElementById('answerTextField');
+        const answerChoiceField = document.getElementById('answerChoiceField');
         const answerTrueFalseField = document.getElementById('answerTrueFalseField');
         const answerLabel = document.getElementById('answerLabel');
         const answerInput = document.getElementById('answerInput');
@@ -178,6 +190,7 @@
 
             choicesField.style.display = 'none';
             answerTextField.style.display = 'block';
+            answerChoiceField.style.display = 'none';
             answerTrueFalseField.style.display = 'none';
             matchingHint.style.display = 'none';
             essayHint.style.display = 'none';
@@ -185,7 +198,11 @@
             answerInput.required = true;
 
             if (type === 'Multiple Choice') {
+                // The correct answer is picked from the choices above, not typed again.
                 choicesField.style.display = 'block';
+                answerTextField.style.display = 'none';
+                answerChoiceField.style.display = 'block';
+                answerInput.required = false;
             } else if (type === 'True/False') {
                 answerTextField.style.display = 'none';
                 answerTrueFalseField.style.display = 'block';
@@ -203,8 +220,14 @@
         }
 
         // Only animate the fields once the person has changed the type themselves.
+        let previousType = typeSelect.value;
         typeSelect.addEventListener('change', function () {
             form.classList.add('is-interacted');
+            // Don't carry a picked Multiple Choice answer over into another type's answer box.
+            if (previousType === 'Multiple Choice' && typeSelect.value !== 'Multiple Choice') {
+                answerInput.value = '';
+            }
+            previousType = typeSelect.value;
             updateFields();
         });
         updateFields();

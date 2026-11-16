@@ -342,14 +342,11 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
 
         $data = $request->validate([
             'paperSize' => ['required', 'in:Letter,Legal'],
-            'footerText' => ['nullable', 'string', 'max:255'],
             'watermarkText' => ['nullable', 'string', 'max:100'],
             'columns' => ['nullable', 'array'],
             'headerTemplate' => ['required', 'in:classic,formal,minimal,marsu,coe'],
             'footerTemplate' => ['required', 'in:simple,paged,minimal,marsu,coe'],
             'headerTop' => ['nullable', 'integer', 'between:0,200'],
-            'headerLines' => ['nullable', 'string', 'max:600'],
-            'footerLines' => ['nullable', 'string', 'max:900'],
             'watermarkImage' => ['nullable', 'image', 'max:2048'],
             'removeWatermarkImage' => ['nullable'],
             'partOrder' => ['nullable', 'array'],
@@ -392,12 +389,6 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         // Blank "distance from top" keeps the stored value (the column is NOT NULL).
         if (! isset($data['headerTop'])) {
             unset($data['headerTop']);
-        }
-
-        // Letterhead / footer wording: one line per row; blank falls back to the built-in text.
-        foreach (['headerLines', 'footerLines'] as $key) {
-            $text = trim(preg_replace("/\r\n|\r/", "\n", (string) ($data[$key] ?? '')));
-            $data[$key] = $text !== '' ? $text : null;
         }
 
         if (! empty($data['partOrder'])) {
@@ -567,7 +558,7 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         }
     }
 
-    public function replaceOptions(Course $course, Exam $exam, Question $question)
+    public function replaceOptions(Request $request, Course $course, Exam $exam, Question $question)
     {
         $this->authorizeOwner($course);
         $this->authorizeExamBelongsToCourse($course, $exam);
@@ -577,6 +568,14 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         $candidates = $this->replacementPool($exam, $question)->orderByDesc('questionId')->get();
         $topicNames = DB::table('topic')->whereIn('topicId', $candidates->pluck('topicId')->unique())->pluck('topicName', 'topicId');
         $tosTitle = $this->examTitle($exam);
+
+        // The exam page opens this list in a pop-up (?modal=1), so send only the picker's content.
+        if ($request->boolean('modal')) {
+            return view('exams.partials.replace-picker', [
+                'course' => $course, 'exam' => $exam, 'question' => $question,
+                'candidates' => $candidates, 'topicNames' => $topicNames, 'modal' => true,
+            ]);
+        }
 
         return view('exams.replace', compact('course', 'exam', 'question', 'candidates', 'topicNames', 'tosTitle'));
     }

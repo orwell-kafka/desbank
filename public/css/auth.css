@@ -228,3 +228,30 @@
 
 /* Loading state without motion: dimmed and not clickable. */
 .auth-submit:disabled { opacity: 0.75; cursor: progress; }
+
+/* Show / hide password button (log in page) */
+.auth-password { position: relative; }
+.auth-password input { padding-right: 48px; }
+.auth-password-toggle {
+    position: absolute;
+    top: 6px;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--navy);
+    cursor: pointer;
+}
+.auth-password-toggle svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.auth-password-toggle svg[hidden] { display: none; }
+.auth-password-toggle:hover { color: var(--amber-dark); }
+.auth-password-toggle:focus-visible { outline: 2px solid var(--navy-light); outline-offset: -2px; border-radius: var(--radius-sm); }
+/* Morse blink: the eyelid closes to a line (vertical squash) and opens again */
+.auth-password-toggle .eye-shape { transform-box: view-box; transform-origin: 12px 12px; transition: transform .07s ease-in-out; }
+.auth-password-toggle .eye-shape * { vector-effect: non-scaling-stroke; }
+.auth-password-toggle.is-closed .eye-shape { transform: scaleY(.06); }

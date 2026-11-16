@@ -694,3 +694,30 @@ body.has-exam-dock .db-shell { padding-bottom: 76px; }
     .db-sidenav { display: none; }
     .workspace:has(> .db-shell > .db-sidenav) { padding-left: 0; }
 }
+
+/* ---- Questions page: search box ---- */
+.work-toolbar .work-field-search { flex: 1 1 260px; min-width: 220px; }
+.work-toolbar .work-field-search .work-input { min-height: 40px; padding-top: 8px; padding-bottom: 8px; font-size: 13px; }
+
+/* ---- Exam page: "Choose a replacement" pop-up (public/js/exam-replace.js) ---- */
+html.work-modal-open { overflow: hidden; }
+.work-picker { border: 0; padding: 0; border-radius: 5px; width: min(940px, calc(100vw - 32px)); max-width: none; max-height: calc(100vh - 40px); color: var(--work-dark); background: #fff; box-shadow: 0 24px 60px rgba(14, 35, 56, .35); }
+.work-picker[open] { display: flex; flex-direction: column; }
+.work-picker::backdrop { background: rgba(14, 35, 56, .55); }
+.work-picker-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 12px 14px 29px; border-top: 3px solid #d49a45; border-bottom: 1px solid var(--work-line); flex: 0 0 auto; }
+.work-picker-head h2 { margin: 0; font: 700 21px/1.3 var(--font-display, sans-serif); letter-spacing: -.02em; }
+.work-picker-close { appearance: none; width: 40px; height: 40px; border: 0; border-radius: 4px; background: transparent; color: #425d75; font-size: 26px; line-height: 1; cursor: pointer; }
+.work-picker-close:hover { background: #edf1f5; color: var(--work-dark); }
+.work-picker-close:focus-visible { outline: 3px solid var(--work-gold); outline-offset: 1px; }
+.work-picker-body { overflow: auto; padding: 0 0 24px; flex: 1 1 auto; }
+.work-picker-intro { margin: 16px 29px 0; }
+.work-picker-body .work-directory { margin-top: 20px !important; }
+.work-picker-loading { margin: 0; padding: 36px 29px; color: #4d6173; font-size: 14px; }
+@media (max-width: 640px) {
+    .work-picker { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+    .work-picker-head { padding-left: 20px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .work-picker[open] { animation: work-confirm-in var(--motion-panel) var(--ease-out); }
+    .work-picker[open]::backdrop { animation: work-confirm-fade var(--motion-ui) ease-out; }
+}

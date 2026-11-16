@@ -209,7 +209,7 @@
         'minimal' => 'images/exam-templates/footer-minimal.svg',
     ];
 
-    // MarSU letterhead: built-in wording copied from the Word template; editable per exam.
+    // MarSU letterhead: built-in wording copied from the Word template (fixed, not editable).
     $marsuHeaderDefault = "Marinduque State University\nCollege of Engineering\nBachelor of Science in Computer Engineering\nPanfilo M. Manguera Sr. Rd., Tanza, Boac, Marinduque";
     $marsuFooterDefault = "Vision: By 2030, MarSU is a globally recognized university, fostering academic excellence through research and innovation.\nMission: MarSU provides excellence in instruction, research, extension and production, responsive to the needs of the 21st century education in pursuit of global transformation.";
     $splitLines = fn ($text) => array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text)), fn ($l) => $l !== ''));
@@ -221,12 +221,9 @@
     $footerTpl = $exam->footerTemplate ?? 'simple';
     $headerDefault = $headerTpl === 'coe' ? $coeHeaderDefault : $marsuHeaderDefault;
     $footerDefault = $footerTpl === 'coe' ? $coeFooterDefault : $marsuFooterDefault;
-    $headerLines = $splitLines(old('headerLines', $exam->headerLines) ?: $headerDefault);
-    $footerLines = $splitLines(old('footerLines', $exam->footerLines) ?: $footerDefault);
-    $letterheadDefaults = [
-        'header' => ['marsu' => $marsuHeaderDefault, 'coe' => $coeHeaderDefault],
-        'footer' => ['marsu' => $marsuFooterDefault, 'coe' => $coeFooterDefault],
-    ];
+    // Header/footer wording is fixed: always the built-in text, never user-edited.
+    $headerLines = $splitLines($headerDefault);
+    $footerLines = $splitLines($footerDefault);
     $isLetterheadHdr = in_array($headerTpl, ['marsu', 'coe'], true);
     $isLetterheadFtr = in_array($footerTpl, ['marsu', 'coe'], true);
     // Turns e-mail addresses and www. addresses in a header line into blue underlined text, like the Word file.
@@ -329,18 +326,11 @@
                     <option value="marsu" {{ old('headerTemplate', $exam->headerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU letterhead (logos, 4 lines, orange rule)</option>
                     <option value="coe" {{ old('headerTemplate', $exam->headerTemplate) == 'coe' ? 'selected' : '' }}>College of Engineering letterhead (logo, 6 lines, orange bar)</option>
                 </select>
-                <div class="hint">Pre-designed layout — school name/department text only, no custom logo.</div>
+                <div class="hint">Pre-designed layout — school name/department text only, no custom logo. The header and footer wording is fixed and cannot be edited.</div>
 
                 <label for="headerTop">Header distance from top (px)</label>
                 <input type="number" id="headerTop" name="headerTop" min="0" max="200" value="{{ old('headerTop', $headerTop) }}">
                 <div class="hint">Moves the whole header down from the top edge of the paper. The MarSU letterhead matches the Word file at 30; the College of Engineering letterhead at 12.</div>
-
-                <label for="headerLines">Letterhead lines (MarSU / College of Engineering)</label>
-                <textarea id="headerLines" name="headerLines" rows="6" maxlength="600" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('headerLines', $exam->headerLines ?: $headerDefault) }}</textarea>
-                <div class="hint">One line per row. MarSU: centered between the two logos. College of Engineering: line 2 is the big college name, line 3 is bold.</div>
-
-                <h3>Footer Text</h3>
-                <input type="text" name="footerText" value="{{ old('footerText', $exam->footerText) }}">
 
                 <h3>Footer Template</h3>
                 <select name="footerTemplate">
@@ -350,10 +340,6 @@
                     <option value="marsu" {{ old('footerTemplate', $exam->footerTemplate) == 'marsu' ? 'selected' : '' }}>MarSU footer (orange rule, logos, vision/mission)</option>
                     <option value="coe" {{ old('footerTemplate', $exam->footerTemplate) == 'coe' ? 'selected' : '' }}>College of Engineering footer (quality award, ISO badge, vision/mission, tagline)</option>
                 </select>
-
-                <label for="footerLines">Footer lines (MarSU / College of Engineering)</label>
-                <textarea id="footerLines" name="footerLines" rows="7" maxlength="900" style="width:100%; box-sizing:border-box; padding:6px; margin-top:4px; border:1px solid #d1d5db; border-radius:4px; font:inherit; font-size:13px;">{{ old('footerLines', $exam->footerLines ?: $footerDefault) }}</textarea>
-                <div class="hint">One paragraph per row. A leading label such as &ldquo;Vision:&rdquo; is printed in bold. On the College of Engineering footer, a row without a label is printed as the centered bold tagline.</div>
 
                 <h3>Watermark Text</h3>
                 <input type="text" name="watermarkText" value="{{ old('watermarkText', $exam->watermarkText) }}">
@@ -703,29 +689,16 @@
     @unless ($printMode)
     <script>
         // Choosing a letterhead moves it to the distance used in its Word file (MarSU 30 px, College of
-        // Engineering 12 px) unless the distance was already changed by hand, and swaps the built-in wording
-        // in the line boxes (only when they still hold built-in wording, never when they were edited).
+        // Engineering 12 px) unless the distance was already changed by hand.
         (function () {
             var hdr = document.querySelector('select[name="headerTemplate"]');
-            var ftr = document.querySelector('select[name="footerTemplate"]');
             var top = document.getElementById('headerTop');
-            var hLines = document.getElementById('headerLines');
-            var fLines = document.getElementById('footerLines');
-            var defaults = @json($letterheadDefaults);
-            var norm = function (t) { return (t || '').replace(/\r/g, '').trim(); };
-            var swap = function (box, set, key) {
-                if (!box || !set[key]) return;
-                var cur = norm(box.value);
-                if (cur === '' || cur === norm(set.marsu) || cur === norm(set.coe)) box.value = set[key];
-            };
             if (hdr) hdr.addEventListener('change', function () {
                 if (top && (top.value === '50' || top.value === '30' || top.value === '12')) {
                     if (hdr.value === 'marsu') top.value = '30';
                     if (hdr.value === 'coe') top.value = '12';
                 }
-                swap(hLines, defaults.header, hdr.value);
             });
-            if (ftr) ftr.addEventListener('change', function () { swap(fLines, defaults.footer, ftr.value); });
         })();
     </script>
     @endunless

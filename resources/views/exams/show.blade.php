@@ -150,7 +150,7 @@
                                     </td>
                                     <td>
                                         <div class="work-row-actions">
-                                            <a href="{{ route('courses.exams.replace.options', [$course, $exam, $question->questionId]) }}" class="work-row-btn work-row-btn-primary" style="text-decoration:none;" aria-label="Choose a replacement for question {{ $i + 1 }}">Choose…</a>
+                                            <a href="{{ route('courses.exams.replace.options', [$course, $exam, $question->questionId]) }}" class="work-row-btn work-row-btn-primary" style="text-decoration:none;" data-replace-modal aria-haspopup="dialog" aria-label="Choose a replacement for question {{ $i + 1 }}">Choose…</a>
                                             <form method="POST" action="{{ route('courses.exams.replace', [$course, $exam, $question->questionId]) }}" data-pending>
                                                 @csrf
                                                 <button type="submit" class="work-row-btn" data-pending-label="Replacing…" aria-label="Auto-replace question {{ $i + 1 }}">Auto-replace</button>
@@ -270,5 +270,6 @@
             }).observe(head);
         })();
     </script>
+    <script src="{{ asset('js/exam-replace.js') }}?v={{ @filemtime(public_path('js/exam-replace.js')) }}" defer></script>
 </body>
 </html>
