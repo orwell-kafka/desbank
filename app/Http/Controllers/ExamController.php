@@ -89,6 +89,7 @@ class ExamController extends Controller
                 'tosId' => $tos->tosId,
                 'totalItems' => 0,
                 'totalScore' => $tos->totalScore,
+                'headerTemplate' => 'accredited',   // major (Midterm/Final) exams start with the newest header
                 'created' => now(),
             ], 'examId');
 
@@ -247,7 +248,12 @@ class ExamController extends Controller
         $answerLineDefault = self::ANSWER_LINE_DEFAULT;
         $answerLines = $this->resolveAnswerLines($exam);
 
-        return compact('tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart', 'answerLineTypes', 'answerLineDefault', 'answerLines');
+        $defaultGeneralInstructions = self::DEFAULT_GENERAL_INSTRUCTIONS;
+        $generalInstructions = trim((string) ($exam->generalInstructions ?? '')) !== ''
+            ? $exam->generalInstructions
+            : $defaultGeneralInstructions;
+
+        return compact('tos', 'questions', 'directions', 'defaultDirections', 'presentTypes', 'columnsPerPart', 'answerLineTypes', 'answerLineDefault', 'answerLines', 'generalInstructions', 'defaultGeneralInstructions');
     }
 
 public function answerKey(Course $course, Exam $exam)
@@ -344,17 +350,18 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             'paperSize' => ['required', 'in:Letter,Legal'],
             'watermarkText' => ['nullable', 'string', 'max:100'],
             'columns' => ['nullable', 'array'],
-            'headerTemplate' => ['required', 'in:classic,formal,minimal,marsu,coe'],
+            'headerTemplate' => ['required', 'in:minimal,marsu,coe,accredited'],
             'footerTemplate' => ['required', 'in:simple,paged,minimal,marsu,coe'],
             'headerTop' => ['nullable', 'integer', 'between:0,200'],
             'watermarkImage' => ['nullable', 'image', 'max:2048'],
             'removeWatermarkImage' => ['nullable'],
             'partOrder' => ['nullable', 'array'],
+            'generalInstructions' => ['nullable', 'string', 'max:600'],
             'directions' => ['nullable', 'array'],
             'directions.*' => ['nullable', 'string', 'max:600'],
             'answerLines' => ['nullable', 'array'],
             'answerLines.*' => ['nullable', 'numeric', 'between:0,4'],
-        ], [], ['directions.*' => 'direction text', 'answerLines.*' => 'answer line length']);
+        ], [], ['generalInstructions' => 'general instructions', 'directions.*' => 'direction text', 'answerLines.*' => 'answer line length']);
 
         // Answer lines: keep only the types that print one. Blank = default length; 0 = no line.
         // Only values that differ from the default are stored.
@@ -385,6 +392,13 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
             }
         }
         $data['directions'] = $overrides ? json_encode($overrides) : null;
+
+        // General instructions: an empty box (or text equal to the default) resets to the default wording.
+        $general = trim(str_replace(["\r\n", "\r"], "\n", (string) ($data['generalInstructions'] ?? '')));
+        $data['generalInstructions'] = ($general !== '' && $general !== self::DEFAULT_GENERAL_INSTRUCTIONS) ? $general : null;
+        if (! \Illuminate\Support\Facades\Schema::hasColumn('exam', 'generalInstructions')) {
+            unset($data['generalInstructions']);   // migration not run yet: don't break saving the other settings
+        }
 
         // Blank "distance from top" keeps the stored value (the column is NOT NULL).
         if (! isset($data['headerTop'])) {
@@ -437,6 +451,9 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
         }
         return $lines;
     }
+
+    /** Printed under the student's details; editable per exam on the format page. */
+    public const DEFAULT_GENERAL_INSTRUCTIONS = 'Read the directions of each test carefully. Write your answers neatly and legibly.';
 
     /** Default printed direction for each question type. */
     public static function defaultDirections(): array
