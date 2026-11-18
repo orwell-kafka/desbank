@@ -51,7 +51,7 @@
                                 <th scope="col">Title</th>
                                 <th scope="col">Exam type</th>
                                 <th scope="col" class="work-num">Total score</th>
-                                <th scope="col">Manage</th>
+                                <th scope="col" class="work-tos-actions-cell" aria-label="Actions"></th>
                             </tr></thead>
                             <tbody>
                                 @foreach ($tosList as $tos)
@@ -60,8 +60,8 @@
                                         <td class="work-tos-title">{{ $tos->title }}</td>
                                         <td><span class="work-chip work-chip-gold">{{ $tos->examType }}</span></td>
                                         <td class="work-num">{{ \App\Support\Points::format($tos->totalScore) }}</td>
-                                        <td>
-                                            <div class="work-row-actions">
+                                        <td class="work-tos-actions-cell">
+                                            <div class="work-row-actions work-row-actions-tos">
                                                 <form method="POST" action="{{ route('courses.tos.generate', [$course, $tos]) }}" data-pending>
                                                     @csrf
                                                     <button type="submit" class="work-row-btn work-row-btn-primary" data-pending-label="Generating…">Generate exam</button>

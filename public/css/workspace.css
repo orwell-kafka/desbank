@@ -732,3 +732,7 @@ html.work-modal-open { overflow: hidden; }
     .work-picker[open] { animation: work-confirm-in var(--motion-panel) var(--ease-out); }
     .work-picker[open]::backdrop { animation: work-confirm-fade var(--motion-ui) ease-out; }
 }
+
+/* ToS list: "Generate exam" nudged right; the three-dots menu sits at the far right edge of the row. */
+.work-table .work-tos-actions-cell { width: 38%; padding-right: 24px; }
+.work-row-actions-tos { flex-wrap: nowrap; justify-content: space-between; gap: 9px 16px; padding-left: 70px; }

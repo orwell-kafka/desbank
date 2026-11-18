@@ -94,7 +94,7 @@
                                         <th scope="col">Type</th>
                                     @endunless
                                     <th scope="col">Bloom level</th>
-                                    <th scope="col">Manage</th>
+                                    <th scope="col" aria-label="Actions"></th>
                                 </tr></thead>
                                 <tbody>
                                     @foreach ($questions as $question)
