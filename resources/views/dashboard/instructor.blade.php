@@ -13,11 +13,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading">
+            <header class="work-heading work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Instructor / Overview</p>
                     <h1>Assessment workspace<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Welcome back, <strong>{{ auth()->user()->name }}</strong>. Your tools for planning, assembling, and preparing assessments are here.</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="work-signout">
                     @csrf

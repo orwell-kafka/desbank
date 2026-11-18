@@ -136,7 +136,7 @@
         .info-score .score-total { position: absolute; right: 8px; bottom: 4px; font-size: 22px; font-weight: bold; line-height: 1; }
         .info-row.info-row-boxed > .info-field:first-child { padding-bottom: 0.13in; }   /* Name line sits level with "Score:" */
 
-        .general-instructions { margin: 26px 0; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; line-height: 1.4; }
+        .general-instructions { text-align: justify; margin: 26px 0; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; line-height: 1.4; }
         .general-instructions .gi-text { white-space: pre-line; }
         /* "Test I. Multiple Choice (Items 1–3)": the direction below is indented to start under the
            first letter of the question type (column 2), whatever the width of "Test I." / "Test III.". */
@@ -144,11 +144,15 @@
         .part-header { display: contents; font-weight: bold; }
         .part-header .ph-num { grid-row: 1; grid-column: 1; }
         .part-header .ph-type { grid-row: 1; grid-column: 2; text-transform: capitalize; }
-        .part-direction { grid-row: 2; grid-column: 2; margin-top: 4px; font-weight: bold; font-style: normal; }
+        .part-direction { grid-row: 2; grid-column: 2; text-align: justify; margin-top: 4px; font-weight: bold; font-style: normal; }
         .part-direction .direction-text { white-space: pre-line; }
         .question-list { columns: var(--cols, 1); column-gap: 30px; }
-        .question-item { font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; margin-bottom: 10px; break-inside: avoid; }
-        .choices { margin-top: 4px; margin-left: 15px; }
+        .question-item { text-align: justify; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; margin-bottom: 10px; break-inside: avoid; }
+        /* Hanging indent: a wrapped line starts under the first word of the question, not under the number. */
+        .q-row { display: flex; align-items: baseline; }
+        .q-lead { flex: 0 0 auto; margin-right: 0.35em; white-space: nowrap; }
+        .q-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+        .choices { margin-top: 4px; margin-left: 15px; text-align: left; }
         .choices div { font-size: 12pt; margin-bottom: 2px; }
         /* Choices sit side by side when they all fit on one line; otherwise they stack (see $choicesFit in the view). */
         .choices.choices-row { display: flex; flex-wrap: wrap; column-gap: 28px; row-gap: 2px; }
@@ -165,7 +169,7 @@
 
         .matching-layout { display: flex; gap: 30px; margin-top: 8px; }
         .matching-col-a { flex: 1; }
-        .matching-col-a .item { font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; margin-bottom: 10px; }
+        .matching-col-a .item { text-align: justify; font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; margin-bottom: 10px; }
         .matching-col-b { flex-shrink: 0; min-width: 160px; padding-left: 20px; }        .matching-col-b .item { font-family: 'Times New Roman', 'Liberation Serif', Times, serif; font-size: 12pt; margin-bottom: 8px; }
         /* ---- Footer templates (developer-designed, fixed) ---- */
         .footer-simple { text-align: center; font-size: 11px; color: #6b7280; margin-top: 30px; border-top: 1px solid #d1d5db; padding-top: 8px; }
@@ -816,7 +820,7 @@
                         <div class="matching-layout">
                             <div class="matching-col-a">
                                 @foreach ($group as $question)
-                                    <div class="item"><span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span>{{ $itemCounter }}. {{ $question->content }}</div>
+                                    <div class="item q-row"><span class="q-lead"><span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span><span class="q-num">{{ $itemCounter }}.</span></span><span class="q-text">{{ $question->content }}</span></div>
                                     @php $itemCounter++; @endphp
                                 @endforeach
                             </div>
@@ -845,7 +849,7 @@
                         <div class="question-list" style="--cols: {{ $sectionCols }};">
                             @foreach ($group as $question)
                                 <div class="question-item">
-                                    @if ($alLen !== null)<span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span>@endif{{ $itemCounter }}. {{ $question->content }}
+                                    <div class="q-row"><span class="q-lead">@if ($alLen !== null)<span class="{{ $alClass }}" data-type="{{ $type }}" style="{{ $alStyle }}"></span>@endif<span class="q-num">{{ $itemCounter }}.</span></span><span class="q-text">{{ $question->content }}</span></div>
                                     @if ($question->choices)
                                         @php $choiceList = explode(',', $question->choices); @endphp
                                         <div class="choices {{ $choicesFit($choiceList) ? 'choices-row' : '' }}">

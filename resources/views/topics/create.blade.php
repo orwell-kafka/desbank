@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Topics</p>
                     <h1>Add a topic<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">A topic groups related questions. You can add as many as the course needs.</p>
                 </div>
             </header>
 

@@ -12,11 +12,10 @@
         <div class="work-adminbar"><span class="work-adminbar-brand">DESBank</span><span class="work-adminbar-role">Administration</span></div>
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Admin / Accounts</p>
                     <h1>Account approvals<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Welcome, <strong>{{ auth()->user()->name }}</strong>. Review instructor sign-ups and see the status of every instructor account.</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="work-signout">
                     @csrf

@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Topics</p>
                     <h1>Edit topic<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Renaming a topic does not move or change its questions.</p>
                 </div>
             </header>
 

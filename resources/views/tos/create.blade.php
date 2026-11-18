@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Table of Specifications</p>
                     <h1>Create a ToS<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Plan how many items each topic and Bloom level gets, then generate an exam from it.</p>
                 </div>
             </header>
 

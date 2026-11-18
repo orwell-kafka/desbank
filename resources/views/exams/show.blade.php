@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Generated exam</p>
                     <h1>{{ $tosTitle }}<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Replace any question by choosing another from the question bank, or let the system pick one, then format and print the paper.</p>
                 </div>
                 <div class="work-heading-actions" id="examHeadActions">
                     <a href="{{ route('courses.exams.format', [$course, $exam]) }}" class="work-action-primary">Format &amp; print <span aria-hidden="true">→</span></a>

@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Question bank</p>
                     <h1>Edit question<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Update an item in the question bank for <strong>{{ $topic->topicName }}</strong> in {{ $course->courseName }}.</p>
                 </div>
             </header>
 

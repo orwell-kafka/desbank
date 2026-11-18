@@ -109,8 +109,8 @@
     padding: 14px 17px;
     min-height: 45px;
 }
-.work-action-primary { background: var(--work-gold); color: #10283f; border: 1px solid var(--work-gold); }
-.work-action-primary:hover { background: #f1ba68; border-color: #f1ba68; color: #0c2339; }
+.work-action-primary { background: #d4962f; color: #10283f; border: 1px solid #d4962f; }
+.work-action-primary:hover { background: #e0a444; border-color: #e0a444; color: #0c2339; }
 .work-action-secondary { background: transparent; border: 1px solid #617589; color: #fff; }
 .work-action-secondary:hover { background: #203b54; border-color: #92a9bb; color: #fff; }
 .work-feature-bottom {
@@ -232,6 +232,10 @@
 /* ---- Heading variants ---- */
 .work-heading-compact { padding: 8px 0 28px; align-items: flex-end; }
 .work-heading-compact h1 { font-size: clamp(30px, 3.4vw, 44px); margin-bottom: 12px; }
+/* Heading without an intro paragraph (questions page): close the gap the paragraph used to fill */
+.work-heading-tight { padding-bottom: 20px; }
+.work-heading-tight h1 { margin-bottom: 0; }
+.work-heading-tight ~ .work-directory { margin-top: 20px; }
 .work-heading-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; flex-shrink: 0; }
 
 /* ---- Buttons on light surfaces ---- */
@@ -251,8 +255,8 @@ button.work-action-primary, button.work-action-secondary, button.work-action-out
     background: #fff; border: 1px solid #ced8e0; color: #173550;
 }
 .work-row-btn:hover { background: #edf2f6; border-color: #8298a9; }
-.work-row-btn-primary { background: var(--work-gold); border-color: var(--work-gold); color: #10283f; }
-.work-row-btn-primary:hover { background: #f1ba68; border-color: #f1ba68; }
+.work-row-btn-primary { background: #d4962f; border-color: #d4962f; color: #10283f; }
+.work-row-btn-primary:hover { background: #e0a444; border-color: #e0a444; }
 .work-row-btn-ok { background: #eaf7f0; border-color: #abd5be; color: var(--work-ok); }
 .work-row-btn-ok:hover { background: #d6f0e3; border-color: #23825d; }
 .work-row-btn-bad { background: #fff; border-color: #e3b4b4; color: var(--work-bad); }
@@ -377,6 +381,13 @@ html { scroll-padding-bottom: 96px; }
 .work-tab small { font: 500 11px var(--font-mono, monospace); color: #8797a4; }
 .work-tab:hover { color: var(--work-dark); }
 .work-tab[aria-current="page"] { color: var(--work-dark); border-bottom-color: #c3892c; }
+/* Clickable tab pills (questions page): bordered buttons in moss green */
+.work-tabs-pills { --moss: #4a6b3a; --moss-dark: #2f4a24; --moss-tint: #eef3e6; --moss-line: #a9c08f; --moss-fill: #dfe9d2; --moss-fill-hover: #cddcb9; gap: 8px; padding: 12px 14px; }
+.work-tabs-pills .work-tab { margin-bottom: 0; padding: 8px 14px; background: var(--moss-fill); border: 1px solid var(--moss-line); border-bottom-width: 1px; border-radius: var(--radius-sm, 5px); color: var(--moss-dark); cursor: pointer; box-shadow: 0 1px 0 rgba(47, 74, 36, .08); }
+.work-tabs-pills .work-tab small { padding: 0 6px; background: #fff; border-radius: 9px; color: var(--moss); }
+.work-tabs-pills .work-tab:hover { background: var(--moss-fill-hover); border-color: var(--moss); color: var(--moss-dark); text-decoration: underline; text-underline-offset: 4px; }
+.work-tabs-pills .work-tab[aria-current="page"] { background: var(--moss); border-color: var(--moss); color: #fff; box-shadow: inset 0 -3px 0 var(--moss-dark); text-decoration: none; }
+.work-tabs-pills .work-tab[aria-current="page"] small { background: #fff; color: var(--moss-dark); font-weight: 600; }
 
 .work-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 22px; padding: 16px 29px; border-bottom: 1px solid var(--work-line); }
 .work-toolbar form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 22px; margin: 0; flex: 1 1 auto; }

@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Quiz</p>
                     <h1>Create a quiz<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">No Table of Specifications needed. Name the quiz, choose the topics, and say how many items of each type you want. Questions are picked at random from your question bank.</p>
                 </div>
             </header>
 

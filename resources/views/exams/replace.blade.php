@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Replace question</p>
                     <h1>Choose a replacement<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Pick another <strong>{{ $question->bloomLevel }}</strong> / <strong>{{ $question->questionType }}</strong> question from the question bank. Only questions that keep the Table of Specifications intact are listed.</p>
                 </div>
             </header>
 

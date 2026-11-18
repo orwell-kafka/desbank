@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Table of Specifications</p>
                     <h1>Specifications<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">A Table of Specifications plans how many items each topic and Bloom level contributes. Generate an exam from any saved plan for <strong>{{ $course->courseName }}</strong>.</p>
                 </div>
                 <a href="{{ route('courses.tos.create', $course) }}" class="work-action-primary">Create a ToS <span aria-hidden="true">+</span></a>
             </header>
@@ -92,7 +91,7 @@
                 @endif
             </section>
 
-            <div class="work-below-directory"><a data-back href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a><span>Topics / ToS / Exams</span></div>
+            <div class="work-below-directory"><a data-back href="{{ route('courses.show', $course) }}">← Back to {{ $course->courseCode }}</a></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

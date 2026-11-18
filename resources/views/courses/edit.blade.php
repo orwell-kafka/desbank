@@ -12,11 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> Course directory</p>
                     <h1>Edit course<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">Changing the name or code updates it everywhere this course appears. Its topics, questions, and exams are not affected.</p>
                 </div>
             </header>
 

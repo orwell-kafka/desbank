@@ -12,13 +12,10 @@
         @include('partials.navbar')
 
         <main id="main-content" class="work-main">
-            <header class="work-heading work-heading-compact">
+            <header class="work-heading work-heading-compact work-heading-tight">
                 <div>
                     <p class="work-eyebrow"><span class="work-rule" aria-hidden="true"></span> <span class="work-course-code">{{ $course->courseCode }}</span> Question bank</p>
                     <h1>{{ $topic->topicName }}<span class="work-title-period">.</span></h1>
-                    <p class="work-intro">
-                        Browse every question in this topic. Search by keyword, filter by question type or Bloom level, or edit an item. The most recently added questions come first.
-                    </p>
                 </div>
                 <a href="{{ route('courses.topics.questions.create', [$course, $topic]) }}{{ $selectedType ? '?type=' . urlencode($selectedType) : '' }}" class="work-action-primary">Add a question <span aria-hidden="true">+</span></a>
             </header>
@@ -33,7 +30,7 @@
                 $hasFilter = $selectedType || $bloomFilter || $search !== '';
             @endphp
             <section class="work-directory" aria-labelledby="work-questions-title">
-                <nav class="work-tabs" aria-label="Question types">
+                <nav class="work-tabs work-tabs-pills" aria-label="Question types">
                     <a href="{{ $listUrl }}{{ $keep ? '?' . http_build_query($keep) : '' }}" class="work-tab" @if (! $selectedType) aria-current="page" @endif>All <small>{{ $total }}</small></a>
                     @foreach ($counts as $type => $count)
                         <a href="{{ $listUrl }}?{{ http_build_query(array_merge(['type' => $type], $keep)) }}" class="work-tab" @if ($type === $selectedType) aria-current="page" @endif>{{ $type }} <small>{{ $count }}</small></a>
