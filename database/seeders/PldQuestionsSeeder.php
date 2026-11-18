@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 /**
- * Adds 120 real questions to the course "Programming Logic and Design":
- * 20 for each question type (Multiple Choice, True/False, Fill in the Blanks, Enumeration,
- * Matching Type, Essay) and 20 for each Bloom level (Remembering ... Creating),
- * spread over six topics of 20 questions each.
+ * Adds 732 real questions to the course "Programming Logic and Design" so that every combination of
+ * Bloom level (Remembering ... Creating) and question type (Multiple Choice, True/False, Fill in the
+ * Blanks, Enumeration, Matching Type, Essay) holds at least 20 questions. Each Bloom level has 122
+ * questions and each question type has 122 questions, spread over six topics.
+ * This is what the ToS needs: its Question Bank check counts questions per Bloom level and type.
  *
  * Data file: database/seeders/desbank_pld_questions.json (next to this file).
  *
