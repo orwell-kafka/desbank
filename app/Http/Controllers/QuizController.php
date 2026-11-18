@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Question;
+use App\Support\QuestionText;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -75,13 +76,19 @@ class QuizController extends Controller
         // Pick random questions per type from the chosen topics; stop before saving anything if the bank is short.
         $shortages = [];
         $picked = [];
+        $usedTexts = [];
         foreach ($plan as $type => $p) {
-            $pool = Question::whereIn('topicId', $data['topicId'])->where('questionType', $type)->inRandomOrder()->get(['questionId', 'bloomLevel']);
+            $pool = Question::whereIn('topicId', $data['topicId'])->where('questionType', $type)->inRandomOrder()->get(['questionId', 'bloomLevel', 'content']);
             if ($pool->count() < $p['count']) {
                 $shortages[] = "{$type}: need {$p['count']}, only {$pool->count()} available";
                 continue;
             }
+            // The same item is often entered under several types: use fresh wording first, repeats only to fill the gap.
+            $pool = $pool->sortBy(fn ($q) => isset($usedTexts[QuestionText::normalize($q->content)]) ? 1 : 0)->values();
             $picked[$type] = $pool->take($p['count']);
+            foreach ($picked[$type] as $q) {
+                $usedTexts[QuestionText::normalize($q->content)] = true;
+            }
         }
 
         if (! empty($shortages)) {
@@ -99,6 +106,7 @@ class QuizController extends Controller
                 'title' => trim($data['title']),
                 'totalItems' => 0,
                 'totalScore' => 0,
+                'paperSize' => 'Legal',
                 'created' => now(),
             ], 'examId');
 

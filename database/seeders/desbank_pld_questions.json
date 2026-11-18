@@ -1,0 +1,872 @@
+[
+  {
+    "topicName": "Problem Solving and Algorithms",
+    "questions": [
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Remembering",
+        "content": "Which of the following is a step-by-step procedure for solving a problem?",
+        "correctAnswer": "Algorithm",
+        "choices": [
+          "Variable",
+          "Operating system",
+          "Compiler",
+          "Algorithm"
+        ]
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Remembering",
+        "content": "An algorithm and a program are exactly the same thing.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Remembering",
+        "content": "List the four main steps of the problem-solving process in programming, in order.",
+        "correctAnswer": "Understand the problem,Plan the solution,Write the code,Test and debug the program"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Remembering",
+        "content": "Define an algorithm and state at least three of its characteristics.",
+        "correctAnswer": "An algorithm is a finite, ordered set of clear steps that solves a problem. Its characteristics include having input, producing output, being definite (every step is precise), being finite (it ends after a limited number of steps) and being effective (each step can actually be carried out)."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Understanding",
+        "content": "A good algorithm must eventually end after a finite number of steps.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Understanding",
+        "content": "An algorithm that has no clear stopping point and keeps running forever violates the property of ____.",
+        "correctAnswer": "finiteness"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Understanding",
+        "content": "The property of an algorithm which requires every step to be clear and unambiguous.",
+        "correctAnswer": "Definiteness"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Applying",
+        "content": "An algorithm computes the average of three numbers. After adding the three numbers, what must it do next?",
+        "correctAnswer": "Divide the sum by 3",
+        "choices": [
+          "Divide the sum by 3",
+          "Square the sum",
+          "Subtract 3 from the sum",
+          "Multiply the sum by 3"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Applying",
+        "content": "In an algorithm that computes the area of a rectangle, the length and the width are the ____ of the algorithm.",
+        "correctAnswer": "input"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Applying",
+        "content": "The part of a solution that tells what the program must produce, such as the computed area of a rectangle.",
+        "correctAnswer": "Output"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Analyzing",
+        "content": "Algorithm A solves a problem in 10 steps and Algorithm B solves the same problem in 100 steps for the same input. Which statement best compares them?",
+        "correctAnswer": "A is more efficient than B",
+        "choices": [
+          "A is more efficient than B",
+          "B is more efficient than A",
+          "A and B always give different answers",
+          "B is more definite than A"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Analyzing",
+        "content": "If an algorithm produces a wrong result for a valid input, it fails the property of ____.",
+        "correctAnswer": "correctness"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Analyzing",
+        "content": "Analyze the problem 'compute a student's final grade from three exam scores'. List its input, process and output, in that order.",
+        "correctAnswer": "Three exam scores,Compute the average of the scores,Final grade"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Analyzing",
+        "content": "Compare an algorithm and a program. How are they related and how do they differ?",
+        "correctAnswer": "An algorithm is the logical plan, a sequence of steps written in any form such as plain language, pseudocode or a flowchart. A program is the implementation of an algorithm in a specific programming language that a computer can run. One algorithm can be implemented as many different programs, so the algorithm is language-independent while the program is not."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Evaluating",
+        "content": "An algorithm that takes 5 steps is always better than one that takes 50 steps, even if the 5-step algorithm gives wrong answers.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Evaluating",
+        "content": "You are evaluating an algorithm that finds the largest number in a list. List three criteria you would use to judge it.",
+        "correctAnswer": "Correctness,Efficiency,Clarity"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Evaluating",
+        "content": "The measure of how few steps or how little time an algorithm needs compared with another one that solves the same problem.",
+        "correctAnswer": "Efficiency"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Creating",
+        "content": "You must design an algorithm that computes the perimeter of a square. Which sequence of steps is correct?",
+        "correctAnswer": "Input the side; multiply the side by 4; output the result",
+        "choices": [
+          "Multiply 4 by 4; input the side; output the result",
+          "Input the side; add 4 to the side; output the result",
+          "Input the side; multiply the side by 4; output the result",
+          "Output the result; input the side; multiply the side by 4"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Creating",
+        "content": "You are creating an algorithm that converts degrees Celsius to Fahrenheit. After multiplying the Celsius value by 9/5, the next step is to ____ 32.",
+        "correctAnswer": "add"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Creating",
+        "content": "The activity of writing out the ordered steps that will solve a problem before any code is written.",
+        "correctAnswer": "Algorithm design"
+      }
+    ]
+  },
+  {
+    "topicName": "Pseudocode and Flowcharts",
+    "questions": [
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Remembering",
+        "content": "Which flowchart symbol is used to show the start or the end of a program?",
+        "correctAnswer": "Oval",
+        "choices": [
+          "Rectangle",
+          "Parallelogram",
+          "Diamond",
+          "Oval"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Remembering",
+        "content": "The lines with arrowheads that connect flowchart symbols are called ____ lines.",
+        "correctAnswer": "flow"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Remembering",
+        "content": "A description of an algorithm written in plain English-like statements that resembles program code.",
+        "correctAnswer": "Pseudocode"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Remembering",
+        "content": "What is a flowchart and what is it used for? Name at least three common flowchart symbols.",
+        "correctAnswer": "A flowchart is a diagram that shows the steps of an algorithm and the order in which they happen, using standard symbols connected by arrows. It is used to plan, explain and check the logic of a program. Common symbols are the oval (start or end), the parallelogram (input or output), the rectangle (process) and the diamond (decision)."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Understanding",
+        "content": "Pseudocode can be run directly by a computer without any translation.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Understanding",
+        "content": "In a flowchart the parallelogram, the rectangle and the diamond each have a meaning. List what each represents, in that order.",
+        "correctAnswer": "Input or output,Process,Decision"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Understanding",
+        "content": "Explain why programmers write pseudocode before writing the actual program code.",
+        "correctAnswer": "Pseudocode lets the programmer concentrate on the logic of the solution without worrying about the syntax of a language. It makes the plan easy to read, discuss and correct before coding, helps find logical mistakes early, and can be translated into any programming language."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Applying",
+        "content": "In a flowchart that reads a number and prints it, the Read step should be drawn using a parallelogram.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Applying",
+        "content": "To show the statement 'total = a + b' in a flowchart, you would draw it inside a ____ symbol.",
+        "correctAnswer": "rectangle"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Applying",
+        "content": "The flowchart symbol you would use to show the step 'Display the total' on the screen.",
+        "correctAnswer": "Parallelogram"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Analyzing",
+        "content": "Study the pseudocode: READ n; IF n MOD 2 = 0 THEN PRINT 'Even' ELSE PRINT 'Odd'. What is printed when n is 7?",
+        "correctAnswer": "Odd",
+        "choices": [
+          "7",
+          "Even",
+          "Odd",
+          "Nothing is printed"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Analyzing",
+        "content": "A diamond symbol in a flowchart must have at least ____ exit paths, one for each possible outcome of its condition.",
+        "correctAnswer": "two"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Analyzing",
+        "content": "Study the pseudocode: SET total = 0; FOR i = 1 TO 3: total = total + i; PRINT total. List the value of total after each pass of the loop, in order.",
+        "correctAnswer": "1,3,6"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Analyzing",
+        "content": "Compare pseudocode and flowcharts as tools for representing an algorithm. Discuss at least one advantage of each.",
+        "correctAnswer": "A flowchart shows the logic visually, so the flow of decisions and repetitions is easy to follow at a glance, which is helpful for beginners and for explaining a solution. Pseudocode is text, so it is quicker to write and edit, handles long algorithms without taking much space, and is closer to real code, which makes it easier to convert into a program. Flowcharts become hard to manage when the algorithm is large, while pseudocode is harder to read for people who prefer diagrams."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Evaluating",
+        "content": "A flowchart with crossing lines and many unlabeled symbols is a good representation of an algorithm.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Evaluating",
+        "content": "A flowchart is being reviewed for quality. List three things you would check to decide whether it is well drawn.",
+        "correctAnswer": "Uses standard symbols,Has a clear start and end,Flow lines show direction"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Evaluating",
+        "content": "A classmate says that pseudocode is a waste of time and programmers should start coding right away. Evaluate this claim and defend your position.",
+        "correctAnswer": "The claim is mostly wrong. Starting to code immediately often leads to logical errors that are expensive to fix later. Pseudocode lets the programmer test the logic quickly and separate planning from syntax. For very small programs writing pseudocode may seem like extra work, but for anything with decisions and loops it saves time overall and improves the quality of the final program."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Creating",
+        "content": "A flowchart that determines whether a student passed or failed must contain at least one decision symbol.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Creating",
+        "content": "Design the pseudocode for computing the area of a circle. List the steps in order.",
+        "correctAnswer": "READ radius,COMPUTE area = 3.1416 * radius * radius,PRINT area"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Creating",
+        "content": "The diagram you would draw to design the step-by-step logic of a login program before coding it.",
+        "correctAnswer": "Flowchart"
+      }
+    ]
+  },
+  {
+    "topicName": "Variables, Data Types and Operators",
+    "questions": [
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Remembering",
+        "content": "What do you call a named storage location in memory whose value can change while a program runs?",
+        "correctAnswer": "Variable",
+        "choices": [
+          "Operator",
+          "Constant",
+          "Variable",
+          "Comment"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Remembering",
+        "content": "A value that cannot change while the program runs is called a ____.",
+        "correctAnswer": "constant"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Remembering",
+        "content": "A data type used to store whole numbers such as 5 or -20.",
+        "correctAnswer": "Integer"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Understanding",
+        "content": "Why is 'student age' not a valid variable name in most programming languages?",
+        "correctAnswer": "It contains a space",
+        "choices": [
+          "It contains a space",
+          "It uses lowercase letters",
+          "It contains a vowel",
+          "It is too short"
+        ]
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Understanding",
+        "content": "Assigning the value 3.5 to a variable declared as an integer can cause the decimal part to be lost.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Understanding",
+        "content": "List the data type normally used to store each of the following, in order: a whole number, a number with a decimal point and a single letter.",
+        "correctAnswer": "Integer,Float,Character"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Understanding",
+        "content": "Explain the difference between a variable and a constant. Give one example of each.",
+        "correctAnswer": "A variable is a named memory location whose value may change while the program runs, for example score, which increases as the player earns points. A constant is a named value that is fixed and cannot be changed after it is set, for example PI = 3.1416 or a tax rate used throughout the program."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Applying",
+        "content": "After the statements x = 5 and then x = x + 2, the value stored in x is 5.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Applying",
+        "content": "The value of the expression 6 + 4 * 2 is ____.",
+        "correctAnswer": "14"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Applying",
+        "content": "The operator that gives the remainder of a division, for example 10 divided by 3 leaves 1.",
+        "correctAnswer": "Modulus"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Analyzing",
+        "content": "Given x = 10 and y = 4, which expression gives the greatest result?",
+        "correctAnswer": "x * y",
+        "choices": [
+          "x + y",
+          "x * y",
+          "x - y",
+          "x MOD y"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Analyzing",
+        "content": "In the statement 'total = price * quantity', the variable ____ receives the computed value.",
+        "correctAnswer": "total"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Analyzing",
+        "content": "A symbol such as the + in 3 + 4 that performs an action on the values around it.",
+        "correctAnswer": "Operator"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Evaluating",
+        "content": "Which variable name is the best choice for storing a student's final grade, based on the naming rules and readability?",
+        "correctAnswer": "finalGrade",
+        "choices": [
+          "x",
+          "1grade",
+          "finalGrade",
+          "final grade"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Evaluating",
+        "content": "A programmer stores a person's age in a variable named x. Renaming it to age improves the ____ of the program.",
+        "correctAnswer": "readability"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Evaluating",
+        "content": "A program stores a student's name, the student's average grade and whether the student passed. Evaluate and list the most suitable data type for each, in that order.",
+        "correctAnswer": "String,Float,Boolean"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Evaluating",
+        "content": "A programmer uses single letters such as a, b and c as the names of every variable in a long program. Evaluate this practice and recommend a better approach.",
+        "correctAnswer": "Single-letter names make a long program hard to read, debug and maintain because nobody can tell what each variable holds. A better approach is to use short but meaningful names such as price, quantity and totalCost, following a consistent naming style, so the code explains itself."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Creating",
+        "content": "A program that computes the total cost of a purchase from a price and a quantity needs at least three variables: price, quantity and total.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Creating",
+        "content": "Design the variables for a program that computes and displays the area of a rectangle. List three suitably named variables, in the order they are used.",
+        "correctAnswer": "length,width,area"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Creating",
+        "content": "Write pseudocode that converts a temperature from Celsius to Fahrenheit. Declare the variables you use and show the formula.",
+        "correctAnswer": "DECLARE celsius, fahrenheit AS Float; READ celsius; fahrenheit = celsius * 9 / 5 + 32; PRINT fahrenheit. The formula multiplies the Celsius value by 9/5 and then adds 32."
+      }
+    ]
+  },
+  {
+    "topicName": "Selection Structures",
+    "questions": [
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Remembering",
+        "content": "Which keyword is used in most programming languages to start a decision?",
+        "correctAnswer": "IF",
+        "choices": [
+          "PRINT",
+          "IF",
+          "FOR",
+          "WHILE"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Remembering",
+        "content": "The part of an IF statement that runs when the condition is false is the ____ clause.",
+        "correctAnswer": "ELSE"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Remembering",
+        "content": "An expression that evaluates to either true or false, such as age >= 18.",
+        "correctAnswer": "Condition"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Understanding",
+        "content": "What happens to the statements inside an IF block when its condition is false and there is no ELSE?",
+        "correctAnswer": "They are skipped",
+        "choices": [
+          "The program stops with an error",
+          "They run twice",
+          "They are skipped",
+          "They run once"
+        ]
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Understanding",
+        "content": "In an IF-ELSE structure, both the IF block and the ELSE block are executed every time.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Understanding",
+        "content": "List the three logical operators commonly used to combine conditions.",
+        "correctAnswer": "AND,OR,NOT"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Understanding",
+        "content": "Explain the difference between a single-selection (IF), a dual-selection (IF-ELSE) and a multiple-selection structure.",
+        "correctAnswer": "A single-selection IF runs a block only when the condition is true and does nothing otherwise. A dual-selection IF-ELSE chooses between two blocks: one when the condition is true and another when it is false. A multiple-selection structure, such as an IF-ELSE IF chain or a SWITCH, chooses one block out of three or more possibilities."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Applying",
+        "content": "For the condition (score >= 75) AND (score <= 100), a score of 60 makes the whole condition true.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Applying",
+        "content": "Using the symbols of C-like languages, write the relational operators for equal to, not equal to and greater than or equal to, in that order.",
+        "correctAnswer": "==,!=,>="
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Applying",
+        "content": "Write pseudocode for a program that reads a number and displays whether it is positive, negative or zero.",
+        "correctAnswer": "READ number; IF number > 0 THEN PRINT 'Positive'; ELSE IF number < 0 THEN PRINT 'Negative'; ELSE PRINT 'Zero'; END IF."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Analyzing",
+        "content": "In the code IF x > 5 THEN y = 1 ELSE y = 2, the value of y is 2 when x is 5.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Analyzing",
+        "content": "If age = 20 and the condition is (age < 13) OR (age > 59), the result of the condition is ____.",
+        "correctAnswer": "false"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Analyzing",
+        "content": "The structure in which one IF statement is placed inside another IF statement.",
+        "correctAnswer": "Nested IF"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Evaluating",
+        "content": "Which design is the most suitable for assigning a letter grade from ranges such as 90-100, 80-89 and 70-79?",
+        "correctAnswer": "An IF-ELSE IF chain",
+        "choices": [
+          "An IF-ELSE IF chain",
+          "A constant",
+          "A single IF with no ELSE",
+          "A loop that never ends"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Evaluating",
+        "content": "A discount applies only when BOTH conditions are met. The logical operator that best fits this rule is ____.",
+        "correctAnswer": "AND"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Evaluating",
+        "content": "The operator you should choose when a customer qualifies for a discount if the customer is a senior citizen or a student.",
+        "correctAnswer": "OR"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Evaluating",
+        "content": "Evaluate this statement: 'A nested IF is always better than using logical operators.' Support your answer with an example.",
+        "correctAnswer": "The statement is not true. Logical operators often make the code shorter and easier to read. For example IF age >= 18 AND hasID = true is clearer than two nested IFs. Nested IFs are better when the second decision depends on the first one being true, or when different actions are needed at each level."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Creating",
+        "content": "A program that classifies a person as child, teenager, adult or senior based on age needs more than one condition to cover all four groups.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Creating",
+        "content": "Design a decision for an ATM withdrawal. List three conditions the program should check before dispensing cash.",
+        "correctAnswer": "PIN is correct,Balance is enough,Amount is within the daily limit"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Creating",
+        "content": "Create pseudocode that reads three numbers and displays the largest of them.",
+        "correctAnswer": "READ a, b, c; largest = a; IF b > largest THEN largest = b; END IF; IF c > largest THEN largest = c; END IF; PRINT largest."
+      }
+    ]
+  },
+  {
+    "topicName": "Repetition Structures",
+    "questions": [
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Remembering",
+        "content": "A loop is a control structure that repeats a block of statements.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Remembering",
+        "content": "Name the three common types of loops used in programming.",
+        "correctAnswer": "FOR loop,WHILE loop,DO-WHILE loop"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Remembering",
+        "content": "Define iteration and explain why loops are useful in programs.",
+        "correctAnswer": "Iteration is the repeated execution of a block of statements. Loops are useful because they avoid writing the same instructions many times, make programs shorter and easier to change, and can handle a number of repetitions that is not known until the program runs."
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Understanding",
+        "content": "Which statement describes the difference between a WHILE loop and a DO-WHILE loop?",
+        "correctAnswer": "A DO-WHILE loop runs its body at least once",
+        "choices": [
+          "A WHILE loop checks its condition after the body",
+          "A DO-WHILE loop never repeats",
+          "A WHILE loop always runs at least once",
+          "A DO-WHILE loop runs its body at least once"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Understanding",
+        "content": "A loop whose condition never becomes false and therefore never stops is called an ____ loop.",
+        "correctAnswer": "infinite"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Understanding",
+        "content": "The loop that is best used when the number of repetitions is known in advance.",
+        "correctAnswer": "FOR loop"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Applying",
+        "content": "How many times does the body run in the loop FOR i = 1 TO 5?",
+        "correctAnswer": "5",
+        "choices": [
+          "1",
+          "6",
+          "4",
+          "5"
+        ]
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Applying",
+        "content": "In the loop count = 0; WHILE count < 3: count = count + 1, the final value of count is 3.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Applying",
+        "content": "List the numbers displayed by the loop FOR i = 2 TO 10 STEP 2, in the order they are shown.",
+        "correctAnswer": "2,4,6,8,10"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Applying",
+        "content": "Write pseudocode that uses a loop to display the numbers 1 to 10.",
+        "correctAnswer": "FOR i = 1 TO 10: PRINT i: END FOR. A WHILE loop with a counter starting at 1 that increases by 1 until it passes 10 is also correct."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Analyzing",
+        "content": "The loop x = 10; WHILE x > 0: x = x + 1 will eventually stop.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Analyzing",
+        "content": "Trace the loop: result = 1; FOR i = 1 TO 4: result = result * i. List the value of result after each pass, in order.",
+        "correctAnswer": "1,2,6,24"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Analyzing",
+        "content": "The error in which a loop runs one time too many or one time too few because of a wrong starting or ending value.",
+        "correctAnswer": "Off-by-one error"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Evaluating",
+        "content": "You must keep asking a user for a password until it is correct, and you do not know how many tries it will take. Which loop is the most suitable?",
+        "correctAnswer": "WHILE loop",
+        "choices": [
+          "WHILE loop",
+          "FOR loop that counts from 1 to 3",
+          "A single IF statement",
+          "Sequence only"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Evaluating",
+        "content": "Printing 'Hello' 100 times with 100 separate PRINT statements is poor design because a ____ can do the same job in a few lines.",
+        "correctAnswer": "loop"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Evaluating",
+        "content": "The statement you would choose to leave a loop immediately once the item being searched for has been found.",
+        "correctAnswer": "BREAK"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Creating",
+        "content": "You must design a loop that displays the multiplication table of 5 from 5 x 1 up to 5 x 12. Which loop header is correct?",
+        "correctAnswer": "FOR i = 1 TO 12",
+        "choices": [
+          "FOR i = 1 TO 12",
+          "FOR i = 1 TO 5",
+          "FOR i = 5 TO 12",
+          "FOR i = 12 TO 1 STEP 2"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Creating",
+        "content": "To compute the sum of the numbers 1 to 100 with a loop, the variable that collects the total must be set to ____ before the loop starts.",
+        "correctAnswer": "0"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Creating",
+        "content": "The variable that is set up before a loop and increased on every pass to keep track of how many times the loop has run.",
+        "correctAnswer": "Counter"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Creating",
+        "content": "Design an algorithm, in pseudocode, that reads 10 numbers and displays their average.",
+        "correctAnswer": "SET sum = 0; FOR i = 1 TO 10: READ number; sum = sum + number; END FOR; average = sum / 10; PRINT average."
+      }
+    ]
+  },
+  {
+    "topicName": "Arrays and Modular Programming",
+    "questions": [
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Remembering",
+        "content": "An array is a collection of elements of the same data type stored under one name.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Remembering",
+        "content": "List three advantages of modular programming.",
+        "correctAnswer": "Easier to read,Easier to test,Code can be reused"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Remembering",
+        "content": "Define an array and a function. State the purpose of each.",
+        "correctAnswer": "An array is a data structure that stores a fixed number of values of the same data type under one name, with each value reached through an index. Its purpose is to store and process many related values without declaring many separate variables. A function is a named block of code that performs one task and can be called whenever needed. Its purpose is to organize a program into reusable parts."
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Understanding",
+        "content": "An array named scores holds 5 values and indexing starts at 0. Which index refers to the last element?",
+        "correctAnswer": "4",
+        "choices": [
+          "5",
+          "1",
+          "0",
+          "4"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Understanding",
+        "content": "The value passed to a function when it is called, such as the 5 in square(5), is called an ____.",
+        "correctAnswer": "argument"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Understanding",
+        "content": "The number that identifies the position of an element in an array.",
+        "correctAnswer": "Index"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Applying",
+        "content": "Given the array numbers = [4, 8, 15, 16], what is the value of numbers[2] when indexing starts at 0?",
+        "correctAnswer": "15",
+        "choices": [
+          "4",
+          "16",
+          "15",
+          "8"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Applying",
+        "content": "A function that sends a computed value back to the part of the program that called it uses the ____ statement.",
+        "correctAnswer": "return"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Applying",
+        "content": "The array fruits holds Apple, Banana and Cherry in positions 0, 1 and 2. List the elements in reverse order.",
+        "correctAnswer": "Cherry,Banana,Apple"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Applying",
+        "content": "Write a function in pseudocode named square that receives a number and returns its square. Show how to call it with the value 6.",
+        "correctAnswer": "FUNCTION square(n): RETURN n * n: END FUNCTION. Calling it: result = square(6), which stores 36 in result."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Analyzing",
+        "content": "In an array of 10 elements indexed from 0, trying to access index 10 causes an out-of-range error.",
+        "correctAnswer": "True"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Analyzing",
+        "content": "The array values holds 3, 6 and 9. A loop doubles every element in place. List the contents of the array after the loop, in order.",
+        "correctAnswer": "6,12,18"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Analyzing",
+        "content": "Analyze why using an array is better than declaring 50 separate variables to store 50 student scores.",
+        "correctAnswer": "With an array the 50 scores share one name and are reached by index, so a single loop can read, total or search all of them. With 50 separate variables the program would need 50 declarations and 50 repeated statements for every operation, which is long, error-prone and hard to change when the number of students changes."
+      },
+      {
+        "questionType": "True/False",
+        "bloomLevel": "Evaluating",
+        "content": "A single function that reads the input, calculates the result, formats the report and saves a file is a well-designed function.",
+        "correctAnswer": "False"
+      },
+      {
+        "questionType": "Enumeration",
+        "bloomLevel": "Evaluating",
+        "content": "Evaluate the design of a function. List three qualities of a well-designed function.",
+        "correctAnswer": "Does one task only,Has a meaningful name,Is short and readable"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Evaluating",
+        "content": "The design practice you are applying when you judge a large program to be easier to maintain because it is split into small independent parts.",
+        "correctAnswer": "Modularity"
+      },
+      {
+        "questionType": "Multiple Choice",
+        "bloomLevel": "Creating",
+        "content": "You must store the quiz scores of 30 students and compute their total. Which design is the most appropriate?",
+        "correctAnswer": "One array of 30 elements and a loop",
+        "choices": [
+          "A single integer variable",
+          "One array of 30 elements and a loop",
+          "Thirty separate variables",
+          "A constant"
+        ]
+      },
+      {
+        "questionType": "Fill in the Blanks",
+        "bloomLevel": "Creating",
+        "content": "To reuse a calculation such as the area of a circle in many places, you should place it in a ____ and call it whenever it is needed.",
+        "correctAnswer": "function"
+      },
+      {
+        "questionType": "Matching Type",
+        "bloomLevel": "Creating",
+        "content": "The kind of array you would design to store a single row of 40 test scores under one name.",
+        "correctAnswer": "One-dimensional array"
+      },
+      {
+        "questionType": "Essay",
+        "bloomLevel": "Creating",
+        "content": "Design pseudocode that stores five numbers in an array and displays the highest one. Use a loop and show your logic.",
+        "correctAnswer": "DECLARE nums[5]; FOR i = 0 TO 4: READ nums[i]: END FOR; highest = nums[0]; FOR i = 1 TO 4: IF nums[i] > highest THEN highest = nums[i]: END IF: END FOR; PRINT highest."
+      }
+    ]
+  }
+]

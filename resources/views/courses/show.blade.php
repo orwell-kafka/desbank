@@ -17,7 +17,7 @@
         .dp-head p { margin: 0; font-size: 14px; color: #607282; }
         .dp-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 26px; margin-top: 24px; align-items: start; }
         .dp-side { background: color-mix(in srgb, var(--c) 7%, #fff); border-radius: 14px; padding: 16px 18px; }
-        .dp-side h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #46607a; margin: 0 0 8px; }
+        .dp-side h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #46607a; margin: 0 0 8px; text-align: center; }
         .dp-side dl { margin: 0; }
         .dp-stat { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 7px 0; }
         .dp-side dt { font-size: 14px; color: #3c556e; }
@@ -82,7 +82,6 @@
                         <section class="dp-group" aria-labelledby="dp-exams">
                             <h2 id="dp-exams">Exams</h2>
                             <ul class="dp-list">
-                    <li><a href="{{ route('courses.tos.create', $course) }}" class="dp-row"><span class="dp-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></span><span class="dp-text"><strong>Create a ToS</strong><span>Plan a Midterm or Final, then generate the exam from it</span></span><span class="dp-go" aria-hidden="true">›</span></a></li>
                     <li><a href="{{ route('courses.tos.index', $course) }}" class="dp-row"><span class="dp-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg></span><span class="dp-text"><strong>Tables of Specification</strong><span>View, edit, print, or generate an exam from a ToS</span></span><span class="dp-go" aria-hidden="true">›</span></a></li>
                     <li><a href="{{ route('courses.quizzes.create', $course) }}" class="dp-row"><span class="dp-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-6 15h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 11.9 13 12.5 13 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></span><span class="dp-text"><strong>Create a quiz</strong><span>No ToS needed. Just a title, topics, and item counts</span></span><span class="dp-go" aria-hidden="true">›</span></a></li>
                     <li><a href="{{ route('courses.exams.index', $course) }}" class="dp-row"><span class="dp-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span><span class="dp-text"><strong>Exams and quizzes</strong><span>Review, replace questions, format, and print</span></span><span class="dp-go" aria-hidden="true">›</span></a></li>

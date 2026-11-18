@@ -41,7 +41,7 @@ class AuthController extends Controller
 
         return $account->isAdmin()
             ? redirect()->route('dashboard.admin')
-            : redirect()->route('dashboard.instructor');
+            : redirect()->route('courses.index');
     }
 
     public function showRegister()

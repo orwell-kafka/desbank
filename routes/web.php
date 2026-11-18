@@ -23,10 +23,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.at
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/instructor/dashboard', function () {
-        return view('dashboard.instructor');
-    })->name('dashboard.instructor');
-
     Route::resource('courses', CourseController::class);
 
     Route::resource('courses.topics', TopicController::class)

@@ -277,7 +277,7 @@
             .paper { box-shadow: none; margin: 0; }
         }
     </style>
-    <style>@page { size: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '8.5in 14in' : '8.5in 11in' }}; margin: 0; }</style>
+    <style>@page { size: {{ ($exam->paperSize ?? 'Legal') === 'Letter' ? '8.5in 11in' : '8.5in 14in' }}; margin: 0; }</style>
 <script src="{{ asset('js/nav-history.js') }}?v={{ @filemtime(public_path('js/nav-history.js')) }}"></script>
 </head>
 <body>
@@ -349,8 +349,8 @@
 
                 <label>Paper Size</label>
                 <select name="paperSize">
-                    <option value="Letter" {{ old('paperSize', $exam->paperSize) == 'Letter' ? 'selected' : '' }}>Letter (Short)</option>
-                    <option value="Legal" {{ old('paperSize', $exam->paperSize) == 'Legal' ? 'selected' : '' }}>Legal (Long)</option>
+                    <option value="Letter" {{ old('paperSize', $exam->paperSize ?? 'Legal') == 'Letter' ? 'selected' : '' }}>Letter (Short)</option>
+                    <option value="Legal" {{ old('paperSize', $exam->paperSize ?? 'Legal') == 'Legal' ? 'selected' : '' }}>Legal (Long)</option>
                 </select>
 
                 <h3>Question Types</h3>
@@ -685,7 +685,7 @@
                     });
                 </script>
             @else
-            <div class="paper {{ strtolower($exam->paperSize ?? 'letter') }} {{ $isLetterheadHdr ? 'has-marsu-header' : '' }} {{ $headerTpl === 'accredited' ? 'has-acc-header' : '' }} {{ $isLetterheadFtr ? 'has-marsu-footer' : '' }} {{ $footerTpl === 'coe' ? 'has-coe-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --hdr-h: {{ match ($headerTpl) { 'coe' => '1.15in', 'accredited' => '2.3in', default => '1.0355in' } }}; --page-h: {{ ($exam->paperSize ?? 'Letter') === 'Legal' ? '14in' : '11in' }};">
+            <div class="paper {{ strtolower($exam->paperSize ?? 'legal') }} {{ $isLetterheadHdr ? 'has-marsu-header' : '' }} {{ $headerTpl === 'accredited' ? 'has-acc-header' : '' }} {{ $isLetterheadFtr ? 'has-marsu-footer' : '' }} {{ $footerTpl === 'coe' ? 'has-coe-footer' : '' }}" style="--header-top: {{ $headerTop }}px; --hdr-h: {{ match ($headerTpl) { 'coe' => '1.15in', 'accredited' => '2.3in', default => '1.0355in' } }}; --page-h: {{ ($exam->paperSize ?? 'Legal') === 'Letter' ? '11in' : '14in' }};">
                 @if ($exam->watermarkImagePath)
                     <img src="{{ $src('storage/' . $exam->watermarkImagePath) }}" class="watermark-img">
                 @elseif ($exam->watermarkText)
@@ -750,8 +750,8 @@
                 @if ($headerTpl === 'accredited')
                     @php
                         $accExamType = $tos->examType ?? '';
-                        $accExamLine = $exam->isQuiz() ? 'Quiz' : trim($accExamType . ' Exam');
-                        $accCourseLine = $exam->isQuiz() ? ($tos->title ?? '') : \App\Models\Tos::headingTitle($course);
+                        $accExamLine = $exam->isQuiz() ? ($tos->title ?? '') : trim($accExamType . ' Exam');
+                        $accCourseLine = $exam->isQuiz() ? '' : \App\Models\Tos::headingTitle($course);
                         $accTermLine = $exam->isQuiz() ? '' : trim(($tos->semester ?? '') . ' ' . ($tos->academicYear ?? ''));
                     @endphp
                     <div class="acc-title">
@@ -763,14 +763,14 @@
                         </div>
                     </div>
                 @elseif ($isLetterheadHdr)
-                    <div class="marsu-title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
+                    <div class="marsu-title">{{ $tos->title ?? 'Exam' }}@if (!empty($tos->examType)) — {{ $tos->examType }}@endif</div>
                 @else
                     @php $headerClass = 'header-' . $headerTpl; @endphp
                     <div class="{{ $headerClass }}">
                         <img src="{{ $src($headerImageMap[$headerTpl] ?? $headerImageMap['minimal']) }}">
                         <div class="school">{{ $exam->schoolName ?? 'School Name' }}</div>
                         <div class="dept">{{ $exam->department ?? 'Department' }}</div>
-                        <div class="title">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
+                        <div class="title">{{ $tos->title ?? 'Exam' }}@if (!empty($tos->examType)) — {{ $tos->examType }}@endif</div>
                     </div>
                 @endif
 

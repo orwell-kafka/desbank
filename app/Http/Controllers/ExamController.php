@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Tos;
+use App\Support\QuestionText;
 use App\Support\TosMatrix;
 use App\Services\ExamPdf;
 use Illuminate\Http\Request;
@@ -90,14 +91,22 @@ class ExamController extends Controller
                 'totalItems' => 0,
                 'totalScore' => $tos->totalScore,
                 'headerTemplate' => 'accredited',   // major (Midterm/Final) exams start with the newest header
+                'paperSize' => 'Legal',
                 'created' => now(),
             ], 'examId');
 
             $totalItems = 0;
 
+            // Teachers often enter the same item under different question types. Questions whose wording is
+            // already in the exam are used last, and only when there is nothing else to pick from.
+            $allIds = collect($eligibleByRow)->flatMap(fn ($e) => collect($e['byTopic'])->flatten())->unique()->values()->all();
+            $textOf = Question::whereIn('questionId', $allIds)->pluck('content', 'questionId')
+                ->map(fn ($c) => QuestionText::normalize($c))->all();
+            $usedTexts = [];
+
             foreach ($eligibleByRow as $entry) {
                 $row = $entry['row'];
-                $picked = collect($this->pickForRow($entry['byTopic'], $entry['wanted'], (int) $row->generatedItemCount));
+                $picked = collect($this->pickForRow($entry['byTopic'], $entry['wanted'], (int) $row->generatedItemCount, $textOf, $usedTexts));
 
                 foreach ($picked as $questionId) {
                     DB::table('examquestion')->insert([
@@ -138,24 +147,32 @@ class ExamController extends Controller
      * @param  array<int, int>  $wanted  items wanted per topic
      * @return array<int>
      */
-    private function pickForRow(array $byTopic, array $wanted, int $need): array
+    private function pickForRow(array $byTopic, array $wanted, int $need, array $textOf = [], array &$usedTexts = []): array
     {
         $picked = [];
         $left = [];
+        $isRepeat = fn ($id) => isset($usedTexts[$textOf[$id] ?? '#'.$id]);
 
         foreach ($byTopic as $topicId => $ids) {
-            $ids = collect($ids)->shuffle()->values()->all();
+            // Random order, but questions already in the exam by wording go to the back of the line.
+            $ids = collect($ids)->shuffle()->sortBy(fn ($id) => $isRepeat($id) ? 1 : 0)->values()->all();
             $take = min((int) ($wanted[$topicId] ?? 0), count($ids));
             $picked = array_merge($picked, array_slice($ids, 0, $take));
             $left[$topicId] = array_slice($ids, $take);
         }
 
         while (count($picked) < $need) {
-            // take from the topic with the most unused questions
+            // take from the topic with the most unused questions, fresh wording first
             $topicId = null;
+            $topicFresh = false;
             foreach ($left as $id => $ids) {
-                if (! empty($ids) && ($topicId === null || count($ids) > count($left[$topicId]))) {
+                if (empty($ids)) {
+                    continue;
+                }
+                $fresh = ! $isRepeat($ids[0]);
+                if ($topicId === null || ($fresh && ! $topicFresh) || ($fresh === $topicFresh && count($ids) > count($left[$topicId]))) {
                     $topicId = $id;
+                    $topicFresh = $fresh;
                 }
             }
             if ($topicId === null) {
@@ -164,7 +181,12 @@ class ExamController extends Controller
             $picked[] = array_shift($left[$topicId]);
         }
 
-        return array_slice($picked, 0, $need);
+        $picked = array_slice($picked, 0, $need);
+        foreach ($picked as $id) {
+            $usedTexts[$textOf[$id] ?? '#'.$id] = true;
+        }
+
+        return $picked;
     }
 
     public function editFormat(Course $course, Exam $exam)
@@ -615,7 +637,11 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
                     ->withErrors(['exam' => 'That question is no longer available as a replacement. Please choose another.']);
             }
         } else {
-            $replacement = $pool->inRandomOrder()->first();
+            // Prefer a question whose wording is not already in this exam (the same item under another type).
+            $inExam = Question::whereIn('questionId', DB::table('examquestion')->where('examId', $exam->examId)->pluck('questionId'))
+                ->pluck('content')->map(fn ($c) => QuestionText::normalize($c))->flip();
+            $candidates = $pool->inRandomOrder()->get();
+            $replacement = $candidates->first(fn ($q) => ! isset($inExam[QuestionText::normalize($q->content)])) ?? $candidates->first();
 
             if (! $replacement) {
                 return back()->withErrors(['exam' => $exam->isQuiz()
@@ -690,7 +716,7 @@ public function updateFormat(\Illuminate\Http\Request $request, Course $course, 
     private function tosForHeader(Exam $exam)
     {
         if ($exam->isQuiz()) {
-            return (object) ['title' => $exam->title ?: 'Quiz', 'examType' => 'Quiz'];
+            return (object) ['title' => $exam->title ?: 'Quiz', 'examType' => ''];
         }
 
         return Tos::find($exam->tosId);

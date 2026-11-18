@@ -276,7 +276,7 @@ final class DesbankDemoSeeder extends Seeder
             'created' => now(),
         ];
         $optional = [
-            'paperSize' => 'Letter',
+            'paperSize' => 'Legal',
             'schoolName' => 'DESBank Demo Institute',
             'department' => 'Academic Testing Department',
             'footerText' => 'DEMO CONTENT - NOT FOR ACTUAL ASSESSMENT',

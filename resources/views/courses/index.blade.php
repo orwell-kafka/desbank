@@ -21,17 +21,17 @@
                 .dc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; list-style: none; margin: 0; padding: 0; }
                 .dc-card { position: relative; display: flex; flex-direction: column; background: #fff; border: 1px solid #dde4ea; border-left: 6px solid var(--c); border-radius: 12px; padding: 16px 16px 12px 18px; transition: transform .15s ease, box-shadow .15s ease; }
                 /* The top part of the card (code, name, units) bleeds to the card's edges; the cover picture is drawn behind it only, so it stops above the links row. */
-                .dc-body { position: relative; margin: -16px -16px 0 -18px; padding: 16px 16px 16px 18px; }
+                .dc-body { position: relative; box-sizing: border-box; min-height: 152px; margin: -16px -16px 0 -18px; padding: 16px 16px 16px 18px; }
                 .dc-card.has-cover { isolation: isolate; }
-                .dc-card.has-cover .dc-body::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 6px 11px 0 0; background: var(--cover) center / cover no-repeat; opacity: .17; pointer-events: none; }
+                .dc-card.has-cover .dc-body::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 6px 11px 0 0; background: var(--cover) center / cover no-repeat; opacity: .28; pointer-events: none; }
                 .dc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(18, 38, 58, .1); }
                 .dc-card:focus-within { outline: 2px solid var(--c); outline-offset: 2px; }
                 .dc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
                 .dc-code { display: inline-block; font: 600 12px/1 ui-monospace, 'IBM Plex Mono', monospace; letter-spacing: .04em; color: var(--c); background: color-mix(in srgb, var(--c) 12%, #fff); padding: 6px 9px; border-radius: 6px; }
-                .dc-title { display: block; margin: 14px 0 4px; font-size: 19px; line-height: 1.3; font-weight: 700; color: #12263a; text-decoration: none; }
+                .dc-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin: 14px 0 4px; font-size: 19px; line-height: 1.3; font-weight: 700; color: #12263a; text-decoration: none; }
                 .dc-title::before { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 12px; }
                 .dc-units { margin: 0; font-size: 13px; color: #607282; min-height: 18px; }
-                .dc-links { display: flex; gap: 6px; margin-top: 0; padding-top: 10px; border-top: 1px dashed #dde4ea; position: relative; z-index: 2; }
+                .dc-links { display: flex; gap: 6px; margin-top: auto; padding-top: 10px; border-top: 1px dashed #dde4ea; position: relative; z-index: 2; }
                 .dc-links a { font-size: 13px; font-weight: 600; color: #2a5375; text-decoration: none; padding: 5px 9px; border-radius: 6px; }
                 .dc-links a:hover { background: #eef3f7; color: #12263a; }
                 .dc-menu { position: relative; z-index: 3; }
@@ -105,7 +105,6 @@
                     });
                 </script>
             @endif
-            <div class="work-below-directory"><a data-back href="{{ route('dashboard.instructor') }}">← Back to instructor workspace</a></div>
         </main>
         <footer class="work-footer"><span>DESBank</span><span>Assessment authoring workspace</span></footer>
     </div>

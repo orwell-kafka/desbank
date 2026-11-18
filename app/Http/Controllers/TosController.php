@@ -14,7 +14,7 @@ class TosController extends Controller
 {
     // A ToS exists only for the major exams. Quizzes do not get one.
     private const EXAM_TYPES = Tos::EXAM_TYPES;
-    private const SEMESTERS = ['1st semester', '2nd semester', 'Summer'];
+    private const SEMESTERS = ['1st semester', '2nd semester', 'Midyear'];
     private const BLOOM_LEVELS = ['Remembering', 'Understanding', 'Applying', 'Analyzing', 'Evaluating', 'Creating'];
     private const QUESTION_TYPES = ['Multiple Choice', 'True/False', 'Fill in the Blanks', 'Enumeration', 'Matching Type', 'Essay'];
 
@@ -486,6 +486,27 @@ class TosController extends Controller
         }
 
         $bloomScoreTotal = round($bloomScoreTotal, 2);
+
+        // The Question Bank must already hold enough questions for every row of Table 2, counted across
+        // the checked topics. The ToS is not saved otherwise (the exam could never be generated from it).
+        $caps = TosMatrix::bankCaps(array_map('intval', $topicIds));
+        $shortRows = [];
+        foreach ($bloom as $b) {
+            $key = TosMatrix::key($b['bloomLevel'], $b['questionType']);
+            $available = 0;
+            foreach ($caps as $cells) {
+                $available += (int) ($cells[$key] ?? 0);
+            }
+            if ($available < $b['itemCount']) {
+                $shortRows[] = "{$b['bloomLevel']} / {$b['questionType']}: need {$b['itemCount']}, only {$available} in the Question Bank";
+            }
+        }
+        if (! empty($shortRows)) {
+            return [
+                'error' => 'The ToS was not saved because the Question Bank does not have enough questions for the checked topics. Add the missing questions or lower the item count for: ' . implode('; ', $shortRows) . '.',
+                'field' => 'bloomKey',
+            ];
+        }
 
         // The total score is not asked for: it is simply the sum of the Table 2 rows.
 

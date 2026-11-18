@@ -10,16 +10,10 @@
         <button type="button" class="db-sidenav-toggle" id="dbSidenavToggle" aria-expanded="false" aria-controls="dbSidenavList" aria-label="Expand navigation">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <a href="{{ route('dashboard.instructor') }}" class="db-sidenav-brand">DESBank</a>
+        <a href="{{ route('courses.index') }}" class="db-sidenav-brand">DESBank</a>
     </div>
 
     <ul class="db-sidenav-list" id="dbSidenavList">
-        <li>
-            <a href="{{ route('dashboard.instructor') }}" class="db-sidenav-link" @if (request()->routeIs('dashboard.instructor')) aria-current="page" @endif>
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"/></svg>
-                <span class="db-sidenav-label">Workspace</span>
-            </a>
-        </li>
         <li>
             <a href="{{ route('courses.index') }}" class="db-sidenav-link" @if ($navCourses) aria-current="page" @endif>
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19M9 8h6"/></svg>

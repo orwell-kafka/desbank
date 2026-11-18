@@ -94,6 +94,11 @@
         return ids.length ? ids : Object.keys(bank.topics);
     }
 
+    // The topics that are actually ticked in Table 1 (unlike selectedTopicIds, never "all topics").
+    function tickedTopicIds() {
+        return Array.prototype.map.call(form.querySelectorAll('input[name="topicId[]"]:checked'), function (c) { return c.value; });
+    }
+
     function bankFor(level, type, topicIds) {
         var key = level + '|' + type;
         return topicIds.reduce(function (n, id) { return n + ((bank.counts[id] && bank.counts[id][key]) || 0); }, 0);
@@ -247,6 +252,13 @@
             showError('Points per item and item count must both be greater than zero.');
             return;
         }
+        if (bankEl) {
+            var availableNow = bankFor(level, type, selectedTopicIds());
+            if (count > availableNow) {
+                showError('Not enough questions: the Question Bank has ' + availableNow + ' ' + level + ' / ' + type + ' question' + (availableNow === 1 ? '' : 's') + ' for the selected topics, but you asked for ' + count + '. Add more questions to the bank or lower the item count.');
+                return;
+            }
+        }
         errorEl.hidden = true;
 
         var existingIndex = rows.findIndex(function (r) { return r.level === level && r.type === type; });
@@ -325,7 +337,21 @@
         updateMatrix();
     }
 
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (e) {
+        // Do not save a ToS the Question Bank cannot cover (also checked again on the server).
+        if (bankEl && rows.length) {
+            var ticked = tickedTopicIds();
+            var short = rows.filter(function (r) { return r.count > bankFor(r.level, r.type, ticked); });
+            if (ticked.length && short.length) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                showError('The ToS was not saved: the Question Bank does not have enough questions for ' + short.map(function (r) {
+                    return r.level + ' / ' + r.type + ' (need ' + r.count + ', only ' + bankFor(r.level, r.type, ticked) + ')';
+                }).join('; ') + '. Add the missing questions or lower the item count.');
+                errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+        }
         var container = document.getElementById('bloomHiddenInputs');
         container.textContent = '';
         rows.forEach(function (row) {
@@ -338,7 +364,7 @@
                 container.appendChild(input);
             });
         });
-    });
+    }, true);   // capture phase: runs before the shared "Saving…" handler, which then sees the cancel
 
     render();
 })();

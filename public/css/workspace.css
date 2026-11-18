@@ -637,7 +637,7 @@ body.has-exam-dock .db-shell { padding-bottom: 76px; }
 /* Course cover picture field: a faint preview, the same way the picture appears on the course. */
 .work-optional { font-weight: 400; color: #607282; }
 .work-cover-preview { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; height: 110px; margin: 6px 0 10px; border: 1px dashed #b6c3ce; border-radius: 6px; background: #fff; font-size: 12px; color: #607282; overflow: hidden; }
-.work-cover-preview::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: var(--cover, none); background-position: center; background-size: cover; background-repeat: no-repeat; opacity: .17; }
+.work-cover-preview::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: var(--cover, none); background-position: center; background-size: cover; background-repeat: no-repeat; opacity: .28; }
 .work-cover-preview.has-image { border-style: solid; border-color: var(--work-line); }
 .work-cover-remove { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #36506a; cursor: pointer; }
 

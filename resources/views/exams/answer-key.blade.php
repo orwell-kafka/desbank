@@ -45,7 +45,7 @@
             <label style="font-size:13px;">Paper Size</label>
             <select id="paperSizeSelect" onchange="document.getElementById('answerPaper').className = 'paper ' + this.value;">
                 <option value="letter">Letter (Short)</option>
-                <option value="legal">Legal (Long)</option>
+                <option value="legal" selected>Legal (Long)</option>
             </select>
 
             <button type="button" onclick="window.print()">Print / Save as PDF</button>
@@ -54,11 +54,11 @@
         </div>
 
         <div class="preview-wrapper">
-            <div class="paper letter" id="answerPaper">
+            <div class="paper legal" id="answerPaper">
                 <div class="ak-header">
                     <div class="school">{{ $exam->schoolName ?? $course->courseName }}</div>
                     <div class="title">ANSWER KEY</div>
-                    <div class="sub">{{ $tos->title ?? 'Exam' }} — {{ $tos->examType ?? '' }}</div>
+                    <div class="sub">{{ $tos->title ?? 'Exam' }}@if (!empty($tos->examType)) — {{ $tos->examType }}@endif</div>
                 </div>
 
                 <div class="meta-row">
