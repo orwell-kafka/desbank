@@ -29,7 +29,7 @@ class TosExamPointsTest extends TestCase
     {
         parent::setUp();
 
-        $this->account = Account::create(['name' => 'T', 'email' => 't@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
+        $this->account = Account::forceCreate(['name' => 'T', 'email' => 't@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
         $this->course = Course::create(['accountId' => $this->account->accountId, 'courseName' => 'C', 'courseCode' => 'C-1']);
 
         foreach (['Alpha', 'Beta', 'Gamma'] as $i => $name) {

@@ -315,6 +315,27 @@ class TosController extends Controller
         return view('tos.print', ['course' => $course, 'tos' => $tos, 'levels' => $levels, 'totalItems' => $totalItems] + $data);
     }
 
+    /** Remembers the "Prepared by" / "Approved" names and titles on the signed-in account, so they pre-fill every print. */
+    public function saveSignatories(Request $request)
+    {
+        $data = $request->validate([
+            'preparedName' => ['nullable', 'string', 'max:150'],
+            'preparedRole' => ['nullable', 'string', 'max:150'],
+            'approvedName' => ['nullable', 'string', 'max:150'],
+            'approvedRole' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $account = $request->user();
+        foreach (['preparedName', 'preparedRole', 'approvedName', 'approvedRole'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $account->{'tos' . ucfirst($field)} = trim((string) $data[$field]);
+            }
+        }
+        $account->save();
+
+        return response()->json(['saved' => true]);
+    }
+
     /**
      * The two ToS tables as they should read. Points per topic are what the topic x Bloom/type
      * distribution really adds up to, so this agrees with the generated exam (older ToS get their

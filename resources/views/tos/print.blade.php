@@ -23,7 +23,19 @@
         table.spec tfoot td.lbl { text-align: right; }
         table.spec tr { break-inside: avoid; }
         table.levels td.lvl { text-align: left; }
+        .signatories { margin-top: 36px; font-size: 11pt; break-inside: avoid; }
+        .signatories .sig-prepared { margin-left: 50%; text-align: center; }
+        .signatories .sig-approved { margin-top: 28px; text-align: left; }
+        .signatories .sig-label { margin: 0 0 22px; }
+        .signatories .sig-approved .sig-label { text-align: left; }
+        .signatories .sig-prepared .sig-label { text-align: left; }
+        .signatories .sig-name { font-weight: bold; margin: 0; min-height: 1.2em; }
+        .signatories .sig-role { font-style: italic; margin: 0; min-height: 1.2em; }
+        .signatories [contenteditable] { outline: none; }
+        .signatories [contenteditable]:hover, .signatories [contenteditable]:focus { background: #fef9c3; box-shadow: 0 0 0 2px #fde68a; border-radius: 2px; }
+        .toolbar .hint { color: #555; font-size: 12px; }
         @media print {
+            .signatories [contenteditable]:hover, .signatories [contenteditable]:focus { background: none; box-shadow: none; }
             body { background: #fff; padding: 0; }
             .toolbar { display: none; }
             .paper { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
@@ -33,6 +45,13 @@
 </head>
 <body>
     @php
+        $me = auth()->user();
+        $sig = [
+            'preparedName' => $me->tosPreparedName ?: strtoupper($me->name ?? ''),
+            'preparedRole' => $me->tosPreparedRole ?: 'Faculty',
+            'approvedName' => $me->tosApprovedName ?: 'MELITO L. HIRONDO CE, MEng',
+            'approvedRole' => $me->tosApprovedRole ?: 'Dean, College of Engineering',
+        ];
         $fmt = fn ($v) => rtrim(rtrim(number_format((float) $v, 2, '.', ''), '0'), '.');
         $totalHours = $topicRows->sum('contactHours');
         $totalPoints = $topicRows->sum('assignedPoints');
@@ -40,6 +59,7 @@
     <div class="toolbar">
         <button type="button" onclick="window.print()">Print / Save as PDF</button>
         <a data-back href="{{ route('courses.tos.show', [$course, $tos]) }}">← Back to ToS</a>
+        <span class="hint">Tip: click a name or title at the bottom to edit it. Changes are saved automatically.</span> <span class="hint" id="sigStatus"></span>
     </div>
 
     <div class="paper">
@@ -106,6 +126,66 @@
                 <td class="c">100%</td>
             </tr></tfoot>
         </table>
+
+        <div class="signatories">
+            <div class="sig-prepared">
+                <p class="sig-label">Prepared by:</p>
+                <p class="sig-name" contenteditable="true" spellcheck="false" data-sig="preparedName">{{ $sig['preparedName'] }}</p>
+                <p class="sig-role" contenteditable="true" spellcheck="false" data-sig="preparedRole">{{ $sig['preparedRole'] }}</p>
+            </div>
+
+            <div class="sig-approved">
+                <p class="sig-label">Approved:</p>
+                <p class="sig-name" contenteditable="true" spellcheck="false" data-sig="approvedName">{{ $sig['approvedName'] }}</p>
+                <p class="sig-role" contenteditable="true" spellcheck="false" data-sig="approvedRole">{{ $sig['approvedRole'] }}</p>
+            </div>
+        </div>
     </div>
+    <script>
+        // Names/titles are editable on the page and saved to the signed-in account,
+        // so they come back pre-filled on every print, on any browser.
+        (function () {
+            var url = @json(route('tos.signatories.save'));
+            var token = @json(csrf_token());
+            var status = document.getElementById('sigStatus');
+            var timer = null;
+
+            function collect() {
+                var out = {};
+                document.querySelectorAll('[data-sig]').forEach(function (el) {
+                    out[el.getAttribute('data-sig')] = el.textContent.replace(/\s+/g, ' ').trim();
+                });
+                return out;
+            }
+
+            function save() {
+                if (status) status.textContent = 'Saving...';
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+                    body: JSON.stringify(collect())
+                }).then(function (r) {
+                    if (status) status.textContent = r.ok ? 'Saved' : 'Could not save';
+                }).catch(function () {
+                    if (status) status.textContent = 'Could not save';
+                });
+            }
+
+            document.querySelectorAll('[data-sig]').forEach(function (el) {
+                el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+                el.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    var t = (e.clipboardData || window.clipboardData).getData('text').replace(/\s+/g, ' ');
+                    document.execCommand('insertText', false, t);
+                });
+                el.addEventListener('input', function () {
+                    if (status) status.textContent = '';
+                    clearTimeout(timer);
+                    timer = setTimeout(save, 600);
+                });
+                el.addEventListener('blur', function () { clearTimeout(timer); if (status && status.textContent === '') save(); });
+            });
+        })();
+    </script>
 </body>
 </html>

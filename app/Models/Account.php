@@ -10,12 +10,16 @@ class Account extends Authenticatable
     protected $primaryKey = 'accountId';
     public $timestamps = false;
 
+    // 'role' and 'status' are intentionally NOT fillable, so a request can never set them.
+    // Code that needs to set them uses forceCreate()/forceFill() explicitly.
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
-        'status',
+        'tosPreparedName',
+        'tosPreparedRole',
+        'tosApprovedName',
+        'tosApprovedRole',
     ];
 
     protected $hidden = [

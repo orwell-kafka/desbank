@@ -6,6 +6,8 @@ use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -22,13 +24,27 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Slow down password guessing: 5 wrong tries per email+IP and 20 per IP, each per minute.
+        $emailKey = 'login:' . Str::lower($credentials['email']) . '|' . $request->ip();
+        $ipKey = 'login-ip:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($emailKey, 5) || RateLimiter::tooManyAttempts($ipKey, 20)) {
+            $seconds = max(RateLimiter::availableIn($emailKey), RateLimiter::availableIn($ipKey));
+            throw ValidationException::withMessages([
+                'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
+            ]);
+        }
+
         $account = Account::where('email', $credentials['email'])->first();
 
         if (! $account || ! Hash::check($credentials['password'], $account->password)) {
+            RateLimiter::hit($emailKey, 60);
+            RateLimiter::hit($ipKey, 60);
             throw ValidationException::withMessages([
                 'email' => 'Those credentials do not match our records.',
             ]);
         }
+
+        RateLimiter::clear($emailKey);
 
         if ($account->role === 'Instructor' && $account->status !== 'approved') {
             throw ValidationException::withMessages([
@@ -57,7 +73,7 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', 'min:8'],
         ]);
 
-        Account::create([
+        Account::forceCreate([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),

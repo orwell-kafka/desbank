@@ -27,11 +27,11 @@
 .auth-brand-head { display: flex; align-items: center; gap: 12px; }
 .auth-mark {
     flex: none;
-    width: 36px;
-    height: 36px;
-    background: var(--navy);
-    border-top: 3px solid var(--amber);
-    border-radius: var(--radius-sm);
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
+    border-radius: 50%;
 }
 .auth-name {
     font-family: var(--font-display);
@@ -126,7 +126,7 @@
         flex-direction: column;
         gap: 40px;
     }
-    .auth-mark { width: 44px; height: 44px; }
+    .auth-mark { width: 72px; height: 72px; }
     .auth-name { font-size: 24px; }
 
     .auth-flow {

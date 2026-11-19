@@ -661,7 +661,11 @@ body.has-exam-dock .db-shell { padding-bottom: 76px; }
     width: 248px;
     box-shadow: 10px 0 28px -10px rgba(8, 20, 32, .5);
 }
-.db-sidenav-top { display: flex; align-items: center; gap: 4px; min-height: 44px; margin-bottom: 14px; }
+.db-sidenav-logo { flex: none; display: flex; align-items: center; gap: 12px; height: 48px; margin: 0 0 20px; padding: 0 4px; text-decoration: none; }
+.db-sidenav-logo img { display: block; width: 40px; height: 40px; object-fit: contain; border-radius: 50%; }
+/* The expand button is only for touch screens (no hover there). With a mouse, hovering opens the bar. */
+.db-sidenav-top { display: none; align-items: center; gap: 4px; min-height: 44px; margin-bottom: 10px; }
+@media (hover: none), (pointer: coarse) { .db-sidenav-top { display: flex; } .db-sidenav-logo { margin-bottom: 2px; } }
 .db-sidenav-toggle {
     appearance: none; flex: none; display: inline-flex; align-items: center; justify-content: center;
     width: 48px; height: 44px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #c9d6e4; cursor: pointer;
@@ -699,6 +703,8 @@ body.has-exam-dock .db-shell { padding-bottom: 76px; }
     .workspace { --side-w: 52px; }
     .db-sidenav { padding: 8px 4px 10px; }
     .db-sidenav-toggle { width: 44px; }
+    .db-sidenav-logo { padding: 0 4px; }
+    .db-sidenav-logo img { width: 36px; height: 36px; }
     .db-sidenav-link { padding: 0 11px; }
 }
 @media print {

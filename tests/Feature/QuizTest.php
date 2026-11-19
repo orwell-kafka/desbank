@@ -20,7 +20,7 @@ class QuizTest extends TestCase
     {
         parent::setUp();
 
-        $this->teacher = Account::create(['name' => 'T', 'email' => 'quiz@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
+        $this->teacher = Account::forceCreate(['name' => 'T', 'email' => 'quiz@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
         $this->actingAs($this->teacher);
         $this->course = Course::create(['accountId' => $this->teacher->accountId, 'courseName' => 'Cognate Elective 1', 'courseCode' => 'CPEC 1', 'creditUnits' => 4]);
         $this->topicId = DB::table('topic')->insertGetId(['courseId' => $this->course->courseId, 'topicName' => 'Intro'], 'topicId');
@@ -75,7 +75,7 @@ class QuizTest extends TestCase
         $this->post(route('courses.quizzes.store', $this->course), $this->payload());
         $examId = DB::table('exam')->value('examId');
 
-        $other = Account::create(['name' => 'O', 'email' => 'other@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
+        $other = Account::forceCreate(['name' => 'O', 'email' => 'other@example.test', 'password' => bcrypt('x'), 'role' => 'Instructor', 'status' => 'approved']);
         $this->actingAs($other)->get(route('courses.exams.show', [$this->course, $examId]))->assertForbidden();
     }
 }

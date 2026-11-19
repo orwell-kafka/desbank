@@ -6,11 +6,15 @@
     $navExams     = request()->routeIs('courses.exams.*', 'courses.quizzes.*');
 @endphp
 <nav class="db-sidenav" id="dbSidenav" aria-label="Main navigation">
+    <a href="{{ route('courses.index') }}" class="db-sidenav-logo">
+        <img src="{{ asset('images/desbank-logo.png') }}" alt="" width="40" height="40">
+        <span class="db-sidenav-brand">DESBank</span>
+    </a>
+
     <div class="db-sidenav-top">
         <button type="button" class="db-sidenav-toggle" id="dbSidenavToggle" aria-expanded="false" aria-controls="dbSidenavList" aria-label="Expand navigation">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
-        <a href="{{ route('courses.index') }}" class="db-sidenav-brand">DESBank</a>
     </div>
 
     <ul class="db-sidenav-list" id="dbSidenavList">

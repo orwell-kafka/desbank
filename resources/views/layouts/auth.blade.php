@@ -12,7 +12,7 @@
     <div class="auth-layout">
         <header class="auth-brand">
             <div class="auth-brand-head">
-                <div class="auth-mark" aria-hidden="true"></div>
+                <img class="auth-mark" src="{{ asset('images/desbank-logo.png') }}" alt="" width="56" height="56">
                 <div>
                     <div class="auth-name">DESBank</div>
                     <p class="auth-sub">Question bank and exam builder</p>

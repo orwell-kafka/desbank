@@ -24,13 +24,15 @@ class AdminController extends Controller
 
     public function approve(Account $account)
     {
-        $account->update(['status' => 'approved']);
+        abort_if($account->role !== 'Instructor', 404);
+        $account->forceFill(['status' => 'approved'])->save();
         return back()->with('status', "{$account->name}'s account approved.");
     }
 
     public function reject(Account $account)
     {
-        $account->update(['status' => 'rejected']);
+        abort_if($account->role !== 'Instructor', 404);
+        $account->forceFill(['status' => 'rejected'])->save();
         return back()->with('status', "{$account->name}'s account rejected.");
     }
 }

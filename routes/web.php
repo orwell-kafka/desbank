@@ -18,11 +18,11 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.attempt');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1')->name('register.attempt');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'approved'])->group(function () {
     Route::resource('courses', CourseController::class);
 
     Route::resource('courses.topics', TopicController::class)
@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
         ->except(['show'])
         ->parameters(['topics' => 'topic', 'questions' => 'question']);
 
+    Route::post('/tos/signatories', [TosController::class, 'saveSignatories'])->name('tos.signatories.save');
     Route::get('/courses/{course}/tos/{tos}/print', [TosController::class, 'print'])->name('courses.tos.print');
     Route::resource('courses.tos', TosController::class)
         ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
@@ -44,7 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/courses/{course}/tos/{tos}/generate', [ExamController::class, 'generate'])->name('courses.tos.generate');
     Route::get('/courses/{course}/exams/{exam}', [ExamController::class, 'show'])->name('courses.exams.show');
     Route::get('/courses/{course}/exams/{exam}/format', [ExamController::class, 'editFormat'])->name('courses.exams.format');
-    Route::get('/courses/{course}/exams/{exam}/format/pdf', [ExamController::class, 'formatPdf'])->name('courses.exams.format.pdf');
+    Route::get('/courses/{course}/exams/{exam}/format/pdf', [ExamController::class, 'formatPdf'])->middleware('throttle:10,1')->name('courses.exams.format.pdf');
     Route::get('/courses/{course}/exams/{exam}/answer-key', [ExamController::class, 'answerKey'])->name('courses.exams.answerkey');
     Route::post('/courses/{course}/exams/{exam}/format', [ExamController::class, 'updateFormat'])->name('courses.exams.format.update');
     Route::get('/courses/{course}/exams/{exam}/questions/{question}/replace', [ExamController::class, 'replaceOptions'])->name('courses.exams.replace.options');
